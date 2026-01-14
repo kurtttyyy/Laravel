@@ -51,16 +51,19 @@
 
             <div class="d-flex justify-content-between align-items-center">
                 <span class="badge bg-light text-dark">3d ago</span>
-                <a href="javascript:void(0)" 
-                   class="fw-semibold text-success text-decoration-none view-details"
-                   data-job-title="Assistant Professor - Computer Science"
-                   data-job-college="Northeastern College"
-                   data-job-type="Full-Time"
-                   data-job-contract="Contract/Temp"
-                   data-job-location="Santiago City"
-                   data-job-points='["Careers growth","Be a part of a strong team delivering a clear mission","Build foundational knowledge of avant-garde practice and disciplines"]'>
-                   View Details →
-                </a>
+                    <a href="javascript:void(0)" 
+                    class="fw-semibold text-success text-decoration-none view-details"
+                    data-job-title="Assistant Professor - Computer Science"
+                    data-job-college="Northeastern College"
+                    data-job-type="Full-Time"
+                    data-job-contract="Contract/Temp"
+                    data-job-location="Santiago City"
+                    data-job-description='["Teach undergraduate and graduate computer science courses","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development"]'
+                    data-job-responsibilities='["Deliver lectures and labs","Advise students","Conduct research","Conduct research","Conduct research","Conduct research"]'
+                    data-job-qualifications='["Master’s degree in Computer Science","Teaching experience preferred"]'
+                    data-job-benefits='["Career growth","Health insurance","Professional development support"]'>
+                    View Details →
+                    </a>
             </div>
         </div>
     </div>
@@ -90,17 +93,20 @@
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
-                <span class="badge bg-light text-dark">1d ago</span>
-                <a href="javascript:void(0)" 
-                   class="fw-semibold text-success text-decoration-none view-details"
-                   data-job-title="Senior Lecturer - Data Science"
-                   data-job-college="Northeastern College"
-                   data-job-type="Part-Time"
-                   data-job-contract="Contract/Temp"
-                   data-job-location="New York City"
-                   data-job-points='["Work with cutting-edge AI technologies","Collaborate on interdisciplinary research projects","Mentor undergraduate and graduate students"]'>
-                   View Details →
-                </a>
+                <span class="badge bg-light text-dark">3d ago</span>
+                    <a href="javascript:void(0)" 
+                    class="fw-semibold text-success text-decoration-none view-details"
+                    data-job-title="Assistant Professor - Computer Science"
+                    data-job-college="Northeastern College"
+                    data-job-type="Full-Time"
+                    data-job-contract="Contract/Temp"
+                    data-job-location="Santiago City"
+                    data-job-description='["Teach undergraduate and graduate computer science courses","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development"]'
+                    data-job-responsibilities='["Deliver lectures and labs","Advise students","Conduct research","Conduct research","Conduct research","Conduct research"]'
+                    data-job-qualifications='["Master’s degree in Computer Science","Teaching experience preferred"]'
+                    data-job-benefits='["Career growth","Health insurance","Professional development support"]'>
+                    View Details →
+                    </a>
             </div>
         </div>
     </div>
@@ -110,15 +116,58 @@
 <div id="overlay"></div>
 
 {{-- Right-side sidebar --}}
+{{-- Right-side sidebar --}}
 <div id="jobSidebar">
-    <span class="close-btn">&times;</span>
-    <h4 id="sidebarTitle"></h4>
-    <h5 class="text-secondary" id="sidebarCollege"></h5>
-    <p id="sidebarType"></p>
-    <p id="sidebarContract"></p>
-    <p id="sidebarLocation"></p>
-    <ul id="sidebarPoints"></ul>
+    <!-- Sticky Header -->
+    <div class="sidebar-header" id="sidebarHeader">
+        <span class="close-btn">&times;</span>
+
+        <h1 id="sidebarTitle"></h1>
+
+        <h6 class="text-secondary">
+            <i class="bi bi-mortarboard-fill me-1"></i>
+            <span id="sidebarCollege"></span>
+        </h6>
+
+        <div class="job-meta">
+            <i class="bi bi-clock-fill me-1"></i>
+            <span id="sidebarType"></span>
+            <span class="divider">|</span>
+            <span id="sidebarContract"></span>
+        </div>
+
+        <p id="sidebarLocation">
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            <span id="sidebarLocationText"></span>
+        </p>
+
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="sidebar-body">
+        <h6 class="section-title">Job Description</h6>
+        <ul id="sidebarDescription"></ul>
+
+        <h6 class="section-title">Responsibilities</h6>
+        <ul id="sidebarResponsibilities"></ul>
+
+        <h6 class="section-title">Qualifications</h6>
+        <ul id="sidebarQualifications"></ul>
+
+        <h6 class="section-title">Benefits</h6>
+        <ul id="sidebarBenefits"></ul>
+
+        <!-- Apply Now Button -->
+    <div class="text-center mt-3">
+        <a href="#" id="applyJobBtn" class="btn btn-success w-100">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Apply Now
+        </a>
+    </div>
+    </div>
+
 </div>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -126,32 +175,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const overlay = document.getElementById('overlay');
     const closeBtn = sidebar.querySelector('.close-btn');
 
-    // Open sidebar
+    function populateList(id, items) {
+        const ul = document.getElementById(id);
+        ul.innerHTML = "";
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
+        });
+    }
+
     document.querySelectorAll('.view-details').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Populate sidebar dynamically based on clicked job
-            document.getElementById('sidebarTitle').textContent = this.dataset.jobTitle;
-            document.getElementById('sidebarCollege').textContent = this.dataset.jobCollege;
-            document.getElementById('sidebarType').textContent = "Type: " + this.dataset.jobType;
-            document.getElementById('sidebarContract').textContent = "Contract: " + this.dataset.jobContract;
-            document.getElementById('sidebarLocation').textContent = "Location: " + this.dataset.jobLocation;
 
-            const points = JSON.parse(this.dataset.jobPoints);
-            const ul = document.getElementById('sidebarPoints');
-            ul.innerHTML = "";
-            points.forEach(point => {
-                const li = document.createElement('li');
-                li.textContent = point;
-                ul.appendChild(li);
-            });
+            // Title & college (school icon already in HTML)
+            document.getElementById('sidebarTitle').textContent =
+                this.dataset.jobTitle;
+            document.getElementById('sidebarCollege').textContent =
+                this.dataset.jobCollege;
 
-            // Show overlay and sidebar
+            // Job type + contract (clock icon already in HTML)
+            document.getElementById('sidebarType').textContent =
+                this.dataset.jobType;
+            document.getElementById('sidebarContract').textContent =
+                this.dataset.jobContract;
+
+            // Location (pin icon already in HTML)
+            document.getElementById('sidebarLocationText').textContent =
+                this.dataset.jobLocation;
+
+            // Job sections
+            populateList(
+                'sidebarDescription',
+                JSON.parse(this.dataset.jobDescription)
+            );
+            populateList(
+                'sidebarResponsibilities',
+                JSON.parse(this.dataset.jobResponsibilities)
+            );
+            populateList(
+                'sidebarQualifications',
+                JSON.parse(this.dataset.jobQualifications)
+            );
+            populateList(
+                'sidebarBenefits',
+                JSON.parse(this.dataset.jobBenefits)
+            );
+
+            // Show sidebar
             overlay.style.display = 'block';
             sidebar.classList.add('show');
         });
     });
 
-    // Close sidebar
     function closeSidebar() {
         sidebar.classList.remove('show');
         overlay.style.display = 'none';
@@ -160,5 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
     closeBtn.addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
 });
+
 </script>
+
+
 @endsection

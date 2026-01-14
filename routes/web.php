@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('jobOpen');
+    return view('applicationSteps');
 });
 
 Route::get('/index', function () {
-    return view('jobOpen');
+    return view('applicationSteps');
 });
 
 Route::get('/application', function () {
@@ -16,4 +16,8 @@ Route::get('/application', function () {
 
 Route::get('/jobOpen', function () {
     return view('jobOpen');
+});
+
+Route::get('/ApplicationSteps', function () {
+    return view('applicationSteps');
 });

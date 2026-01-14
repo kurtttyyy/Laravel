@@ -1,10 +1,16 @@
 <?php
 
 use App\Http\Controllers\GuestPageController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('guest.index');
+});
+
+Route::controller(PageController::class)->group(function () {
+    Route::get('/login', 'display_login')->name('login');
+    Route::get('/register', 'display_register')->name('register');
 });
 
 Route::controller(GuestPageController::class)->group(function () {

@@ -11,8 +11,8 @@
             </div>
         </div>
         <div class="ms-auto d-flex gap-3">
-            <a href="#" class="btn btn-sm btn-outline-light">Job Applicant</a>
-            <a href="#" class="btn btn-sm btn-outline-light">Application Status</a>
+            <a href="{{ route('guest.jobOpen') }}" class="btn btn-sm btn-outline-light">Job Applicant</a>
+            <a href="{{ route('guest.application') }}" class="btn btn-sm btn-outline-light">Application Status</a>
         </div>
     </div>
 </header>
@@ -107,7 +107,7 @@
                     <span class="badge custom-badge me-1">Part-time</span>
                     <span class="badge bg-purple-light-opacity me-1">On-site</span>
                 </div>
-                <button class="btn btn-primary w-100 green-btn">View Details & Apply</button>
+                <button onclick="window.location.href='/job/available'" class="btn btn-primary w-100 green-btn">View Details & Apply</button>
             </div>
         </div>
 

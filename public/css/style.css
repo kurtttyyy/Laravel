@@ -367,6 +367,132 @@ body {
 }
 
 
+/* Application steps */
+
+.stepper1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Step Circle + Label */
+.step1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.circle1 {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.label1 {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    color: #555;
+}
+
+/* Line between steps */
+.line1 {
+    flex: 1;
+    height: 4px;
+    background-color: #e5e7eb;
+    margin-top: -20px;
+}
+
+/* Completed states */
+.completed1 .circle1 {
+    background-color: #198754;
+    color: white;
+}
+
+.line1.completed1 {
+    background-color: #198754;
+}
+
+
+.upload-area {
+    border: 2px dashed #0d6b37;
+    border-radius: .5rem;
+    padding: 30px;
+    text-align: center;
+    display: block;
+    cursor: pointer;
+    transition: border-color .3s ease, background .3s ease;
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: #0f5836;
+    background-color: #d8fde1;
+}
+
+.upload-area input[type="file"] {
+    display: none;
+}
+
+.upload-icon {
+    font-size: 40px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.upload-main-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.upload-sub-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+/* Review notice box */
+.review-notice {
+    border: 2px solid #155724;      /* Dark green border */
+    background-color: #d4edda;      /* Light green background */
+    padding: 16px;
+    border-radius: .5rem;
+}
+
+.review-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #155724;
+    color: #ffffff;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.text-dark-green {
+    color: #155724;
+}
+
+.review-notice1 {
+    border: 2px solid #d4edda;      /* Dark green border */
+    background-color: #d4edda;      /* Light green background */
+    padding: 16px;
+    border-radius: .5rem;
+}
+
+
+
+
+
 
 
 

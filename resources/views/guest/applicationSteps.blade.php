@@ -72,234 +72,229 @@
             </div>
 
 <!-- Personal Info Form -->
-<div id="personalForm" class="mt-4">
-    <h4 class="fw-bold mb-3">Personal Information</h4>
-    <form id="formPersonal">
+<form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
+    <div id="personalForm" class="mt-4">
+        <h4 class="fw-bold mb-3">Personal Information</h4>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="first_name" class="form-label">First Name*</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter your first name" required>
+                </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="first_name" class="form-label">First Name*</label>
-                <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter your first name" required>
+                <div class="col-md-6">
+                    <label for="last_name" class="form-label">Last Name*</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter your last name" required>
+                </div>
             </div>
 
-            <div class="col-md-6">
-                <label for="last_name" class="form-label">Last Name*</label>
-                <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter your last name" required>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email Address*</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone Number*</label>
+                    <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your phone number" required>
+                </div>
             </div>
-        </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="email" class="form-label">Email Address*</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address*</label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="Enter your address" required>
             </div>
 
-            <div class="col-md-6">
-                <label for="phone" class="form-label">Phone Number*</label>
-                <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your phone number" required>
+            <div class="d-flex justify-content-between">
+                <div></div>
+                <button type="button" id="btnToExperience" class="btn btn-primary">Proceed</button>
             </div>
-        </div>
+    </div>
 
-        <div class="mb-3">
-            <label for="address" class="form-label">Address*</label>
-            <input type="text" id="address" name="address" class="form-control" placeholder="Enter your address" required>
-        </div>
 
-        <div class="d-flex justify-content-between">
-            <div></div>
-            <button type="button" id="btnToExperience" class="btn btn-primary">Proceed</button>
-        </div>
+    <!-- Work Experience & Education Form -->
+    <div id="experienceForm" class="mt-4 d-none">
+        <h4 class="fw-bold mb-3">Work Experience & Education</h4>
+            <div class="mb-3">
+                <label for="education" class="form-label">Highest Educational Attainment*</label>
+                <select class="form-select" id="education" name="education" required>
+                    <option value="">Select one</option>
+                    <option value="High School">High School</option>
+                    <option value="Associate Degree">Associate Degree</option>
+                    <option value="Bachelor's Degree">Bachelor's Degree</option>
+                    <option value="Master's Degree">Master's Degree</option>
+                    <option value="Doctorate">Doctorate</option>
+                </select>
+            </div>
 
-    </form>
-</div>
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Field of Study*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                    <option value="">Select one</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Business">Business</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Education">Education</option>
+                    <option value="Health Sciences">Health Sciences</option>
+                </select>
+            </div>
 
-<!-- Work Experience & Education Form -->
-<div id="experienceForm" class="mt-4 d-none">
-    <h4 class="fw-bold mb-3">Work Experience & Education</h4>
-    <form id="formExperience">
+            <div class="mb-3">
+                <label for="experience_years" class="form-label">Years of Relevant Experience*</label>
+                <select class="form-select" id="experience_years" name="experience_years" required>
+                    <option value="">Select one</option>
+                    <option value="0–1">0–1</option>
+                    <option value="2–3">2–3</option>
+                    <option value="4–5">4–5</option>
+                    <option value="6+">6+</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label for="education" class="form-label">Highest Educational Attainment*</label>
-            <select class="form-select" id="education" name="education" required>
-                <option value="">Select one</option>
-                <option value="High School">High School</option>
-                <option value="Associate Degree">Associate Degree</option>
-                <option value="Bachelor's Degree">Bachelor's Degree</option>
-                <option value="Master's Degree">Master's Degree</option>
-                <option value="Doctorate">Doctorate</option>
-            </select>
-        </div>
+            <div class="mb-4">
+                <label for="key_skills" class="form-label">Key Skill & Expertise*</label>
 
-        <div class="mb-3">
-            <label for="field_study" class="form-label">Field of Study*</label>
-            <select class="form-select" id="field_study" name="field_study" required>
-                <option value="">Select one</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Business">Business</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Education">Education</option>
-                <option value="Health Sciences">Health Sciences</option>
-            </select>
-        </div>
+                <!-- Autocomplete suggestion box -->
+                <input list="skillsList" class="form-control" id="key_skills" name="key_skills" placeholder="Type or select a skill" required>
 
-        <div class="mb-3">
-            <label for="experience_years" class="form-label">Years of Relevant Experience*</label>
-            <select class="form-select" id="experience_years" name="experience_years" required>
-                <option value="">Select one</option>
-                <option value="0–1">0–1</option>
-                <option value="2–3">2–3</option>
-                <option value="4–5">4–5</option>
-                <option value="6+">6+</option>
-            </select>
-        </div>
+                <datalist id="skillsList">
+                    <option value="Team Leadership">
+                    <option value="Project Management">
+                    <option value="Communication">
+                    <option value="Software Development">
+                    <option value="Graphic Design">
+                    <option value="Data Analysis">
+                    <option value="Customer Service">
+                </datalist>
+            </div>
 
-        <div class="mb-4">
-            <label for="key_skills" class="form-label">Key Skill & Expertise*</label>
+            <div class="d-flex justify-content-between">
+                <button type="button" id="btnBackToPersonal" class="btn btn-secondary">Previous</button>
+                <button type="button" id="btnToDocuments" class="btn btn-primary">Proceed</button>
+            </div>
+    </div>
 
-            <!-- Autocomplete suggestion box -->
-            <input list="skillsList" class="form-control" id="key_skills" name="key_skills" placeholder="Type or select a skill" required>
+    <!--Documents Form-->
+    <div id="documentsForm" class="mt-4 d-none">
+        <h4 class="fw-bold mb-3">Required Document</h4>
+            <!-- Resume/CV -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Resume/CV*</label>
 
-            <datalist id="skillsList">
-                <option value="Team Leadership">
-                <option value="Project Management">
-                <option value="Communication">
-                <option value="Software Development">
-                <option value="Graphic Design">
-                <option value="Data Analysis">
-                <option value="Customer Service">
-            </datalist>
-        </div>
+                <label for="resume" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your resume</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="resume"
+                        name="documents[0][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[0][type]" value="resume">
+                </label>
+            </div>
 
-        <div class="d-flex justify-content-between">
-            <button type="button" id="btnBackToPersonal" class="btn btn-secondary">Previous</button>
-            <button type="button" id="btnToDocuments" class="btn btn-primary">Proceed</button>
-        </div>
+            <!-- Cover Letter -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Cover Letter*</label>
 
-    </form>
-</div>
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your cover letter</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
 
-<!--Documents Form-->
-<div id="documentsForm" class="mt-4 d-none">
-    <h4 class="fw-bold mb-3">Required Document</h4>
-    <form id="formDocuments" enctype="multipart/form-data">
-        <!-- Resume/CV -->
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Resume/CV*</label>
+            <!-- Certifications -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
 
-            <label for="resume" class="upload-area">
-                <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                <div class="upload-main-text">Click to upload your resume</div>
-                <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                <input 
-                    type="file" 
-                    id="resume" 
-                    name="resume"
-                    accept=".pdf,.doc,.docx"
-                    required
-                >
-            </label>
-        </div>
-
-        <!-- Cover Letter -->
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Cover Letter*</label>
-
-            <label for="cover_letter" class="upload-area">
-                <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                <div class="upload-main-text">Click to upload your cover letter</div>
-                <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                <input 
-                    type="file" 
-                    id="cover_letter" 
-                    name="cover_letter"
-                    accept=".pdf,.doc,.docx"
-                    required
-                >
-            </label>
-        </div>
-
-        <!-- Certifications -->
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
-
-            <label for="certifications" class="upload-area">
-                <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                <div class="upload-main-text">Click to upload your documents</div>
-                <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                <input 
-                    type="file" 
-                    id="certifications" 
-                    name="certifications"
-                    accept=".pdf,.doc,.docx"
-                    required
-                >
-            </label>
-        </div>
+                <label for="certifications" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your documents</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="certifications"
+                        name="documents[2][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[2][type]" value="certifications">
+                </label>
+            </div>
 
 
                 <div class="d-flex justify-content-between">
                     <button type="button" id="btnBackToExperience" class="btn btn-secondary">Previous</button>
                     <button type="button" id="btnToReview" class="btn btn-primary">Proceed</button>
                 </div>
+            </div>
 
-            </form>
-        </div>
+        <!-- Review & Submit Form (to be implemented) -->
+    <!-- Review Your Application Form -->
+    <div id="reviewForm" class="mt-4 d-none">
+        <h3 class="fw-bold mb-3">Review Your Application</h3>
 
-    <!-- Review & Submit Form (to be implemented) -->
-<!-- Review Your Application Form -->
-<div id="reviewForm" class="mt-4 d-none">
-    <h3 class="fw-bold mb-3">Review Your Application</h3>
-
-    <div class="review-notice d-flex align-items-start mb-4">
-        <div class="review-icon">i</div>
-        <div class="ms-3">
-            <div class="fw-semibold" style="font-size: 1.1rem;">Before you submit</div>
-            <div class="text-dark-green">
-                Please review all information carefully. You can go back to any previous step to make sure changes.
+        <div class="review-notice d-flex align-items-start mb-4">
+            <div class="review-icon">i</div>
+            <div class="ms-3">
+                <div class="fw-semibold" style="font-size: 1.1rem;">Before you submit</div>
+                <div class="text-dark-green">
+                    Please review all information carefully. You can go back to any previous step to make sure changes.
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Personal Information Summary -->
-    <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-        <h5 class="fw-bold text-success">Personal Information</h5>
-        <p>First Name:</strong> <span id="review-first-name"></span></p>
-        <p>Last Name:</strong> <span id="review-last-name"></span></p>
-        <p>Email Address:</strong> <span id="review-email"></span></p>
-        <p>Phone Number:</strong> <span id="review-phone"></span></p>
-        <p>Address:</strong> <span id="review-address"></span></p>
-    </div>
+        <!-- Personal Information Summary -->
+        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+            <h5 class="fw-bold text-success">Personal Information</h5>
+            <p>First Name:</strong> <span id="review-first-name"></span></p>
+            <p>Last Name:</strong> <span id="review-last-name"></span></p>
+            <p>Email Address:</strong> <span id="review-email"></span></p>
+            <p>Phone Number:</strong> <span id="review-phone"></span></p>
+            <p>Address:</strong> <span id="review-address"></span></p>
+        </div>
 
-    <!-- Experience & Education Summary -->
-    <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-        <h5 class="fw-bold text-success">Experience & Education</h5>
-        <p>Highest Educational Attainment:</strong> <span id="review-education"></span></p>
-        <p>Field of Study:</strong> <span id="review-field-study"></span></p>
-        <p>Years of Relevant Experience:</strong> <span id="review-experience-years"></span></p>
-        <p>Key Skills & Expertise:</strong> <span id="review-key-skills"></span></p>
-    </div>
+        <!-- Experience & Education Summary -->
+        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+            <h5 class="fw-bold text-success">Experience & Education</h5>
+            <p>Highest Educational Attainment:</strong> <span id="review-education"></span></p>
+            <p>Field of Study:</strong> <span id="review-field-study"></span></p>
+            <p>Years of Relevant Experience:</strong> <span id="review-experience-years"></span></p>
+            <p>Key Skills & Expertise:</strong> <span id="review-key-skills"></span></p>
+        </div>
 
-    <!-- Documents Summary -->
-    <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-        <h5 class="fw-bold text-success">Documents</h5>
-        <p>Resume/CV:</strong> <span id="review-resume-file"></span></p>
-        <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
-        <p>Certifications:</strong> <span id="review-certs-file"></span></p>
-    </div>
-
+        <!-- Documents Summary -->
+        <div class="mb-4 p-3 border rounded shadow-sm bg-light">
+            <h5 class="fw-bold text-success">Documents</h5>
+            <p>Resume/CV:</strong> <span id="review-resume-file"></span></p>
+            <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
+            <p>Certifications:</strong> <span id="review-certs-file"></span></p>
+        </div>
 
 
-<!-- Certification Checkbox -->
+
+    <!-- Certification Checkbox -->
     <div class="review-notice1 d-flex align-items-start mb-4">
         <div class="form-check mb-3">
-            <input 
-                class="form-check-input" 
-                type="checkbox" 
-                id="certifyCheckbox" 
+            <input
+                class="form-check-input"
+                type="checkbox"
+                id="certifyCheckbox"
                 required
             >
             <label class="form-check-label text-secondary" for="certifyCheckbox">
-                I certify that all information provided is true and accurate to the best of my knowledge. 
+                I certify that all information provided is true and accurate to the best of my knowledge.
                 I understand that any false information may result in disqualification.
             </label>
         </div>
@@ -308,13 +303,12 @@
 
 
 
-    <div class="d-flex justify-content-between">
-        <button type="button" id="btnBackToDocumentsFromReview" class="btn btn-secondary">Previous</button>
-        <button type="submit" class="btn btn-success">Submit Application</button>
+        <div class="d-flex justify-content-between">
+            <button type="button" id="btnBackToDocumentsFromReview" class="btn btn-secondary">Previous</button>
+            <button type="submit" class="btn btn-success">Submit Application</button>
+        </div>
     </div>
-
-    
-</div>
+</form>
 
 
         </div>

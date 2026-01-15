@@ -65,6 +65,21 @@ body {
   color: #495057;
 }
 
+.nav-home-link {
+    color: #ffffff;          
+    font-weight: 700;       
+    text-decoration: none;  
+}
+
+.nav-home-link:hover,
+.nav-home-link:focus {
+    color: #ffffff;         
+    text-decoration: none;  
+    opacity: 0.85; 
+}
+
+
+
 /* Hero section */
 .hero {
   

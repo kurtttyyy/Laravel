@@ -1,5 +1,47 @@
 @extends('layouts.app')
 
+@section('page-loader')
+<div id="page-loader" class="page-loader" role="status">
+    <div class="loader-content">
+        <div class="loader-icon">
+            <div class="dot dot-1"></div>
+            <div class="dot dot-2"></div>
+            <div class="dot dot-3"></div>
+        </div>
+        <div class="loader-text">
+            loading opportunities<span class="dots">...</span>
+        </div>
+    </div>
+</div>
+@endsection
+@push('loader-script')
+<script>
+(function(){
+    const loader = document.getElementById('page-loader');
+    if(!loader) return;
+
+    const minDelay = 1000;
+    const start = Date.now();
+
+    function hideLoader(){
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, minDelay - elapsed);
+        setTimeout(()=>{
+            loader.classList.add('fade-out');
+            setTimeout(()=> loader.remove(), 350);
+        }, remaining);
+    }
+
+    if(document.readyState === 'complete'){
+        hideLoader();
+    } else {
+        window.addEventListener('load', hideLoader);
+    }
+})();
+</script>
+@endpush
+
+
 @section('content')
 @include('layouts.header')  {{-- UNIVERSAL HEADER --}}
 <div class="header-divider" aria-hidden="true"></div>

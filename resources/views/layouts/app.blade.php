@@ -13,44 +13,16 @@
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <!-- Page loader -->
-    <div id="page-loader" class="page-loader" role="status" aria-live="polite" aria-label="Loading"> 
-        <div class="loader-content">
-            <div class="loader-icon" aria-hidden="true">
-                <div class="dot dot-1"></div>
-                <div class="dot dot-2"></div>
-                <div class="dot dot-3"></div>
-            </div>
-            <div class="loader-text"> loading opportunities<span class="dots">...</span></div>
-        </div>
-    </div>
+
+    {{-- Page loader (optional per page) --}}
+    @yield('page-loader')
 
     @yield('content')
 
-    <!-- Bootstrap JS (CDN) -->
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        (function(){
-            const loader = document.getElementById('page-loader');
-            const minDelay = 1000; // ensure loader is visible for at least this many ms
-            const start = Date.now();
-            function hideLoader(){
-                const elapsed = Date.now() - start;
-                const remaining = Math.max(0, minDelay - elapsed);
-                setTimeout(()=>{
-                    if(loader){
-                        loader.classList.add('fade-out');
-                        setTimeout(()=> loader.remove(), 350);
-                    }
-                }, remaining);
-            }
-            if(document.readyState === 'complete'){
-                hideLoader();
-            } else {
-                window.addEventListener('load', hideLoader);
-            }
-        })();
-    </script>
+    @stack('loader-script')
 </body>
+
 </html>

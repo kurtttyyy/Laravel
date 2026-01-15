@@ -8,9 +8,20 @@
             </div>
         </div>
 
-        <div class="ms-auto d-flex gap-3">
-            <a href="{{ route('guest.jobOpen') }}" class="btn btn-sm btn-outline-light">Job Applicant</a>
-            <a href="{{ route('guest.application') }}" class="btn btn-sm btn-outline-light">Application Status</a>
+        <div class="ms-auto d-flex align-items-center gap-4">
+            <!-- HOME (text only, clickable) -->
+            <a href="{{ route('guest.index') }}"
+               class="nav-home-link">
+                Home
+            </a>
+
+            <!-- Buttons -->
+            <a href="{{ route('guest.jobOpen') }}" class="btn btn-sm btn-outline-light">
+                Job Applicant
+            </a>
+            <a href="{{ route('guest.application') }}" class="btn btn-sm btn-outline-light">
+                Application Status
+            </a>
         </div>
     </div>
 </header>

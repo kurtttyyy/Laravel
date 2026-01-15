@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,4 +24,8 @@ Route::controller(GuestPageController::class)->group(function () {
 
 Route::controller(ApplicantController::class)->group(function () {
     Route::post('applicant/store', 'applicant_store')->name('applicant.store');
+});
+
+Route::controller(RegisterLoginController::class)->group(function () {
+    Route::post('register/store', 'register_store')->name('register.store');
 });

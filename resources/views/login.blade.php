@@ -16,7 +16,7 @@
 </head>
 <body>
 
-<div class="min-h-screen flex items-center justify-center 
+<div class="min-h-screen flex items-center justify-center
      bg-gradient-to-br from-green-900 via-green-700 to-green-500 px-6">
 
 
@@ -144,7 +144,7 @@
 
                 <p class="text-center text-sm text-gray-500 mt-8">
                     Don’t have an account?
-                    <a href="#" class="text-green-800 font-semibold hover:underline">
+                    <a href="{{ route('register')}}" class="text-green-800 font-semibold hover:underline">
                         Create one now
                     </a>
                 </p>

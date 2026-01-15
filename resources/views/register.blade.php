@@ -104,22 +104,22 @@
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
                 <p class="text-gray-500 mb-8">Register to access the HRMS</p>
 
-                <form class="space-y-5">
-
+                <form class="space-y-5" method='POST' action = '{{ route("register.store")}}'>
+                    @csrf
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="text" placeholder="First Name"
+                        <input type="text" placeholder="First Name" name = "first_name"
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
-                        <input type="text" placeholder="Last Name"
+                        <input type="text" placeholder="Last Name" name = "last_name"
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
                     </div>
 
-                    <input type="email" placeholder="Email Address"
+                    <input type="email" placeholder="Email Address" name = "email"
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
 
-                    <input type="password" placeholder="Password"
+                    <input type="password" placeholder="Password" name = "password"
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
 
-                    <input type="password" placeholder="Confirm Password"
+                    <input type="password" placeholder="Confirm Password" name = "confirmation_password"
                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
 
                     <button
@@ -131,7 +131,7 @@
 
                 <p class="text-center text-sm text-gray-500 mt-8">
                     Already have an account?
-                    <a href="login.html" class="text-green-700 font-semibold hover:underline">
+                    <a href="{{ route('login')}}" class="text-green-700 font-semibold hover:underline">
                         Sign in
                     </a>
                 </p>

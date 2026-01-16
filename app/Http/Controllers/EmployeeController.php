@@ -6,7 +6,7 @@ class EmployeeController extends Controller
 {
     public function employeeHome()
     {
-        return view('employee.employeeHome');
+        return view('employee.employeeLeave');
     }
 
     

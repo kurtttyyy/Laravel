@@ -304,92 +304,147 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const personalForm = document.getElementById('personalForm');
-    const experienceForm = document.getElementById('experienceForm');
-    const documentsForm = document.getElementById('documentsForm');
-    const reviewForm = document.getElementById('reviewForm');
 
-    const btnToExperience = document.getElementById('btnToExperience');
-    const btnBackToPersonal = document.getElementById('btnBackToPersonal');
-    const btnToDocuments = document.getElementById('btnToDocuments');
-    const btnBackToExperience = document.getElementById('btnBackToExperience');
-    const btnToReview = document.getElementById('btnToReview');
+    /* =======================
+       FORM SECTIONS
+    ======================= */
+    const personalForm   = document.getElementById('personalForm');
+    const experienceForm = document.getElementById('experienceForm');
+    const documentsForm  = document.getElementById('documentsForm');
+    const reviewForm     = document.getElementById('reviewForm');
+
+    /* =======================
+       BUTTONS
+    ======================= */
+    const btnToExperience              = document.getElementById('btnToExperience');
+    const btnBackToPersonal            = document.getElementById('btnBackToPersonal');
+    const btnToDocuments               = document.getElementById('btnToDocuments');
+    const btnBackToExperience          = document.getElementById('btnBackToExperience');
+    const btnToReview                  = document.getElementById('btnToReview');
     const btnBackToDocumentsFromReview = document.getElementById('btnBackToDocumentsFromReview');
 
-    const certifyCheckbox = document.getElementById('certifyCheckbox');
+    /* =======================
+       STEPPER ELEMENTS
+    ======================= */
+    const steps = document.querySelectorAll('.step1');
+    const lines = document.querySelectorAll('.line1');
 
-    // Disable submit button initially
+    function setStep(stepNumber) {
+        steps.forEach((step, index) => {
+            step.classList.remove('active', 'completed1');
+
+            if (index + 1 < stepNumber) {
+                step.classList.add('completed1');
+            } else if (index + 1 === stepNumber) {
+                step.classList.add('active');
+            }
+        });
+
+        lines.forEach((line, index) => {
+            line.classList.toggle('completed1', index < stepNumber - 1);
+        });
+    }
+
+    // Initial step
+    setStep(1);
+
+    /* =======================
+       CERTIFICATION CHECKBOX
+    ======================= */
+    const certifyCheckbox = document.getElementById('certifyCheckbox');
     const submitButton = reviewForm.querySelector('button[type="submit"]');
     submitButton.disabled = true;
 
-    // Enable/disable submit based on checkbox
     certifyCheckbox.addEventListener('change', () => {
         submitButton.disabled = !certifyCheckbox.checked;
     });
 
+    /* =======================
+       NAVIGATION LOGIC
+    ======================= */
+
+    // Step 1 → Step 2
     btnToExperience.addEventListener('click', () => {
         personalForm.classList.add('d-none');
         experienceForm.classList.remove('d-none');
+        setStep(2);
     });
 
+    // Step 2 → Step 1
     btnBackToPersonal.addEventListener('click', () => {
         experienceForm.classList.add('d-none');
         personalForm.classList.remove('d-none');
+        setStep(1);
     });
 
+    // Step 2 → Step 3
     btnToDocuments.addEventListener('click', () => {
         experienceForm.classList.add('d-none');
         documentsForm.classList.remove('d-none');
+        setStep(3);
     });
 
+    // Step 3 → Step 2
     btnBackToExperience.addEventListener('click', () => {
         documentsForm.classList.add('d-none');
         experienceForm.classList.remove('d-none');
+        setStep(2);
     });
 
+    // Step 3 → Step 4 (Review)
     btnToReview.addEventListener('click', () => {
-        // Populate summary fields
-        document.getElementById('review-first-name').textContent = document.getElementById('first_name').value;
-        document.getElementById('review-last-name').textContent = document.getElementById('last_name').value;
-        document.getElementById('review-email').textContent = document.getElementById('email').value;
-        document.getElementById('review-phone').textContent = document.getElementById('phone').value;
-        document.getElementById('review-address').textContent = document.getElementById('address').value;
 
-        document.getElementById('review-education').textContent = document.getElementById('education').value;
-        document.getElementById('review-field-study').textContent = document.getElementById('field_study').value;
-        document.getElementById('review-experience-years').textContent = document.getElementById('experience_years').value;
-        document.getElementById('review-key-skills').textContent = document.getElementById('key_skills').value;
+        // Populate review fields
+        document.getElementById('review-first-name').textContent =
+            document.getElementById('first_name').value;
+        document.getElementById('review-last-name').textContent =
+            document.getElementById('last_name').value;
+        document.getElementById('review-email').textContent =
+            document.getElementById('email').value;
+        document.getElementById('review-phone').textContent =
+            document.getElementById('phone').value;
+        document.getElementById('review-address').textContent =
+            document.getElementById('address').value;
+
+        document.getElementById('review-education').textContent =
+            document.getElementById('education').value;
+        document.getElementById('review-field-study').textContent =
+            document.getElementById('field_study').value;
+        document.getElementById('review-experience-years').textContent =
+            document.getElementById('experience_years').value;
+        document.getElementById('review-key-skills').textContent =
+            document.getElementById('key_skills').value;
 
         const resumeInput = document.getElementById('resume');
-        const coverInput = document.getElementById('cover_letter');
-        const certsInput = document.getElementById('certifications');
+        const coverInput  = document.getElementById('cover_letter');
+        const certsInput  = document.getElementById('certifications');
 
-        document.getElementById('review-resume-file').textContent = resumeInput.files.length ? resumeInput.files[0].name : 'None';
-        document.getElementById('review-cover-file').textContent = coverInput.files.length ? coverInput.files[0].name : 'None';
-        document.getElementById('review-certs-file').textContent = certsInput.files.length ? certsInput.files[0].name : 'None';
+        document.getElementById('review-resume-file').textContent =
+            resumeInput.files.length ? resumeInput.files[0].name : 'None';
+        document.getElementById('review-cover-file').textContent =
+            coverInput.files.length ? coverInput.files[0].name : 'None';
+        document.getElementById('review-certs-file').textContent =
+            certsInput.files.length ? certsInput.files[0].name : 'None';
 
         documentsForm.classList.add('d-none');
         reviewForm.classList.remove('d-none');
 
-        // reset checkbox and submit state
         certifyCheckbox.checked = false;
         submitButton.disabled = true;
+
+        setStep(4);
     });
 
+    // Step 4 → Step 3
     btnBackToDocumentsFromReview.addEventListener('click', () => {
         reviewForm.classList.add('d-none');
         documentsForm.classList.remove('d-none');
+        setStep(3);
     });
 
-    // Prevent form submission if checkbox is not checked
-    reviewForm.querySelector('form, button[type="submit"]').addEventListener('click', (e) => {
-        if (!certifyCheckbox.checked) {
-            e.preventDefault();
-            alert('Please certify that the information provided is true before submitting.');
-        }
-    });
 });
 </script>
+
 
 
 

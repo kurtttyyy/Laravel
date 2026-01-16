@@ -11,63 +11,53 @@ use Illuminate\Support\Str;
 
 class ApplicantController extends Controller
 {
-    public function applicant_store(Request $request){
-        $attrs = $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|string',
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'education' => 'required|string',
-            'field_study' => 'required|string',
-            'experience_years' => 'required|string',
-            'key_skills' => 'required|string',
-            'documents' => 'required|array',
-            'documents.*.file' => 'required|file|mimes:pdf,doc,docx|max:2048',
-            'documents.*.type' => 'required',
+public function applicant_store(Request $request)
+{
+    $request->validate([
+        'first_name' => 'required|string',
+        'last_name' => 'required|string',
+        'email' => 'required|email',
+        'phone' => 'required|string',
+        'address' => 'required|string',
+        'education' => 'required|string',
+        'field_study' => 'required|string',
+        'experience_years' => 'required|string',
+        'key_skills' => 'required|string',
+        'documents' => 'required|array',
+        'documents.*.file' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        'documents.*.type' => 'required|string',
+    ]);
+
+    $applicant = Applicant::create([
+        'first_name'           => $request->first_name,
+        'last_name'            => $request->last_name,
+        'email'                => $request->email,
+        'phone'                => $request->phone,
+        'address'              => $request->address,
+        'education_attainment' => $request->education,
+        'field_study'          => $request->field_study,
+        'experience'           => $request->experience_years,
+        'skills_n_expertise'   => $request->key_skills,
+        'application_status'   => 'pending',
+    ]);
+
+    foreach ($request->documents as $doc) {
+        $file = $doc['file'];
+
+        $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('uploads', $fileName, 'public');
+
+        ApplicantDocument::create([
+            'applicant_id' => $applicant->id,
+            'type'         => $doc['type'],
+            'filename'     => $file->getClientOriginalName(),
+            'filepath'     => 'uploads/' . $fileName,
+            'mime_type'    => $file->getMimeType(),
+            'size'         => $file->getSize(),
         ]);
-
-        $applicant_store = Applicant::create([
-            'first_name' => $attrs['first_name'],
-            'last_name' => $attrs['last_name'],
-            'email' => $attrs['email'],
-            'phone' => $attrs['phone'],
-            'address' => $attrs['address'],
-            'education_attainment' => $attrs['education'],
-            'field_study' => $attrs['field_study'],
-            'experience' => $attrs['experience_years'],
-            'skills_n_expertise' => $attrs['key_skills'],
-            //'applied_position' => $attrs[''],
-        ]);
-
-
-        DB::transaction(function () use ($request, $applicant_store, &$filePaths) {
-
-            foreach ($request->documents as $doc) {
-
-                $file = $doc['file'];
-                $type = $doc['type'];
-
-                if ($file->isValid()) {
-
-                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-
-                    $file->storeAs('uploads', $fileName, 'public');
-
-                    ApplicantDocument::create([
-                        'applicant_id' => $applicant_store->id,
-                        'type'         => $type,
-                        'filename'     => $file->getClientOriginalName(),
-                        'filepath'     => 'uploads/' . $fileName,
-                        'mime_type'    => $file->getMimeType(),
-                        'size'         => $file->getSize(),
-                    ]);
-
-                    $filePaths[] = 'uploads/' . $fileName;
-                }
-            }
-        });
-
-        return redirect()->back()->with('success', 'Submitted successfully');
     }
+
+    return redirect()->back()->with('success', 'Submitted successfully');
+}
+
 }

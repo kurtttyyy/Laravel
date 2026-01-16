@@ -6,26 +6,37 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| ACTIVE ROUTE (FOR TESTING)
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
-    return view('guest.index');
+    return view('employee.employeeLeave');
 });
 
-Route::controller(PageController::class)->group(function () {
-    Route::get('/login', 'display_login')->name('login');
-    Route::get('/register', 'display_register')->name('register');
-});
+/*
+|--------------------------------------------------------------------------
+| COMMENTED ROUTES
+|--------------------------------------------------------------------------
+*/
 
-Route::controller(GuestPageController::class)->group(function () {
-    Route::get('/application', 'display_application')->name('guest.application');
-    Route::get('/application/procedure', 'display_steps')->name('guest.applicationSteps');
-    Route::get('/index', 'display_index')->name('guest.index');
-    Route::get('/job/available', 'display_job')->name('guest.jobOpen');
-});
+// Route::controller(PageController::class)->group(function () {
+//     Route::get('/login', 'display_login')->name('login');
+//     Route::get('/register', 'display_register')->name('register');
+// });
 
-Route::controller(ApplicantController::class)->group(function () {
-    Route::post('applicant/store', 'applicant_stores')->name('applicant.store');
-});
+// Route::controller(GuestPageController::class)->group(function () {
+//     Route::get('/application', 'display_application')->name('guest.application');
+//     Route::get('/application/procedure', 'display_steps')->name('guest.applicationSteps');
+//     Route::get('/index', 'display_index')->name('guest.index');
+//     Route::get('/job/available', 'display_job')->name('guest.jobOpen');
+// });
 
-Route::controller(RegisterLoginController::class)->group(function () {
-    Route::post('register/store', 'register_store')->name('register.store');
-});
+// Route::controller(ApplicantController::class)->group(function () {
+//     Route::post('applicant/store', 'applicant_store')->name('applicant.store');
+// });
+
+// Route::controller(RegisterLoginController::class)->group(function () {
+//     Route::post('register/store', 'register_store')->name('register.store');
+// });

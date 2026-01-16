@@ -23,7 +23,7 @@ Route::controller(GuestPageController::class)->group(function () {
 });
 
 Route::controller(ApplicantController::class)->group(function () {
-    Route::post('applicant/store', 'applicant_store')->name('applicant.store');
+    Route::post('applicant/store', 'applicant_stores')->name('applicant.store');
 });
 
 Route::controller(RegisterLoginController::class)->group(function () {

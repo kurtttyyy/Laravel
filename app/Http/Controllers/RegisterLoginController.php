@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterLoginController extends Controller
@@ -21,8 +22,8 @@ class RegisterLoginController extends Controller
             return redirect()->back()->with('error', 'Password does not match.');
         }
 
-        $status = 'inactive';
-        $role = 'employee';
+        $status = 'Active';
+        $role = 'Employee';
 
         User::create([
             'first_name' => $attrs['first_name'],
@@ -35,4 +36,35 @@ class RegisterLoginController extends Controller
 
         return redirect()->route('login');
     }
+
+    public function login_store(Request $request)
+    {
+        $attrs = $request->validate([
+            'email'    => 'required|email|exists:users,email',
+            'password' => 'required|string',
+        ]);
+
+        if (Auth::attempt([
+            'email'    => $attrs['email'],
+            'password' => $attrs['password'],
+        ])) {
+
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            return match ($user->role) {
+                'Employee' => redirect()->route('employee_home.display'),
+                'Admin'    => redirect()->route('admin_home.display'),
+                default    => redirect()->route('login')->with('error', 'Unauthorized role'),
+            };
+        }
+
+        return back()
+            ->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+            ])
+            ->withInput();
+    }
+
 }

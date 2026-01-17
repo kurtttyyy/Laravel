@@ -1,14 +1,15 @@
 <?php
 
+
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
-
 Route::get('/', function () {
-    return view('guest.index');
+    return view('employee.employeeDocument');
 });
+/*
 
 Route::controller(PageController::class)->group(function () {
     Route::get('/login', 'display_login')->name('login');
@@ -30,11 +31,9 @@ Route::controller(RegisterLoginController::class)->group(function () {
     Route::post('register/store', 'register_store')->name('register.store');
 });
 
-
-
-/*
-Route::get('/', function () {
-    return view('employee.employeeLeave');
-});
 */
+
+
+
+
 

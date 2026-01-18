@@ -54,7 +54,7 @@ class RegisterLoginController extends Controller
             $user = Auth::user();
 
             return match ($user->role) {
-                'Employee' => redirect()->route('employee_home.display'),
+                'Employee' => redirect()->route('employee.employeeHome'),
                 'Admin'    => redirect()->route('admin_home.display'),
                 default    => redirect()->route('login')->with('error', 'Unauthorized role'),
             };

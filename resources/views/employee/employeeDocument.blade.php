@@ -32,7 +32,6 @@
 
         </div>
 
-        <!-- GRID -->
         <div class="grid grid-cols-2 gap-8">
 
             <!-- 201 FILE -->
@@ -115,7 +114,6 @@
                 </p>
 
 
-                <!-- Doc -->
                 <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
                     <span class="doc-icon bg-blue-100 text-blue-600 w-10 h-10 rounded flex items-center justify-center">
                         <i class="fa-solid fa-file"></i>

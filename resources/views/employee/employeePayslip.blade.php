@@ -26,7 +26,6 @@
     <main class="flex-1 ml-56">
     @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
 <div class="p-8 space-y-8">
-        <!-- Header -->
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h2 class="text-3xl font-bold text-gray-800">Payslips</h2>
@@ -35,7 +34,6 @@
 
         </div>
 
-        <!-- SALARY SUMMARY -->
         <div class="bg-gradient-to-b from-green-900 to-green-500 rounded-2xl p-8 text-white shadow-lg">
 
             <div class="grid grid-cols-4 gap-6 text-center">
@@ -90,6 +88,5 @@
     </main>
 
 </div>
-
 </body>
 </html>

@@ -13,15 +13,15 @@
     </div>
 
 <nav class="p-4 space-y-2">
-    <a href="/dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-green-600 text-white font-medium cursor-pointer hover:bg-green-700 transition">
+    <a href="{{ route('employee.employeeHome') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-green-600 text-white font-medium cursor-pointer hover:bg-green-700 transition">
         <i class="fa fa-dashboard"></i>
         Dashboard
     </a>
-    <a href="/profile" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
+    <a href="{{ route('employee.employeeProfile') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
         <i class="fa fa-user"></i>
         My Profile
     </a>
-    <a href="/leave-requests" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
+    <a href="{{ route('employee.employeeLeave') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
         <i class="fa fa-calendar"></i>
         Leave Requests
     </a>

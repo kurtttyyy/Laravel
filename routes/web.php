@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RegisterLoginController;
@@ -31,9 +32,11 @@ Route::controller(RegisterLoginController::class)->group(function () {
     Route::post('register/store', 'register_store')->name('register.store');
 });
 
+
+
+/*
+Route::get('/', function () {
+    return view('employee.employeeLeave');
+});
 */
-
-
-
-
 

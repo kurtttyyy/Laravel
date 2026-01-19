@@ -8,7 +8,7 @@ use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('guest.index');
+    return view('login_display');
 });
 
 Route::controller(PageController::class)->group(function () {

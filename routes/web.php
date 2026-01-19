@@ -36,6 +36,9 @@ Route::controller(EmployeePageController::class)->group(function () {
     Route::get('employee/dashboard', 'display_home')->name('employee.employeeHome');
     Route::get('employee/leave', 'display_leave')->name('employee.employeeLeave');
     Route::get('employee/profile', 'display_profile')->name('employee.employeeProfile');
+    Route::get('employee/communication', 'display_communication')->name('employee.employeeCommunication');
+    Route::get('employee/document', 'display_document')->name('employee.employeeDocument');
+    Route::get('employee/payslip', 'display_payslip')->name('employee.employeePayslip');
 });
 
 

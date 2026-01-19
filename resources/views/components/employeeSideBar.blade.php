@@ -25,15 +25,15 @@
         <i class="fa fa-calendar"></i>
         Leave Requests
     </a>
-    <a href="/payslips" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
+    <a href="{{ route('employee.employeePayslip') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
         <i class="fa fa-file-text-o"></i>
         Payslips
     </a>
-    <a href="/documents" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
+    <a href="{{ route('employee.employeeDocument') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
         <i class="fa fa-folder"></i>
         Documents
     </a>
-    <a href="/communication" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
+    <a href="{{ route('employee.employeeCommunication') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 hover:bg-green-600/30 cursor-pointer transition">
         <i class="fa fa-users"></i>
         Communication
     </a>

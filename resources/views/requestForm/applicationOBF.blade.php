@@ -1,11 +1,11 @@
         <form method="POST" action="{{ url('/leave/apply') }}" class="space-y-6">
             @csrf
 
-            <!-- LEAVE APPLICATION FORM -->
+            <!-- APPLICATION FORM FOR OFFICIAL BUSINESS AND OFFICIAL TIME -->
             <div class="border-2 border-black p-6 rounded-lg space-y-4">
 
                 <h4 class="text-center font-semibold text-gray-800 mb-6 tracking-wide uppercase">
-                    LEAVE APPLICATION FORM
+                    APPLICATION FORM FOR OFFICIAL BUSINESS AND OFFICIAL TIME
                 </h4>
 
                 <!-- Top Information -->

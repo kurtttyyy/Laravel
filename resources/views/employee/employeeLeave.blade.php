@@ -77,14 +77,14 @@
     <h4 class="font-semibold text-gray-700 mb-4">Select Form</h4>
     <ul class="space-y-2 text-sm">
         <li>
-            <button 
+            <button type="button"
                 onclick="showForm('leaveForm')"
                 class="w-full text-left px-2 py-1 rounded hover:bg-blue-100">
                 LEAVE APPLICATION FORM
             </button>
         </li>
         <li>
-            <button 
+            <button type="button"
                 onclick="showForm('officialForm')"
                 class="w-full text-left px-2 py-1 rounded hover:bg-blue-100">
                 APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
@@ -95,30 +95,42 @@
 
 
 
-<div class="p-8 space-y-6 bg-white rounded-2xl border border-gray-200"> 
+<div class="p-8 space-y-6 bg-white rounded-2xl border border-gray-200">
     <!-- Leave Application Form -->
-    <div>
-        <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
+    <div id="officialForm" >
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
         @include('requestForm.applicationOBF')
+    </div>
 
+    <div id="leaveForm" style ="display:none;">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
+        @include('requestForm.leaveApplicationForm')
     </div>
 </div>
 
 
 </div>
-
-
-
-
-
-
-
 
     </div>
 </div>
 
     </main>
 </div>
+<script>
+    window.showForm = function (tab) {
+        const leave = document.getElementById('leaveForm');
+        const official = document.getElementById('officialForm');
+
+        if (!leave) {
+            console.error('Form elements not found');
+            return;
+        }
+
+        leave.style.display = tab === 'leaveForm' ? 'block' : 'none';
+        official.style.display = tab === 'officialForm' ? 'block' : 'none';
+    }
+</script>
 
 </body>
 </html>
+

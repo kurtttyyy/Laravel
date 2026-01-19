@@ -13,7 +13,7 @@ Route::get('/', function () {
 /*
 
 Route::controller(PageController::class)->group(function () {
-    Route::get('/login', 'display_login')->name('login');
+    Route::get('/login', 'display_login')->name('login_display');
     Route::get('/register', 'display_register')->name('register');
 });
 
@@ -30,6 +30,7 @@ Route::controller(ApplicantController::class)->group(function () {
 
 Route::controller(RegisterLoginController::class)->group(function () {
     Route::post('register/store', 'register_store')->name('register.store');
+    Route::post('login', 'login_store')->name('login');
 });
 
 

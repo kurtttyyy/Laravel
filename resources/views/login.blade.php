@@ -118,18 +118,18 @@
                 <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
                 <p class="text-gray-500 mb-8">Sign in to continue to your account</p>
 
-<form class="space-y-6">
-
+<form class="space-y-6" method="POST" action = "{{ route('login') }}" >
+    @csrf
     <div>
         <label class="text-sm font-medium text-gray-700">Email Address</label>
-        <input type="email"
+        <input type="email" name = "email"
                placeholder="john@example.com"
                class="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
     </div>
 
     <div>
         <label class="text-sm font-medium text-gray-700">Password</label>
-        <input type="password"
+        <input type="password" name = "password"
                placeholder="••••••••"
                class="mt-2 w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
     </div>

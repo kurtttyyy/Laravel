@@ -22,15 +22,6 @@
     <main class="flex-1 ml-56">
     @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
 <div class="p-8 space-y-8">
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-semibold text-gray-900">Documents</h1>
-                <p class="text-gray-500 mt-1">Access important documents and files</p>
-            </div>
-
-
-        </div>
 
         <div class="grid grid-cols-2 gap-8">
 

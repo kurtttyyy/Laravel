@@ -50,6 +50,9 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
     Route::get('system/employee/PD', 'display_pd')->name('admin.adminEmployeePD');
     Route::get('system/employee/performance', 'display_performance')->name('admin.adminEmployeePerformance');
+    Route::get('system/attendance', 'display_attendance')->name('admin.adminAttendance');
+    Route::get('system/leave/management', 'display_leave')->name('admin.adminLeaveManagement');
+    Route::get('system/reports', 'display_reports')->name('admin.adminReports');
 });
 
 

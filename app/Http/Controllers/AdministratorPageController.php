@@ -29,4 +29,17 @@ class AdministratorPageController extends Controller
     public function display_performance(){
         return view('admin.adminEmployeePerformance');
     }
+
+    public function display_attendance(){
+        return view('admin.adminAttendance');
+    }
+
+    public function display_leave(){
+        return view('admin.adminLeaveManagement');
+    }
+
+    public function display_reports(){
+        return view('admin.adminReports');
+    }
 }
+

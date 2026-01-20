@@ -7,22 +7,28 @@
     </div>
 
     <nav class="flex-1 px-4 py-6 space-y-2">
-      <a class="flex items-center gap-3 px-4 py-2 rounded bg-slate-800 text-white" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded bg-slate-800 text-white"
+        href="#">
         <i class="fa-solid fa-house"></i> Dashboard
       </a>
-      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800"
+        href="#">
         <i class="fa-solid fa-users"></i> Employees
       </a>
-      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800"
+        href="#">
         <i class="fa-solid fa-calendar-check"></i> Attendance
       </a>
-      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800"
+        href="#">
         <i class="fa-solid fa-clipboard"></i> Leave Management
       </a>
-      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800"
+        href="#">
         <i class="fa-solid fa-chart-line"></i> Reports
       </a>
-      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800" href="#">
+      <a class="flex items-center gap-3 px-4 py-2 rounded hover:bg-slate-800"
+        href="#">
         <i class="fa-solid fa-gear"></i> Settings
       </a>
     </nav>

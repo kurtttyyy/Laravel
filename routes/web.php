@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdministratorPageController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\GuestPageController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
 
-/*
 Route::get('/', function () {
     return view('guest.index');
 });
@@ -43,7 +43,13 @@ Route::controller(EmployeePageController::class)->group(function () {
     Route::get('employee/payslip', 'display_payslip')->name('employee.employeePayslip');
 });
 
+Route::controller(AdministratorPageController::class)->group(function () {
+    Route::get('system/dashboard', 'display_home')->name('admin.adminHome');
+    Route::get('system/employee/documents', 'display_documents')->name('admin.adminEmployeeDocuments');
+    Route::get('system/employee', 'display_employee')->name('admin.adminEmployee');
+    Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
+    Route::get('system/employee/PD', 'display_pd')->name('admin.adminEmployeePD');
+    Route::get('system/employee/performance', 'display_performance')->name('admin.adminEmployeePerformance');
+});
 
-*/
 
-Route::view('/test', 'Admin.adminEmployee');

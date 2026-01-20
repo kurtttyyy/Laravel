@@ -176,18 +176,18 @@
     <!-- Modal Content -->
 
     <!-- Overview -->
-     @include('Admin.adminEmployeeOverview')
+     @include('Admin.PersonalDetail.adminEmployeeOverview')
 
 
     <!-- Personal Details -->
-     @include('Admin.adminEmployeePD')
+     @include('Admin.PersonalDetail.adminEmployeePD')
 
 
     <!-- Performance -->
-     @include('Admin.adminEmployeePerformance')
+     @include('Admin.PersonalDetail.adminEmployeePerformance')
 
     <!-- Documents -->
-     @include('Admin.adminEmployeeDocuments')
+     @include('Admin.PersonalDetail.adminEmployeeDocuments')
 
 
     <!-- Modal Footer -->

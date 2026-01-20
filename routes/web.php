@@ -45,14 +45,18 @@ Route::controller(EmployeePageController::class)->group(function () {
 
 Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/dashboard', 'display_home')->name('admin.adminHome');
-    Route::get('system/employee/documents', 'display_documents')->name('admin.adminEmployeeDocuments');
     Route::get('system/employee', 'display_employee')->name('admin.adminEmployee');
-    Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
-    Route::get('system/employee/PD', 'display_pd')->name('admin.adminEmployeePD');
-    Route::get('system/employee/performance', 'display_performance')->name('admin.adminEmployeePerformance');
     Route::get('system/attendance', 'display_attendance')->name('admin.adminAttendance');
     Route::get('system/leave/management', 'display_leave')->name('admin.adminLeaveManagement');
     Route::get('system/reports', 'display_reports')->name('admin.adminReports');
+    Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');
+
+    //PersonalDetail
+    Route::get('system/personal/detail/employee/documents', 'display_documents')->name('admin.PersonalDetail.adminEmployeeDocuments');
+    Route::get('system/personal/detail/employee/overview', 'display_overview')->name('admin.PersonalDetail.adminEmployeeOverview');
+    Route::get('system/personal/detail/employee/PD', 'display_pd')->name('admin.PersonalDetail.adminEmployeePD');
+    Route::get('system/personal/detail/employee/performance', 'display_performance')->name('admin.PersonalDetail.adminEmployeePerformance');
+    Route::get('system/personal/detail/edit', 'display_edit')->name('admin.PersonalDetail.editProfile');
 });
 
 

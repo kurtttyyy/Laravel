@@ -16,7 +16,7 @@
     <!-- Main Content -->
     <main class="flex-1 ml-56">
 
-    @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
+    @include('components.employeeHeader.myProfileHeader')
 
 
         <!-- Content -->

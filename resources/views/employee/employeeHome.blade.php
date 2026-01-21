@@ -16,7 +16,7 @@
     <!-- Main Content -->
     <main class="flex-1 ml-56">
         <!-- Top Header -->
-    @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
+    @include('components.employeeHeader.dashboardHeader', ['name' => 'Kurt', 'notifications' => 5])
 
 
 <div class="p-8 space-y-8">

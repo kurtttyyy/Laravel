@@ -27,7 +27,7 @@
   <main class="flex-1">
 
     <!-- Header -->
-     @include('components.adminHeader')
+     @include('components.adminHeader.attendanceHeader')
 
     <!-- Dashboard Content -->
     <div class="p-8 space-y-6">

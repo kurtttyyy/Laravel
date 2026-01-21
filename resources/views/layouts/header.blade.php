@@ -3,7 +3,7 @@
         <div class="navbar-brand d-flex align-items-center gap-3">
             <img src="{{ asset('images/logo.webp') }}" alt="Logo" height="70">
             <div class="d-flex flex-column">
-                <span class="fw-bold fs-2 mb-0 text-white">Northeastern College</span>
+                <span class="fw-bold fs-2 mb-0 text-white">HUMAN RESOURCES DEPARTMENT</span>
                 <small class="subtext">Join Our Team</small>
             </div>
         </div>

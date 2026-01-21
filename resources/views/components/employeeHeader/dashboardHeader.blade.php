@@ -4,7 +4,7 @@
         <!-- LEFT : STATIC TITLE -->
         <div>
             <h2 class="text-3xl font-bold text-gray-900">
-                Employee Portal <span>👋</span>
+                Welcome Back <span>👋</span>
             </h2>
             <p class="text-gray-600 mt-1">
                 Welcome to the employee dashboard

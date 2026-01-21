@@ -1,6 +1,6 @@
     <header class="bg-white px-8 py-5 flex justify-between items-center border-b">
       <div>
-        <h1 class="text-xl font-semibold">HR Dashboard</h1>
+        <h1 class="text-3xl font-bold text-gray-900">HR Dashboard</h1>
         <p class="text-sm text-slate-500">Welcome back! Here's what's happening today.</p>
       </div>
 

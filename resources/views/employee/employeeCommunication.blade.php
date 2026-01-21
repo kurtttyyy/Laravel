@@ -24,7 +24,7 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 ml-56">
-    @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
+    @include('components.employeeHeader.communicationHeader')
     <div class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
     <!-- CARD 1 -->
     <div class="bg-white rounded-2xl shadow-sm p-8 text-center">

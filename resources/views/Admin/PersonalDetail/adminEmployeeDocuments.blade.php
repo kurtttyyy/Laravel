@@ -35,12 +35,24 @@
         </div>
       </div>
       <div class="flex items-center space-x-3">
-        <button class="text-gray-500 hover:text-indigo-600">👁️</button>
-        <button class="text-gray-500 hover:text-indigo-600">⬇️</button>
+        <!-- Eye icon -->
+        <button class="text-gray-500 hover:text-indigo-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+        <!-- Download icon -->
+        <button class="text-gray-500 hover:text-indigo-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- Document Item -->
+    <!-- Repeat for other document items -->
     <div class="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
       <div class="flex items-center space-x-4">
         <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -54,67 +66,24 @@
         </div>
       </div>
       <div class="flex items-center space-x-3">
-        <button class="text-gray-500 hover:text-indigo-600">👁️</button>
-        <button class="text-gray-500 hover:text-indigo-600">⬇️</button>
+        <!-- Eye icon -->
+        <button class="text-gray-500 hover:text-indigo-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+        <!-- Download icon -->
+        <button class="text-gray-500 hover:text-indigo-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- Document Item -->
-    <div class="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-4">
-        <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-          🪪
-        </div>
-        <div>
-          <p class="font-medium text-gray-800">Government ID</p>
-          <p class="text-xs text-gray-500">
-            id_document.jpg • 850 KB • Jan 12, 2022
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center space-x-3">
-        <button class="text-gray-500 hover:text-indigo-600">👁️</button>
-        <button class="text-gray-500 hover:text-indigo-600">⬇️</button>
-      </div>
-    </div>
-
-    <!-- Document Item -->
-    <div class="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-4">
-        <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-green-100 text-green-600">
-          📊
-        </div>
-        <div>
-          <p class="font-medium text-gray-800">W-4 Tax Form</p>
-          <p class="text-xs text-gray-500">
-            w4_form.pdf • 600 KB • Jan 15, 2022
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center space-x-3">
-        <button class="text-gray-500 hover:text-indigo-600">👁️</button>
-        <button class="text-gray-500 hover:text-indigo-600">⬇️</button>
-      </div>
-    </div>
-
-    <!-- Document Item -->
-    <div class="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-4">
-        <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-yellow-100 text-yellow-600">
-          ⭐
-        </div>
-        <div>
-          <p class="font-medium text-gray-800">Professional Certifications</p>
-          <p class="text-xs text-gray-500">
-            certifications.pdf • 1.8 MB • Mar 20, 2023
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center space-x-3">
-        <button class="text-gray-500 hover:text-indigo-600">👁️</button>
-        <button class="text-gray-500 hover:text-indigo-600">⬇️</button>
-      </div>
-    </div>
+    <!-- Repeat similarly for the other documents... -->
 
   </div>
 </div>

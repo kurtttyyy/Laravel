@@ -27,7 +27,7 @@
   <main class="flex-1">
 
     <!-- Header -->
-     @include('components.adminHeader')
+     @include('components.adminHeader.leaveHeader')
 
     <!-- Dashboard Content -->
     <div class="p-8 space-y-6">
@@ -36,8 +36,6 @@
 
 <div class="bg-gray-50 min-h-screen p-6">
 
-    <!-- Page Title -->
-    <h2 class="text-xl font-semibold mb-6">Leave Balances</h2>
 
     <!-- Leave Balance Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

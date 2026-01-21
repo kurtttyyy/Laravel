@@ -24,7 +24,7 @@
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 ml-56">
-    @include('components.employeeHeader', ['name' => 'Kurt', 'notifications' => 5])
+    @include('components.employeeHeader.payslipHeader')
 <div class="p-8 space-y-8">
         <div class="flex justify-between items-center mb-8">
             <div>

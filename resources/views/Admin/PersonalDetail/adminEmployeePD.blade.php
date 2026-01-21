@@ -10,11 +10,11 @@
       Personal Information
     </div>
     <div class="space-y-2 text-sm text-gray-700">
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Full Name</span>John Doe</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Date of Birth</span>March 15, 1990</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Gender</span>Male</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Nationality</span>United States</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Marital Status</span>Single</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Full Name</span>John Doe</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Date of Birth</span>March 15, 1990</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Gender</span>Male</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Nationality</span>Filipino</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Marital Status</span>Single</p>
     </div>
   </div>
 
@@ -28,10 +28,10 @@
       Address
     </div>
     <div class="space-y-2 text-sm text-gray-700">
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Street Address</span>123 Market Street, Apt 4B</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">City</span>San Francisco</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">State</span>California</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Postal Code</span>94102</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Street Address</span>123 Market Street, Apt 4B</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Province</span>Isabela</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Municipality</span>Echague</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Postal Code</span>94102</p>
     </div>
   </div>
 
@@ -44,9 +44,9 @@
       Emergency Contact
     </div>
     <div class="space-y-2 text-sm text-gray-700">
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Contact Name</span>Jane Doe</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Relationship</span>Spouse</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Phone Number</span>+1 (555) 987-6543</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Contact Name</span>Jane Doe</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Relationship</span>Spouse</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Phone Number</span>+1 (555) 987-6543</p>
     </div>
   </div>
 
@@ -59,9 +59,9 @@
       Bank Details
     </div>
     <div class="space-y-2 text-sm text-gray-700">
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Bank Name</span>Chase Bank</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Account Number</span>••••••1234</p>
-      <p><span class="block font-semibold text-xs uppercase text-gray-400">Routing Number</span>021000021</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Bank Name</span>Chase Bank</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Account Number</span>••••••1234</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Routing Number</span>021000021</p>
     </div>
   </div>
 

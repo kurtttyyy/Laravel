@@ -68,10 +68,6 @@ class AdministratorPageController extends Controller
         return view('admin.PersonalDetail.adminEmployeePD');
     }
 
-    public function display_personal_detail_overview(){
-        return view('admin.PersonalDetail.adminEmployeeOverview');
-    }
-
     public function display_performance(){
         return view('admin.PersonalDetail.adminEmployeePerformance');
     }

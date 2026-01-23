@@ -8,13 +8,13 @@
 
 <div class="header-divider"></div>
 
-<main class="container my-5">
+<main class="container my-5 animated-card1 delay-5">
     <div class="container my-5 shadow-sm p-4 bg-white rounded">
     <h2 class="fw-bold mb-1">Your Applications</h2>
     <p class="text-muted mb-4">Track the status of your job applications</p>
 
     {{-- Application Card 1 --}}
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4 animated-card delay-5">
         <div class="card-body">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -62,7 +62,7 @@
     </div>
 
     {{-- Application Card 2 --}}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm animated-card delay-5">
         <div class="card-body">
 
             <div class="d-flex justify-content-between align-items-center mb-3">

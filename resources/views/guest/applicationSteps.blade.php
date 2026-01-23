@@ -12,7 +12,7 @@
 <main class="container my-5">
 
     {{-- step 1 --}}
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -61,7 +61,7 @@
 <!-- Personal Info Form -->
 <form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
-    <div id="personalForm" class="mt-4">
+    <div id="personalForm" class="mt-4 form-step">
         <h4 class="fw-bold mb-3">Personal Information</h4>
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -100,7 +100,7 @@
 
 
     <!-- Work Experience & Education Form -->
-    <div id="experienceForm" class="mt-4 d-none">
+    <div id="experienceForm" class="mt-4 d-none form-step">
         <h4 class="fw-bold mb-3">Work Experience & Education</h4>
             <div class="mb-3">
                 <label for="education" class="form-label">Highest Educational Attainment*</label>
@@ -161,7 +161,7 @@
     </div>
 
     <!--Documents Form-->
-    <div id="documentsForm" class="mt-4 d-none">
+    <div id="documentsForm" class="mt-4 d-none form-step">
         <h4 class="fw-bold mb-3">Required Document</h4>
             <!-- Resume/CV -->
             <div class="mb-4">
@@ -229,7 +229,7 @@
 
         <!-- Review & Submit Form (to be implemented) -->
     <!-- Review Your Application Form -->
-    <div id="reviewForm" class="mt-4 d-none">
+    <div id="reviewForm" class="mt-4 d-none form-step">
         <h3 class="fw-bold mb-3">Review Your Application</h3>
 
         <div class="review-notice d-flex align-items-start mb-4">
@@ -332,12 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setStep(stepNumber) {
         steps.forEach((step, index) => {
             step.classList.remove('active', 'completed1');
-
-            if (index + 1 < stepNumber) {
-                step.classList.add('completed1');
-            } else if (index + 1 === stepNumber) {
-                step.classList.add('active');
-            }
+            if (index + 1 < stepNumber) step.classList.add('completed1');
+            else if (index + 1 === stepNumber) step.classList.add('active');
         });
 
         lines.forEach((line, index) => {
@@ -345,8 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial step
-    setStep(1);
+    setStep(1); // Initial step
 
     /* =======================
        CERTIFICATION CHECKBOX
@@ -360,60 +355,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* =======================
+       FORM TRANSITION FUNCTION
+    ======================= */
+    function transitionForms(hideForm, showForm, direction = 'forward') {
+        const outClass = direction === 'forward' ? 'slide-out-left' : 'slide-out-right';
+        const inClass  = direction === 'forward' ? 'slide-in-right' : 'slide-in-left';
+
+        hideForm.classList.add(outClass);
+
+        setTimeout(() => {
+            hideForm.classList.add('d-none');
+            hideForm.classList.remove(outClass);
+
+            showForm.classList.remove('d-none');
+            showForm.classList.add(inClass);
+
+            setTimeout(() => {
+                showForm.classList.remove(inClass);
+            }, 450);
+        }, 300);
+    }
+
+    /* =======================
        NAVIGATION LOGIC
     ======================= */
 
     // Step 1 → Step 2
     btnToExperience.addEventListener('click', () => {
-        personalForm.classList.add('d-none');
-        experienceForm.classList.remove('d-none');
+        transitionForms(personalForm, experienceForm, 'forward');
         setStep(2);
     });
 
     // Step 2 → Step 1
     btnBackToPersonal.addEventListener('click', () => {
-        experienceForm.classList.add('d-none');
-        personalForm.classList.remove('d-none');
+        transitionForms(experienceForm, personalForm, 'back');
         setStep(1);
     });
 
     // Step 2 → Step 3
     btnToDocuments.addEventListener('click', () => {
-        experienceForm.classList.add('d-none');
-        documentsForm.classList.remove('d-none');
+        transitionForms(experienceForm, documentsForm, 'forward');
         setStep(3);
     });
 
     // Step 3 → Step 2
     btnBackToExperience.addEventListener('click', () => {
-        documentsForm.classList.add('d-none');
-        experienceForm.classList.remove('d-none');
+        transitionForms(documentsForm, experienceForm, 'back');
         setStep(2);
     });
 
     // Step 3 → Step 4 (Review)
     btnToReview.addEventListener('click', () => {
-
         // Populate review fields
-        document.getElementById('review-first-name').textContent =
-            document.getElementById('first_name').value;
-        document.getElementById('review-last-name').textContent =
-            document.getElementById('last_name').value;
-        document.getElementById('review-email').textContent =
-            document.getElementById('email').value;
-        document.getElementById('review-phone').textContent =
-            document.getElementById('phone').value;
-        document.getElementById('review-address').textContent =
-            document.getElementById('address').value;
+        document.getElementById('review-first-name').textContent = document.getElementById('first_name').value;
+        document.getElementById('review-last-name').textContent = document.getElementById('last_name').value;
+        document.getElementById('review-email').textContent = document.getElementById('email').value;
+        document.getElementById('review-phone').textContent = document.getElementById('phone').value;
+        document.getElementById('review-address').textContent = document.getElementById('address').value;
 
-        document.getElementById('review-education').textContent =
-            document.getElementById('education').value;
-        document.getElementById('review-field-study').textContent =
-            document.getElementById('field_study').value;
-        document.getElementById('review-experience-years').textContent =
-            document.getElementById('experience_years').value;
-        document.getElementById('review-key-skills').textContent =
-            document.getElementById('key_skills').value;
+        document.getElementById('review-education').textContent = document.getElementById('education').value;
+        document.getElementById('review-field-study').textContent = document.getElementById('field_study').value;
+        document.getElementById('review-experience-years').textContent = document.getElementById('experience_years').value;
+        document.getElementById('review-key-skills').textContent = document.getElementById('key_skills').value;
 
         const resumeInput = document.getElementById('resume');
         const coverInput  = document.getElementById('cover_letter');
@@ -426,23 +429,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('review-certs-file').textContent =
             certsInput.files.length ? certsInput.files[0].name : 'None';
 
-        documentsForm.classList.add('d-none');
-        reviewForm.classList.remove('d-none');
-
+        transitionForms(documentsForm, reviewForm, 'forward');
         certifyCheckbox.checked = false;
         submitButton.disabled = true;
-
         setStep(4);
     });
 
     // Step 4 → Step 3
     btnBackToDocumentsFromReview.addEventListener('click', () => {
-        reviewForm.classList.add('d-none');
-        documentsForm.classList.remove('d-none');
+        transitionForms(reviewForm, documentsForm, 'back');
         setStep(3);
     });
 
 });
+
 </script>
 
 

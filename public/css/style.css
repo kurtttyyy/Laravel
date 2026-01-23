@@ -18,6 +18,69 @@ body {
   line-height: 1;
 }
 
+/* Card base animation */
+.animated-card {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    animation: fadeUp 0.6s ease both;
+}
+
+.animated-card1 {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    animation: fadeUp 0.6s ease both;
+}
+/* Hover effect */
+.animated-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Entrance animation */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Optional: stagger effect */
+.animated-card.delay-1 { animation-delay: 0.1s; }
+.animated-card.delay-2 { animation-delay: 0.2s; }
+.animated-card.delay-3 { animation-delay: 0.3s; }
+.animated-card.delay-4 { animation-delay: 0.4s; }
+
+
+/* Hover animation only */
+.hover-card {
+    transition: 
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        border-color 0.35s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+/* When cursor points on card */
+.hover-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 18px 40px rgba(0, 128, 0, 0.18);
+    border-color: #28a745;
+}
+
+/* Slight animation for button on hover */
+.hover-card:hover .green-btn {
+    background-color: #1e7e34;
+    transform: scale(1.03);
+}
+
+.green-btn {
+    transition: all 0.3s ease;
+}
+
+
 /* Header subtext */
 .navbar-brand .subtext {
   font-size: 1.05rem;
@@ -265,6 +328,79 @@ body {
     font-size: 0.9rem;
     color: #FFD700;
 }
+
+/* Wrapper animation setup */
+.form-step {
+    position: relative;
+    animation-duration: 0.45s;
+    animation-fill-mode: both;
+}
+
+/* Slide OUT to left */
+.slide-out-left {
+    animation-name: slideOutLeft;
+}
+
+/* Slide IN from right */
+.slide-in-right {
+    animation-name: slideInRight;
+}
+
+/* Slide OUT to right (for Previous) */
+.slide-out-right {
+    animation-name: slideOutRight;
+}
+
+/* Slide IN from left (for Previous) */
+.slide-in-left {
+    animation-name: slideInLeft;
+}
+
+/* Keyframes */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+}
+
 
 
 /* Overlay */

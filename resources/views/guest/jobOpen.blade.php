@@ -10,10 +10,10 @@
 <div class="header-divider"></div>
 
 <main class="container my-5">
-    <h2 class="fw-bold mb-4">Job Vacancies</h2>
+    <h2 class="fw-bold mb-4 ">Job Vacancies</h2>
 
     {{-- Job Card 1 --}}
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -56,7 +56,7 @@
     </div>
 
     {{-- Job Card 2 --}}
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>

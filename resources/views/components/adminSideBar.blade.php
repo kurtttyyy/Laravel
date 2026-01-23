@@ -79,7 +79,7 @@
           Job Position
         </a>
 
-        <a href="{{ route('admin.admininterview') }}"
+        <a href="{{ route('admin.adminInterview') }}"
           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
           <i class="fa-solid fa-comments"></i>
           Interview

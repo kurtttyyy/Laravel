@@ -4,10 +4,13 @@
         <p class="text-gray-600 mt-1">View and manage your leave applications</p>
     </div>
 
-    <div class="flex items-center gap-2">
-        <a href="{{ route('employee.employeeLeave') }}" 
-           class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-           Apply Leave
-        </a>
-    </div>
+            <!-- Notifications (STATIC) -->
+            <button class="relative p-3.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="absolute top-1 right-1 flex items-center justify-center
+                             text-xs font-bold text-white bg-red-600 rounded-full w-5 h-5">
+                    3
+                </span>
+                <i class="fa fa-bell fa-2x"></i>
+            </button>
+
 </header>

@@ -26,13 +26,7 @@
     <main class="flex-1 ml-56">
     @include('components.employeeHeader.payslipHeader')
 <div class="p-8 space-y-8">
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800">Payslips</h2>
-                <p class="text-gray-500">View and download your salary information</p>
-            </div>
 
-        </div>
 
         <div class="bg-gradient-to-b from-green-900 to-green-500 rounded-2xl p-8 text-white shadow-lg">
 

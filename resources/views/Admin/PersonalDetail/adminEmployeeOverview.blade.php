@@ -1,0 +1,138 @@
+    <!-- Overview -->
+    <div x-show="tab === 'overview'" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div class="bg-slate-50 p-4 rounded-xl text-sm">
+        <h2 class="font-semibold mb-5">Contact Information</h2>
+
+        <div class="flex items-start gap-3 mb-5">
+          <!-- Email Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15A2.25 2.25 0 0 0 2.25 6.75m19.5 0-9.75 6.75L2.25 6.75" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Email</span>
+            john.doe@company.com
+          </p>
+        </div>
+
+        <div class="flex items-start gap-3 mb-5">
+          <!-- Phone Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 0 0 2.25-2.25v-1.372a1.125 1.125 0 0 0-.852-1.091l-4.423-1.106a1.125 1.125 0 0 0-1.173.417l-.97 1.293a12.035 12.035 0 0 1-5.292-5.292l1.293-.97a1.125 1.125 0 0 0 .417-1.173L6.963 4.102A1.125 1.125 0 0 0 5.872 3.25H4.5A2.25 2.25 0 0 0 2.25 5.5v1.25z" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Phone</span>
+            +1 (555) 123-4567
+          </p>
+        </div>
+
+        <div class="flex items-start gap-4 mb-5">
+          <!-- Location Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 21s6-5.686 6-10a6 6 0 1 0-12 0c0 4.314 6 10 6 10z" />
+            <circle cx="12" cy="11" r="2.5" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Location</span>
+            San Francisco, CA
+          </p>
+        </div>
+      </div>
+
+
+      <div class="bg-slate-50 p-4 rounded-xl text-sm">
+        <h2 class="font-semibold mb-5">Employment Details</h2>
+
+        <div class="flex items-start gap-3 mb-5">
+          <!-- Employee ID Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4.5 20.25a7.5 7.5 0 0 1 15 0" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Employee ID</span>
+            EMP-2024-1234
+          </p>
+        </div>
+
+        <div class="flex items-start gap-3 mb-5">
+          <!-- Join Date Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 7V3m8 4V3m-11 8h14m-15 9.75A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V7.5A2.25 2.25 0 0 0 18.75 5.25H5.25A2.25 2.25 0 0 0 3 7.5v11.25z" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Join Date</span>
+            Jan 15, 2022
+          </p>
+        </div>
+
+        <div class="flex items-start gap-3 mb-5">
+          <!-- Manager Icon -->
+          <svg class="w-5 h-5 text-gray-400 -mt-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 20.25v-2.625a4.125 4.125 0 0 0-4.125-4.125h-1.75A4.125 4.125 0 0 0 7 17.625V20.25" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0z" />
+          </svg>
+
+          <p>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Manager</span>
+            Sarah Williams
+          </p>
+        </div>
+      </div>
+
+
+      <div class="bg-slate-50 p-4 rounded-xl text-sm">
+        <h3 class="font-semibold mb-5">Skills</h3>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">JavaScript</span>
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">React</span>
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">Node.js</span>
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">Python</span>
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">AWS</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl text-sm">
+        <h3 class="font-semibold mb-5">Recent Activity</h3>
+
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="w-2 h-2 rounded-full bg-green-500 mt-2"></span>
+            <div>
+              <p class="text-gray-700">Completed project milestone</p>
+              <p class="text-xs text-gray-400">2 days ago</p>
+            </div>
+          </li>
+
+          <li class="flex items-start gap-3">
+            <span class="w-2 h-2 rounded-full bg-blue-500 mt-2"></span>
+            <div>
+              <p class="text-gray-700">Attended team meeting</p>
+              <p class="text-xs text-gray-400">5 days ago</p>
+            </div>
+          </li>
+
+          <li class="flex items-start gap-3">
+            <span class="w-2 h-2 rounded-full bg-purple-500 mt-2"></span>
+            <div>
+              <p class="text-gray-700">Updated profile</p>
+              <p class="text-xs text-gray-400">1 week ago</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    

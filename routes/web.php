@@ -9,8 +9,8 @@ use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', function () {
-    return view('guest.index');
+Route::get('/test', function () {
+    return view('admin.compareCode');
 });
 
 Route::controller(PageController::class)->group(function () {

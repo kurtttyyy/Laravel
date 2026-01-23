@@ -55,6 +55,9 @@ class AdministratorPageController extends Controller
         return view('admin.adminShowPosition');
     }
 
+    public function display_overview(){
+        return view('admin.adminEmployeeOverview');
+    }
 
     //Personal Detail
     public function display_documents(){
@@ -65,7 +68,7 @@ class AdministratorPageController extends Controller
         return view('admin.PersonalDetail.adminEmployeePD');
     }
 
-    public function display_overview(){
+    public function display_personal_detail_overview(){
         return view('admin.PersonalDetail.adminEmployeeOverview');
     }
 

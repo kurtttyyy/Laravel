@@ -57,10 +57,11 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');
     Route::get('system/position', 'display_position')->name('admin.adminPosition');
     Route::get('system/show/position', 'display_show_position')->name('admin.adminShowPosition');
+    Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
 
     //PersonalDetail
     Route::get('system/personal/detail/employee/documents', 'display_documents')->name('admin.PersonalDetail.adminEmployeeDocuments');
-    Route::get('system/personal/detail/employee/overview', 'display_overview')->name('admin.PersonalDetail.adminEmployeeOverview');
+    Route::get('system/personal/detail/employee/overview', 'display_personal_detail_overview')->name('admin.PersonalDetail.adminEmployeeOverview');
     Route::get('system/personal/detail/employee/PD', 'display_pd')->name('admin.PersonalDetail.adminEmployeePD');
     Route::get('system/personal/detail/employee/performance', 'display_performance')->name('admin.PersonalDetail.adminEmployeePerformance');
     Route::get('system/personal/detail/edit', 'display_edit')->name('admin.PersonalDetail.editProfile');

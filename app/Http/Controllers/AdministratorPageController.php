@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 class AdministratorPageController extends Controller
 {
+
     public function display_home(){
         return view('admin.adminHome');
     }
@@ -30,6 +31,33 @@ class AdministratorPageController extends Controller
         return view('admin.compareCode');
     }
 
+    public function display_applicant(){
+        return view('admin.adminApplicant');
+    }
+
+    public function display_edit_position(){
+        return view('admin.adminEditPosition');
+    }
+
+    public function display_interview(){
+        return view('admin.adminInterview');
+    }
+
+    public function display_meeting(){
+        return view('admin.adminMeeting');
+    }
+
+    public function display_position(){
+        return view('admin.adminPosition');
+    }
+
+    public function display_show_position(){
+        return view('admin.adminShowPosition');
+    }
+
+    public function display_overview(){
+        return view('admin.adminEmployeeOverview');
+    }
 
     //Personal Detail
     public function display_documents(){
@@ -40,7 +68,7 @@ class AdministratorPageController extends Controller
         return view('admin.PersonalDetail.adminEmployeePD');
     }
 
-    public function display_overview(){
+    public function display_personal_detail_overview(){
         return view('admin.PersonalDetail.adminEmployeeOverview');
     }
 

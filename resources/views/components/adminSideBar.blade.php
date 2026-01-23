@@ -67,19 +67,19 @@
       <!-- Submenu -->
       <div x-show="open" x-collapse class="ml-8 space-y-1">
 
-        <a href="#"
+        <a href="{{ route('admin.adminApplicant') }}"
           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
           <i class="fa-solid fa-user-check"></i>
           Applicant
         </a>
 
-        <a href="#"
+        <a href="{{ route('admin.adminPosition') }}"
           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
           <i class="fa-solid fa-briefcase"></i>
           Job Position
         </a>
 
-        <a href="#"
+        <a href="{{ route('admin.admininterview') }}"
           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
           <i class="fa-solid fa-comments"></i>
           Interview

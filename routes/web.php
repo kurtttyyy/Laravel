@@ -9,8 +9,8 @@ use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/test', function () {
-    return view('admin.compareCode');
+Route::get('/', function () {
+    return view('guest.index');
 });
 
 Route::controller(PageController::class)->group(function () {
@@ -61,6 +61,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
 
     //PersonalDetail
     Route::get('system/personal/detail/employee/documents', 'display_documents')->name('admin.PersonalDetail.adminEmployeeDocuments');
+    Route::get('system/personal/detail/employee/overview', 'display_personal_detail_overview')->name('admin.PersonalDetail.adminEmployeeOverview');
     Route::get('system/personal/detail/employee/PD', 'display_pd')->name('admin.PersonalDetail.adminEmployeePD');
     Route::get('system/personal/detail/employee/performance', 'display_performance')->name('admin.PersonalDetail.adminEmployeePerformance');
     Route::get('system/personal/detail/edit', 'display_edit')->name('admin.PersonalDetail.editProfile');

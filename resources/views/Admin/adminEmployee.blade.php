@@ -29,7 +29,13 @@
   @include('components.adminSideBar')
 
   <!-- Main Content -->
-  <main class="flex-1" x-data="{ openProfile:false, openEditProfile:false, tab:'overview' }">
+<main class="flex-1"
+      x-data="{
+        openProfile:false,
+        openEditProfile:false,
+        tab:'overview',
+        department:'All'
+      }">
 
     <!-- Header -->
     @include('components.adminHeader.employeeHeader')
@@ -58,7 +64,31 @@
             Inactive
         </div>
 
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+          <i class="fa-solid fa-filter text-gray-400"></i>
+          Filter by Department
+        </div>
+
+        <select
+          x-model="department"
+          class="border border-gray-300 rounded-lg px-3 py-2 text-sm
+                focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        >
+          <option value="All">All Departments</option>
+          <option value="Engineering">Engineering</option>
+          <option value="Human Resource">Human Resource</option>
+          <option value="Finance">Finance</option>
+          <option value="IT Support">IT Support</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+
     </div>
+    <!-- FILTER BAR -->
+
+
+
+
+
 
     <!-- Add Employee Button -->
     <button
@@ -73,8 +103,10 @@
 
 
 
+
     <!-- Employee Cards Grid -->
     <div class="flex flex-wrap gap-6">
+      
 
         <!-- Employee Card -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden w-72">
@@ -87,26 +119,79 @@
             <div class="p-4 mt-7">
                 <h3 class="font-bold text-gray-800 text-lg text-center">John Doe</h3>
                 <p class="text-gray-500 text-sm text-center">Senior Software Engineer</p>
-                <p class="text-gray-300 text-sm text-center">Engineering</p>
 
                 <div class="mt-4 space-y-1 text-gray-500 text-sm">
                     <div class="flex items-center gap-2">
-                        <i class="fa-regular fa-envelope"></i>
-                        john.doe@company.com
+                        <i class="fa-regular fa-id-badge"></i>
+                        EMP-2500024-24
                     </div>
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-phone"></i>
-                        +1 (555) 123-4567
+                        <i class="fa-solid fa-sitemap"></i>
+                        Engineer
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-calendar"></i>
+                        Hired March 15, 2019
                     </div>
                 </div>
 
                 <hr class="my-3">
 
                 <div class="flex justify-between items-center">
-                    <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium">
-                        Active
-                    </span>
+                    <div class="flex items-center -space-x-">
+                        <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium z-10">
+                            Active
+                        </span>
 
+                        <span class="px-2 py-1 text-indigo-700 bg-indigo-100 rounded-full text-xs font-medium">
+                            Rehire
+                        </span>
+                    </div>
+                    <button
+                        @click="openProfile = true"
+                        class="text-blue-500 text-sm font-medium hover:underline">
+                        View Profile
+                    </button>
+                </div>
+            </div>
+        </div>
+                <!-- Employee Card -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden w-72">
+            <div class="h-24 bg-gradient-to-r from-purple-500 to-indigo-500 flex justify-center items-center">
+                <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24">
+                    JD
+                </div>
+            </div>
+
+            <div class="p-4 mt-7">
+                <h3 class="font-bold text-gray-800 text-lg text-center">John Doe</h3>
+                <p class="text-gray-500 text-sm text-center">Senior Software Engineer</p>
+
+                <div class="mt-4 space-y-1 text-gray-500 text-sm">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-regular fa-id-badge"></i>
+                        EMP-2500024-24
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-sitemap"></i>
+                        Engineer
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-calendar"></i>
+                        Hired March 15, 2019
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center -space-x-">
+                        <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium z-10">
+                            Active
+                        </span>
+
+
+                    </div>
                     <button
                         @click="openProfile = true"
                         class="text-blue-500 text-sm font-medium hover:underline">
@@ -117,6 +202,8 @@
         </div>
 
     </div>
+
+    
 </div>
 
 
@@ -160,6 +247,8 @@
         @include('Admin.PersonalDetail.adminEmployeePD')
         @include('Admin.PersonalDetail.adminEmployeePerformance')
         @include('Admin.PersonalDetail.adminEmployeeDocuments')
+        @include('Admin.PersonalDetail.adminServiceRecord')
+
 
         <!-- Footer -->
         <div class="flex gap-3 p-6 border-t">
@@ -174,6 +263,8 @@
 
       </div>
     </div>
+
+    
 
     <!-- ================= PROFILE EDIT ================= -->
     @include('Admin.PersonalDetail.editProfile')

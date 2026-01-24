@@ -1,4 +1,4 @@
-<aside class="w-64 bg-slate-900 text-slate-200 flex flex-col">
+<aside class="w-64 bg-slate-900 text-slate-200 flex flex-col" x-data>
   <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
     <div class="w-12 h-12 rounded overflow-hidden flex items-center justify-center">
       <img src="/images/logo.webp" alt="HR Logo" class="w-full h-full object-cover">
@@ -12,7 +12,7 @@
     <a href="{{ route('admin.adminHome') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition
        {{ request()->routeIs('admin.adminHome')
-            ? 'bg-green-600 text-white hover:bg-green-700'
+            ? 'bg-green-600 text-white'
             : 'text-white hover:bg-green-600/30' }}">
         <i class="fa-solid fa-house"></i>
         Dashboard
@@ -22,7 +22,7 @@
     <a href="{{ route('admin.adminEmployee') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition
        {{ request()->routeIs('admin.adminEmployee')
-            ? 'bg-green-600 text-white hover:bg-green-700'
+            ? 'bg-green-600 text-white'
             : 'text-white hover:bg-green-600/30' }}">
         <i class="fa-solid fa-users"></i>
         Employees
@@ -32,7 +32,7 @@
     <a href="{{ route('admin.adminAttendance') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition
        {{ request()->routeIs('admin.adminAttendance')
-            ? 'bg-green-600 text-white hover:bg-green-700'
+            ? 'bg-green-600 text-white'
             : 'text-white hover:bg-green-600/30' }}">
         <i class="fa-solid fa-calendar-check"></i>
         Attendance
@@ -42,45 +42,59 @@
     <a href="{{ route('admin.adminLeaveManagement') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition
        {{ request()->routeIs('admin.adminLeaveManagement')
-            ? 'bg-green-600 text-white hover:bg-green-700'
+            ? 'bg-green-600 text-white'
             : 'text-white hover:bg-green-600/30' }}">
         <i class="fa-solid fa-clipboard"></i>
         Leave Management
     </a>
 
-    <!-- Hiring (Dropdown) -->
-    <div x-data="{ open: false }" class="space-y-1">
+    <!-- ✅ Hiring Dropdown (FIXED) -->
+    <div
+      x-data="{ 
+        open: {{ request()->routeIs('admin.adminApplicant','admin.adminPosition','admin.adminInterview') ? 'true' : 'false' }} 
+      }"
+      class="space-y-1"
+    >
       <button
         @click="open = !open"
         class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg font-medium transition
-        text-white hover:bg-green-600/30"
+               text-white hover:bg-green-600/30"
       >
         <span class="flex items-center gap-3">
           <i class="fa-solid fa-briefcase"></i>
           Hiring
         </span>
 
-        <i class="fa-solid fa-chevron-down transition-transform"
-          :class="{ 'rotate-180': open }"></i>
+        <i class="fa-solid fa-chevron-down transition-transform duration-200"
+           :class="{ 'rotate-180': open }"></i>
       </button>
 
       <!-- Submenu -->
       <div x-show="open" x-collapse class="ml-8 space-y-1">
 
         <a href="{{ route('admin.adminApplicant') }}"
-          class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
+           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm
+           {{ request()->routeIs('admin.adminApplicant')
+                ? 'bg-green-600 text-white'
+                : 'text-white hover:bg-green-600/30' }}">
           <i class="fa-solid fa-user-check"></i>
           Applicant
         </a>
 
         <a href="{{ route('admin.adminPosition') }}"
-          class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
+           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm
+           {{ request()->routeIs('admin.adminPosition')
+                ? 'bg-green-600 text-white'
+                : 'text-white hover:bg-green-600/30' }}">
           <i class="fa-solid fa-briefcase"></i>
           Job Position
         </a>
 
         <a href="{{ route('admin.adminInterview') }}"
-          class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-white hover:bg-green-600/30">
+           class="flex items-center gap-2 px-4 py-2 rounded-md text-sm
+           {{ request()->routeIs('admin.adminInterview')
+                ? 'bg-green-600 text-white'
+                : 'text-white hover:bg-green-600/30' }}">
           <i class="fa-solid fa-comments"></i>
           Interview
         </a>
@@ -88,12 +102,11 @@
       </div>
     </div>
 
-
     <!-- Reports -->
     <a href="{{ route('admin.adminReports') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition
        {{ request()->routeIs('admin.adminReports')
-            ? 'bg-green-600 text-white hover:bg-green-700'
+            ? 'bg-green-600 text-white'
             : 'text-white hover:bg-green-600/30' }}">
         <i class="fa-solid fa-chart-line"></i>
         Reports

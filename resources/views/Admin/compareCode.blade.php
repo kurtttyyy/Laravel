@@ -108,11 +108,23 @@
   </div>
 
   <!-- SALARY BOX -->
-  <div class="border border-gray-500 w-1/2 mt-4">
+  <div class="border border-gray-500 w-1/2 mt-4" style="width: 463px;">
     <div class="row">Basic Salary:</div>
     <div class="row">Rate per Hour:</div>
     <div class="row">COLA:</div>
   </div>
+  <br>
+<div class="border-t border-dashed border-gray-500 my-3"></div>
+
+  <br>
+    <div class="row font-semibold bg-gray-100">Employee Details</div>
+    <div class="row">Basic Salary:</div>
+    <div class="row">Rate per Hour:</div>
+    <div class="row">COLA:</div>
+    <div class="row">Basic Salary:</div>
+    <div class="row">Rate per Hour:</div>
+    <div class="row">COLA:</div>
+    <div class="row">Basic Salary:</div>
 
   <!-- FOOTER -->
   <div class="mt-6 text-xs text-gray-600">

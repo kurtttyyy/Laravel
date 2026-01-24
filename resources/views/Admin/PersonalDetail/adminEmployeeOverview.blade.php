@@ -86,7 +86,7 @@
           </svg>
 
           <p>
-            <span class="block font-semibold text-xs uppercase text-gray-400">Manager</span>
+            <span class="block font-semibold text-xs uppercase text-gray-400">Position</span>
             Sarah Williams
           </p>
         </div>

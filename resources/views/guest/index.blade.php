@@ -120,81 +120,32 @@
 
 <div class="container mt-5">
     <h2 class="fw-bold text-start">Job Vacancies</h2>
-
+    @foreach ($open_position as $position)
     <div class="row">
         <div class="col-12 col-md-6">
             <div class="card p-3 rounded shadow-sm mb-4 animated-card delay-5 hover-card border-1">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="fw-bold mb-1">Assistant Professor - Computer Science</h5>
+                    <h5 class="fw-bold mb-1">{{ $position->title }}</h5>
                     <span class="badge bg-success">New</span>
                 </div>
-                <small class="text-muted">Academic Department</small>
+                <small class="text-muted">{{ $position->department }}</small>
                 <p class="mt-2 mb-3 text-truncate">
-                    We are seeking a passionate educator to join our Computer Science department...
+                    {{ $position->job_description}}
                 </p>
                 <div class="mb-3">
-                    <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full-time</span>
-                    <span class="badge custom-badge me-1">Part-time</span>
-                    <span class="badge bg-purple-light-opacity me-1">On-site</span>
+                    @if ($position->employment == "Full-Time")
+                        <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full - Time</span>
+                        <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode}}</span>
+                    @else
+                        <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Part - Time</span>
+                        <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode}}</span>
+                    @endif
                 </div>
                 <button onclick="window.location.href='/job/available'" class="btn btn-primary w-100 green-btn">View Details & Apply</button>
             </div>
         </div>
-
-
-        <div class="col-12 col-md-6">
-            <div class="card p-3 rounded shadow-sm mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="fw-bold mb-1">Assistant Professor - Computer Science</h5>
-                    <span class="badge bg-success">New</span>
-                </div>
-                <small class="text-muted">Academic Department</small>
-                <p class="mt-2 mb-3 text-truncate" style="max-width: 100%;">We are seeking a passionate educator to join our Computer Science department...</p>
-                <div class="mb-3">
-                    <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full-time</span>
-                    <span class="badge custom-badge me-1">Part-time</span>
-                    <span class="badge bg-purple-light-opacity me-1">On-site</span>
-                </div>
-                <button class="btn btn-primary w-100 green-btn">View Details & Apply</button>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6">
-            <div class="card p-3 rounded shadow-sm mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="fw-bold mb-1">Assistant Professor - Computer Science</h5>
-                    <span class="badge bg-success">New</span>
-                </div>
-                <small class="text-muted">Academic Department</small>
-                <p class="mt-2 mb-3 text-truncate" style="max-width: 100%;">We are seeking a passionate educator to join our Computer Science department...</p>
-                <div class="mb-3">
-                    <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full-time</span>
-                    <span class="badge custom-badge me-1">Part-time</span>
-                    <span class="badge bg-purple-light-opacity me-1">On-site</span>
-                </div>
-                <button class="btn btn-primary w-100 green-btn">View Details & Apply</button>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6">
-            <div class="card p-3 rounded shadow-sm mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="fw-bold mb-1">Assistant Professor - Computer Science</h5>
-                    <span class="badge bg-success">New</span>
-                </div>
-                <small class="text-muted">Academic Department</small>
-                <p class="mt-2 mb-3 text-truncate" style="max-width: 100%;">We are seeking a passionate educator to join our Computer Science department...</p>
-                <div class="mb-3">
-                    <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full-time</span>
-                    <span class="badge custom-badge me-1">Part-time</span>
-                    <span class="badge bg-purple-light-opacity me-1">On-site</span>
-                </div>
-                <button class="btn btn-primary w-100 green-btn">View Details & Apply</button>
-            </div>
-        </div>
-
-
     </div>
+    @endforeach
 </div>
 
 

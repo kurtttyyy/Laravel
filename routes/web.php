@@ -9,11 +9,6 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\RegisterLoginController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::get('/', function () {
-    return view('guest.index');
-});
-
 Route::controller(PageController::class)->group(function () {
     Route::get('/login', 'display_login')->name('login_display');
     Route::get('/register', 'display_register')->name('register');
@@ -22,6 +17,7 @@ Route::controller(PageController::class)->group(function () {
 Route::controller(GuestPageController::class)->group(function () {
     Route::get('/application', 'display_application')->name('guest.application');
     Route::get('/application/procedure', 'display_steps')->name('guest.applicationSteps');
+    Route::get('/', 'display_index')->name('guest.index');
     Route::get('/index', 'display_index')->name('guest.index');
     Route::get('/job/available', 'display_job')->name('guest.jobOpen');
 });

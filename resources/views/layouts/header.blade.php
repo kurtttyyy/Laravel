@@ -16,7 +16,7 @@
             </a>
 
             <!-- Buttons -->
-            <a href="{{ route('guest.jobOpen') }}" class="btn btn-sm btn-outline-light">
+            <a href="{{ route('guest.index') }}" class="btn btn-sm btn-outline-light">
                 Job Applicant
             </a>
             <a href="{{ route('guest.application') }}" class="btn btn-sm btn-outline-light">

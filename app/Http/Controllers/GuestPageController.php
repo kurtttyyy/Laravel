@@ -21,7 +21,10 @@ class GuestPageController extends Controller
         return view('guest.index', compact('open_position'));
     }
 
-    public function display_job(){
-        return view('guest.jobOpen');
+    public function display_job($id){
+        $job = OpenPosition::find($id);
+        $jobOpen = OpenPosition::where('department', $job->department)->get();
+
+        return view('guest.jobOpen', compact('jobOpen'));
     }
 }

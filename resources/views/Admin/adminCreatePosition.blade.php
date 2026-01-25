@@ -43,13 +43,13 @@
             <input class="input" placeholder="Department" name="department">
 
             <select class="input" name="employment">
-              <option value="">Employment Type</option>
+              <option>Employment Type</option>
               <option value="Full-Time">Full-Time</option>
               <option value="Part-Time">Part-Time</option>
             </select>
 
             <select class="input" name="mode">
-              <option value="">Work Mode</option>
+              <option>Work Mode</option>
               <option value="Remote">Remote</option>
               <option value="Onsite">Onsite</option>
               <option value="Hybrid">Hybrid</option>
@@ -65,6 +65,16 @@
             name="description"
             class="input resize-none bullet-textarea"
             placeholder="• Describe the position"
+          ></textarea>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6">
+          <h2 class="font-semibold text-lg mb-4">Passionate</h2>
+          <textarea
+            rows="6"
+            name="passionate"
+            class="input resize-none bullet-textarea"
+            placeholder="• Describe the passionate"
           ></textarea>
         </div>
 
@@ -104,14 +114,14 @@
             <input class="input" placeholder="Salary Max ($)" name="max">
 
             <select class="input" name="level">
-              <option value="">Experience Level</option>
+              <option>Experience Level</option>
               <option value="Junior">Junior</option>
               <option value="Mid">Mid</option>
               <option value="Senior">Senior</option>
             </select>
 
             <select class="input" name="job_type">
-              <option value="">Job Type</option>
+              <option>Job Type</option>
               <option value="Teaching">Teaching</option>
               <option value="Non-Teaching">Non-Teaching</option>
             </select>

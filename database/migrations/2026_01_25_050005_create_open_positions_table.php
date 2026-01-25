@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('skills');
             $table->string('benifits');
             $table->string('job_type');
+            $table->string('passionate');
             $table->timestamp('one')->nullable();
             $table->timestamp('two')->nullable();
             $table->softDeletes();

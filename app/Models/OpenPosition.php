@@ -27,5 +27,6 @@ class OpenPosition extends Model
         'job_type',
         'one',
         'two',
+        'passionate',
     ];
 }

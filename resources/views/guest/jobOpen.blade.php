@@ -11,92 +11,45 @@
 
 <main class="container my-5">
     <h2 class="fw-bold mb-4 ">Job Vacancies</h2>
-
+    @foreach($jobOpen as $job)
     {{-- Job Card 1 --}}
     <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                    <h4 class="mb-1">Assistant Professor - Computer Science</h4>
-                    <h5 class="text-secondary mb-1">Northeastern College</h5>
+                    <h4 class="mb-1">{{ $job->title}}</h4>
+                    <h5 class="text-secondary mb-1">{{ $job->department}}</h5>
                 </div>
                 <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
-                    Full-Time
+                    {{ $job->employment }}
                 </span>
             </div>
 
             <div class="mb-3">
                 <p class="mb-0">Contract/Temp</p>
-                <p class="mb-0">Santiago City</p>
+                <p class="mb-0">{{ $job->location}}</p>
 
-                <ul class="mb-3">
-                    <li>Career growth</li>
-                    <li>Be a part of a strong team delivering a clear mission</li>
-                    <li>Build foundational knowledge of avant-garde practice and disciplines</li>
-                </ul>
+                <pre>{{ $job->passionate }}</pre>
             </div>
 
             <div class="d-flex justify-content-between align-items-center">
                 <span class="badge bg-light text-dark">3d ago</span>
-                    <a href="javascript:void(0)" 
+                    <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
-                    data-job-title="Assistant Professor - Computer Science"
-                    data-job-college="Northeastern College"
-                    data-job-type="Full-Time"
-                    data-job-contract="Contract/Temp"
-                    data-job-location="Santiago City"
-                    data-job-description='["Teach undergraduate and graduate computer science courses","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development"]'
-                    data-job-responsibilities='["Deliver lectures and labs","Advise students","Conduct research","Conduct research","Conduct research","Conduct research"]'
-                    data-job-qualifications='["Master’s degree in Computer Science","Teaching experience preferred"]'
-                    data-job-benefits='["Career growth","Health insurance","Professional development support"]'>
+                    data-job-title="{{ $job->title }}"
+                    data-job-college="{{$job->department}}"
+                    data-job-type="{{ $job->employment }}"
+                    data-job-location="{{ $job->location}}"
+                    data-job-description='@json($job->job_description)'
+                    data-job-responsibilities='@json($job->responsibilities)'
+                    data-job-qualifications='@json($job->requirements)'
+                    data-job-benefits='@json($job->benifits)'>
                     View Details →
                     </a>
             </div>
         </div>
     </div>
-
-    {{-- Job Card 2 --}}
-    <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                    <h4 class="mb-1">Senior Lecturer - Data Science</h4>
-                    <h5 class="text-secondary mb-1">Northeastern College</h5>
-                </div>
-                <span class="badge rounded-pill bg-warning-subtle text-warning px-3 py-2">
-                    Part-Time
-                </span>
-            </div>
-
-            <div class="mb-3">
-                <p class="mb-0">Contract/Temp</p>
-                <p class="mb-0">New York City</p>
-
-                <ul class="mb-3">
-                    <li>Work with cutting-edge AI technologies</li>
-                    <li>Collaborate on interdisciplinary research projects</li>
-                    <li>Mentor undergraduate and graduate students</li>
-                </ul>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="badge bg-light text-dark">3d ago</span>
-                    <a href="javascript:void(0)" 
-                    class="fw-semibold text-success text-decoration-none view-details"
-                    data-job-title="Assistant Professor - Computer Science"
-                    data-job-college="Northeastern College"
-                    data-job-type="Full-Time"
-                    data-job-contract="Contract/Temp"
-                    data-job-location="Santiago City"
-                    data-job-description='["Teach undergraduate and graduate computer science courses","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development","Participate in curriculum development"]'
-                    data-job-responsibilities='["Deliver lectures and labs","Advise students","Conduct research","Conduct research","Conduct research","Conduct research"]'
-                    data-job-qualifications='["Master’s degree in Computer Science","Teaching experience preferred"]'
-                    data-job-benefits='["Career growth","Health insurance","Professional development support"]'>
-                    View Details →
-                    </a>
-            </div>
-        </div>
-    </div>
+    @endforeach
 </main>
 
 {{-- Overlay --}}
@@ -162,15 +115,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const overlay = document.getElementById('overlay');
     const closeBtn = sidebar.querySelector('.close-btn');
 
-    function populateList(id, items) {
-        const ul = document.getElementById(id);
-        ul.innerHTML = "";
-        items.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            ul.appendChild(li);
-        });
-    }
+    function populateList(id, text) {
+    const ul = document.getElementById(id);
+    ul.innerHTML = "";
+
+    if (!text) return;
+
+    const items = text
+        .split('•')
+        .map(item => item.trim())
+        .filter(item => item.length);
+
+    items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+    });
+}
+
 
     document.querySelectorAll('.view-details').forEach(btn => {
         btn.addEventListener('click', function() {

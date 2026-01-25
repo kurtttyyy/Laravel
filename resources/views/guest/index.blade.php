@@ -141,7 +141,7 @@
                         <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode}}</span>
                     @endif
                 </div>
-                <button onclick="window.location.href='/job/available'" class="btn btn-primary w-100 green-btn">View Details & Apply</button>
+                <button onclick="window.location.href='{{ route('guest.jobOpen', $position->id) }}'" class="btn btn-primary w-100 green-btn">View Details & Apply</button>
             </div>
         </div>
     </div>

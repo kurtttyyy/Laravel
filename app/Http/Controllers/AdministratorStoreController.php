@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdministratorStoreController extends Controller
 {
     public function store_new_position(Request $request){
+        Log::info($request);
         $attrs = $request->validate([
             'title' => 'required',
             'department' => 'required',
             'employment' => 'required',
             'mode' => 'required',
-            'job' => 'required',
+            'description' => 'required',
             'responsibilities' => 'required',
             'requirements' => 'required',
             'min' => 'required',
@@ -21,10 +23,11 @@ class AdministratorStoreController extends Controller
             'level' => 'required',
             'location' => 'required',
             'skills' => 'required',
-            'benifits' => 'required',
+            'benefits' => 'required',
             'job_type' => 'required',
-            'one' => 'required|date',
-            'two' => 'required|date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'passionate' => 'required',
         ]);
 
         $store = OpenPosition::create([
@@ -32,7 +35,7 @@ class AdministratorStoreController extends Controller
             'department' => $attrs['department'],
             'employment' => $attrs['employment'],
             'work_mode' => $attrs['mode'],
-            'job_description' => $attrs['job'],
+            'job_description' => $attrs['description'],
             'responsibilities' => $attrs['responsibilities'],
             'requirements' => $attrs['requirements'],
             'min_salary' => $attrs['min'],
@@ -40,10 +43,11 @@ class AdministratorStoreController extends Controller
             'experience_level' => $attrs['level'],
             'location' => $attrs['location'],
             'skills' => $attrs['skills'],
-            'benifits' => $attrs['benifits'],
+            'benifits' => $attrs['benefits'],
             'job_type' => $attrs['job_type'],
-            'one' => $attrs['one'],
-            'two' => $attrs['two'],
+            'one' => $attrs['start_date'],
+            'two' => $attrs['end_date'],
+            'passionate' => $attrs['passionate'],
         ]);
 
         return redirect()->back()->with('success','Success Added Position');

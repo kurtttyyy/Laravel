@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdministratorPageController;
+use App\Http\Controllers\AdministratorStoreController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\EmployeePageController;
 use App\Http\Controllers\GuestPageController;
@@ -58,6 +59,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/position', 'display_position')->name('admin.adminPosition');
     Route::get('system/show/position', 'display_show_position')->name('admin.adminShowPosition');
     Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
+    Route::get('system/create/position', 'display_create_position')->name('admin.adminCreatePosition');
 
     //PersonalDetail
     Route::get('system/personal/detail/employee/documents', 'display_documents')->name('admin.PersonalDetail.adminEmployeeDocuments');
@@ -67,4 +69,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/personal/detail/edit', 'display_edit')->name('admin.PersonalDetail.editProfile');
 });
 
+Route::controller(AdministratorStoreController::class)->group(function () {
+    Route::post('system/store/new/position', 'store_new_position')->name('admin.createPositionStore');
+});
 

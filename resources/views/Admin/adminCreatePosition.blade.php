@@ -31,23 +31,25 @@
 
     <!-- LEFT SIDE -->
     <div class="lg:col-span-2 space-y-6">
-
+    <form action="{{ route('admin.createPositionStore') }}" method="POST">
+        @csrf
       <!-- Job Overview -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Job Overview</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input class="input" placeholder="Job Title" />
-          <input class="input" placeholder="Department" />
-          <select class="input">
+          <input class="input" placeholder="Job Title" name="title"/>
+          <input class="input" placeholder="Department" name="department"/>
+          <select class="input" name="employment">
             <option>Employment Type</option>
-            <option>Full-Time</option>
-            <option>Part-Time</option>
+            <option value="Full-Time">Full-Time</option>
+            <option value="Part-Time">Part-Time</option>
           </select>
-          <select class="input">
+          <select class="input" name="mode">
             <option>Work Mode</option>
-            <option>Remote</option>
-            <option>Onsite</option>
+            <option value="Remote">Remote</option>
+            <option value="Onsite">Onsite</option>
+            <option value="Hybrid">Hybrid</option>
           </select>
         </div>
       </div>
@@ -55,21 +57,21 @@
       <!-- Description -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Job Description</h2>
-        <textarea rows="4" class="input resize-none"
+        <textarea rows="4" class="input resize-none" name="job"
                   placeholder="Describe the position..."></textarea>
       </div>
 
       <!-- Responsibilities -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Responsibilities</h2>
-        <textarea rows="4" class="input resize-none"
+        <textarea rows="4" class="input resize-none" name="responsibilities"
                   placeholder="• Build UI components&#10;• Work with designers"></textarea>
       </div>
 
       <!-- Requirements -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Requirements</h2>
-        <textarea rows="4" class="input resize-none"
+        <textarea rows="4" class="input resize-none" name="requirements"
                   placeholder="• 5+ years experience&#10;• React expertise"></textarea>
       </div>
 
@@ -83,24 +85,30 @@
         <h2 class="font-semibold text-lg mb-4">Job Details</h2>
 
         <div class="space-y-3">
-          <input class="input" placeholder="Salary Min ($)" />
-          <input class="input" placeholder="Salary Max ($)" />
-          <select class="input">
+          <input class="input" placeholder="Salary Min ($)" name="min"/>
+          <input class="input" placeholder="Salary Max ($)" name="max"/>
+          <select class="input" name="level">
             <option>Experience Level</option>
-            <option>Junior</option>
-            <option>Mid</option>
-            <option>Senior</option>
-          </select>
-          <input class="input" placeholder="Location" />
-          <input type="date" class="input" />
-          <input type="date" class="input" />
+            <option value="Junior">Junior</option>
+            <option value="Mid">Mid</option>
+            <option value="Senior">Senior</option>
+          </select >
+          <select class="input" name="job_type">
+            <option>Job Type</option>
+            <option value="Teaching">Teaching</option>
+            <option value="Non-Teaching">Non-Teaching</option>
+
+          </select >
+          <input class="input" placeholder="Location" name="location"/>
+          <input type="date" class="input" name="one"/>
+          <input type="date" class="input" name="two"/>
         </div>
       </div>
 
       <!-- Skills -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Required Skills</h2>
-        <input class="input" placeholder="Type skill and press Enter" />
+        <input class="input" placeholder="Type skill and press Enter" name="skills"/>
 
         <div class="flex flex-wrap gap-2 mt-3">
           <span class="tag">React</span>
@@ -113,16 +121,17 @@
       <!-- Benefits -->
       <div class="bg-white rounded-xl shadow p-6">
         <h2 class="font-semibold text-lg mb-4">Benefits & Perks</h2>
-        <textarea rows="4" class="input resize-none"
+        <textarea rows="4" class="input resize-none" name="benifits"
                   placeholder="• Health Insurance&#10;• Unlimited PTO"></textarea>
       </div>
 
       <!-- Button -->
-      <button
-        class="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">
+      <button type="submit"
+        class="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold
+        hover:bg-indigo-700 transition">
         Create Position
       </button>
-
+    </form>
     </div>
   </div>
 </div>

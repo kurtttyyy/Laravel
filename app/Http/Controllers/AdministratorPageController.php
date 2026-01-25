@@ -79,5 +79,9 @@ class AdministratorPageController extends Controller
     public function display_edit(){
         return view('admin.PersonalDetail.editProfile');
     }
+
+    public function display_create_position(){
+        return view('admin.adminCreatePosition');
+    }
 }
 

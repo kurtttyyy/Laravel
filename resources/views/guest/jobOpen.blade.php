@@ -26,7 +26,6 @@
             </div>
 
             <div class="mb-3">
-                <p class="mb-0">Contract/Temp</p>
                 <p class="mb-0">{{ $job->location}}</p>
 
                 <pre>{{ $job->passionate }}</pre>

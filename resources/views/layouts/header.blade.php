@@ -40,18 +40,20 @@
                 <!-- X Close Button -->
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-            <div class="modal-body px-4">
-                <input type="email" id="verifyEmail" class="form-control py-2 rounded-pill shadow-sm" placeholder="you@example.com">
-                <div id="emailError" class="text-danger mt-2 text-center small" style="display:none;">Please enter a valid email.</div>
-            </div>
+            <form action="{{ route('guest.application') }}" method="POST">
+                @csrf
+                <div class="modal-body px-4">
+                    <input type="email" id="verifyEmail" name="email" class="form-control py-2 rounded-pill shadow-sm" placeholder="you@example.com">
+                    <div id="emailError" class="text-danger mt-2 text-center small" style="display:none;">Please enter a valid email.</div>
+                </div>
 
-            <div class="modal-footer border-0 justify-content-center pb-4">
-                <!-- Continue Button -->
-                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-bold" onclick="checkEmail()">
-                    Continue
-                </button>
-            </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <!-- Continue Button -->
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">
+                        Continue
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

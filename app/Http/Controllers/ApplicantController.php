@@ -71,4 +71,21 @@ class ApplicantController extends Controller
 
         return redirect()->back()->with('success', 'Submitted successfully');
     }
+
+    public function display_application(Request $request){
+        $attrs = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        if (!Applicant::where('email', $attrs['email'])->exists()) {
+            return back()->withErrors([
+                'email' => 'No application found for this email.',
+            ]);
+        }
+
+        $applicants = Applicant::where('email', $attrs['email'])->get();
+
+
+        return view('guest.Application', compact('applicants'));
+    }
 }

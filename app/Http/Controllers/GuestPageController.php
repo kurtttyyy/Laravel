@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GuestLog;
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,7 @@ class GuestPageController extends Controller
 
     public function display_index(){
         $open_position = OpenPosition::all();
+        event(new GuestLog('Viewed'));
         return view('guest.index', compact('open_position'));
     }
 

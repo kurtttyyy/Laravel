@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Applicant;
+use App\Models\GuestLog;
+use App\Models\OpenPosition;
 use Illuminate\Http\Request;
 
 class AdministratorPageController extends Controller
@@ -48,7 +51,12 @@ class AdministratorPageController extends Controller
     }
 
     public function display_position(){
-        return view('admin.adminPosition');
+        $openPosition = OpenPosition::all();
+        $logs = GuestLog::count();
+        $positionCounts = $openPosition->count();
+        $applicantCounts = Applicant::count();
+        return view('admin.adminPosition',
+                    compact('openPosition', 'logs', 'positionCounts', 'applicantCounts'));
     }
 
     public function display_show_position(){

@@ -68,21 +68,6 @@
         });
     });
 
-    function checkEmail() {
-        const emailInput = document.getElementById('verifyEmail');
-        const emailError = document.getElementById('emailError');
-        const email = emailInput.value.trim();
-
-        if (!email || !email.includes('@')) {
-            emailError.style.display = 'block';
-            return;
-        }
-
-        emailError.style.display = 'none';
-
-        // Redirect to application status page
-        window.location.href = "{{ route('guest.application') }}?email=" + encodeURIComponent(email);
-    }
 </script>
 
 

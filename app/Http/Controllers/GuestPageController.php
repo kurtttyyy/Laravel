@@ -13,8 +13,9 @@ class GuestPageController extends Controller
         return view('guest.application');
     }
 
-    public function display_non_teaching(){
-        return view('guest.applicationNonTeachingSteps');
+    public function display_non_teaching($id){
+        $openPosition = OpenPosition::findOrFail($id);
+        return view('guest.applicationNonTeachingSteps', compact('openPosition'));
     }
 
     public function display_teaching(){

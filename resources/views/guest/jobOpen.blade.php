@@ -8,10 +8,10 @@
 
 
 <div class="header-divider"></div>
-
+@foreach($jobOpen as $job)
 <main class="container my-5">
     <h2 class="fw-bold mb-4 ">Job Vacancies</h2>
-    @foreach($jobOpen as $job)
+
     {{-- Job Card 1 --}}
     <div class="card shadow-sm mb-4 animated-card delay-5 hover-card">
         <div class="card-body">
@@ -48,7 +48,7 @@
             </div>
         </div>
     </div>
-    @endforeach
+
 </main>
 
 {{-- Overlay --}}
@@ -98,12 +98,12 @@
 
         <!-- Apply Now Button -->
     <div class="text-center mt-3">
-        <a href="{{ route('guest.applicationNonTeachingSteps') }}" id="applyJobBtn" class="btn btn-success w-100">
+        <a href="{{ route('guest.applicationNonTeachingSteps', $job->id ) }}" id="applyJobBtn" class="btn btn-success w-100">
             <i class="bi bi-box-arrow-up-right me-1"></i> Apply Now
         </a>
     </div>
     </div>
-
+@endforeach
 </div>
 
 

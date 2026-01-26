@@ -16,7 +16,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                    <h2 class="mb-1">Apply for HR Assistant</h2>
+                    <h2 class="mb-1">Apply for {{ $openPosition->title}}</h2>
                     <h6 class="text-secondary mb-1">Please fill out all fields to  complete your application</h6>
                 </div>
             </div>
@@ -61,6 +61,7 @@
 <!-- Personal Info Form -->
 <form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
+    <input type="text" id="last_name" name="position" class="form-control" value="{{ $openPosition->title}}" hidden>
     <div id="personalForm" class="mt-4 form-step">
         <h4 class="fw-bold mb-3">Personal Information</h4>
             <div class="row mb-3">

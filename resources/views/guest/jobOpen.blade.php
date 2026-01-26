@@ -98,7 +98,7 @@
 
         <!-- Apply Now Button -->
     <div class="text-center mt-3">
-        <a href="{{ route('guest.applicationSteps') }}" id="applyJobBtn" class="btn btn-success w-100">
+        <a href="{{ route('guest.applicationNonTeachingSteps') }}" id="applyJobBtn" class="btn btn-success w-100">
             <i class="bi bi-box-arrow-up-right me-1"></i> Apply Now
         </a>
     </div>

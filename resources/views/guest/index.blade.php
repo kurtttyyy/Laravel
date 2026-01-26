@@ -47,21 +47,56 @@
 <div class="header-divider" aria-hidden="true"></div>
 
 <main>
-    <section class="hero text-white py-5">
-        <div class="container text-center py-5">
-            <h1 class="display-5 fw-bold">Build Your Future With Us</h1>
-            <p class="lead mb-4">Explore career opportunities and take the first step towards your dream job</p>
+<section class="hero text-white py-5 position-relative overflow-hidden">
 
-            <form class="d-flex justify-content-center mb-4" role="search">
-                <div class="input-group search-input" style="max-width:720px;">
-                    <input type="search" class="form-control" placeholder="Search job titles, keywords..." aria-label="Search">
-                    <button class="btn btn-hero" type="submit">Search</button>
-                </div>
-            </form>
+    <!-- Carousel Background -->
+    <div id="heroCarousel" class="carousel slide carousel-fade position-absolute top-0 start-0 w-100 h-100"
+         data-bs-ride="carousel" data-bs-interval="4000">
+
+        <div class="carousel-inner h-100">
+            <div class="carousel-item active h-100">
+                <img src="{{ asset('images/banner.png') }}"
+                     class="d-block w-100 h-90 object-fit-cover"
+                     alt="Careers">
+            </div>
+            <div class="carousel-item h-100">
+                <img src="{{ asset('images/banner2.jpg') }}"
+                     class="d-block w-100 h-90 object-fit-cover"
+                     alt="Team">
+            </div>
+            <div class="carousel-item h-100">
+                <img src="{{ asset('images/banner5.jpg') }}"
+                     class="d-block w-100 h-90 object-fit-cover"
+                     alt="Growth">
+            </div>
         </div>
+    </div>
+
+    <!-- Dark Overlay -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-75"></div>
+
+    <!-- Hero Content -->
+    <div class="container text-center py-5 position-relative z-3">
+        <h1 class="display-5 fw-bold text-warning">
+            Build Your Future With Us
+        </h1>
+
+        <p class="lead mb-4 text-warning">
+            Explore career opportunities and take the first step towards your dream job
+        </p>
 
 
-    </section>
+        <form class="d-flex justify-content-center mb-4" role="search">
+            <div class="input-group search-input" style="max-width:720px;">
+                <input type="search" class="form-control"
+                       placeholder="Search job titles, keywords..."
+                       aria-label="Search">
+                <button class="btn btn-hero" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+</section>
+
             <div class="container">
             <div class="filter-card bg-white rounded shadow-sm p-4 mx-auto" style="max-width:1100px; margin-top:-40px;">
                 <div class="row g-3">

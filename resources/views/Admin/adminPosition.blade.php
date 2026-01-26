@@ -112,8 +112,13 @@
         </p>
 
         <div class="flex gap-2 mt-4 flex-wrap">
-            <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">{{ $open->skills }}</span>
+            @foreach (explode(',', $open->skills) as $skill)
+                <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">
+                    {{ trim($skill) }}
+                </span>
+            @endforeach
         </div>
+
 
         <div class="flex justify-between items-center mt-6">
             <span class="text-xs text-slate-500">

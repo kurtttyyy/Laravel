@@ -26,17 +26,9 @@
   <!-- Main Content -->
   <main class="flex-1">
 
-    <!-- Header -->
-    @include('components.adminHeader.attendanceHeader')
-
     <!-- Dashboard Content -->
     <div class="p-8 space-y-6">
 
-  <!-- Back -->
-  <a href="/job-details"
-     class="text-sm text-slate-500 flex items-center gap-2 mb-6">
-    ← Back to Job Details
-  </a>
 
   <!-- Card -->
   <div class="bg-white rounded-xl shadow-sm p-8 max-w-6xl mx-auto">
@@ -48,10 +40,11 @@
       </h1>
 
       <div class="flex gap-3">
-        <button
-          class="px-5 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">
+      <a href="{{ route('admin.adminShowPosition') }}" 
+        class="px-5 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 inline-block text-center">
           Cancel
-        </button>
+      </a>
+
 
         <button
           class="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">

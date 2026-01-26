@@ -55,7 +55,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/interview', 'display_interview')->name('admin.adminInterview');
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');
     Route::get('system/position', 'display_position')->name('admin.adminPosition');
-    Route::get('system/show/position', 'display_show_position')->name('admin.adminShowPosition');
+    Route::get('system/show/position/{id}', 'display_show_position')->name('admin.adminShowPosition');
     Route::get('system/employee/overview', 'display_overview')->name('admin.adminEmployeeOverview');
     Route::get('system/create/position', 'display_create_position')->name('admin.adminCreatePosition');
 

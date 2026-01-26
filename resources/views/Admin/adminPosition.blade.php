@@ -126,7 +126,7 @@
             </span>
 
             <div class="flex gap-2">
-                <button onclick="window.location.href='/system/show/position'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">View Details</button>
+                <button onclick="window.location.href='{{ route('admin.adminShowPosition', $open->id) }}'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">View Details</button>
                 <button onclick="window.location.href='/system/edit/position'" class="border px-4 py-2 rounded-lg text-sm">Edit</button>
             </div>
         </div>

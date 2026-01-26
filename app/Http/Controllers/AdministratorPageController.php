@@ -61,8 +61,11 @@ class AdministratorPageController extends Controller
         'logs', 'positionCounts', 'applicantCounts','countApplication'));
     }
 
-    public function display_show_position(){
-        return view('admin.adminShowPosition');
+    public function display_show_position($id){
+        $open = OpenPosition::findOrFail($id);
+        $titles = OpenPosition::pluck('title');
+        $countApplication = Applicant::whereIn('applied_position', $titles)->count();
+        return view('admin.adminShowPosition', compact('open','countApplication'));
     }
 
     public function display_overview(){

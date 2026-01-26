@@ -4,6 +4,7 @@ body {
   color: #222;
 }
 
+
 /* Tighter logo and name */
 .navbar-brand {
   gap: .4rem;
@@ -221,6 +222,8 @@ body {
     color: #f4c150; 
     margin-left: 4px;
 }
+
+
 
 
 /* Stats cards */

@@ -155,33 +155,52 @@
 
 <div class="container mt-5">
     <h2 class="fw-bold text-start">Job Vacancies</h2>
-    @foreach ($open_position as $position)
+
     <div class="row">
-        <div class="col-12 col-md-6">
-            <div class="card p-3 rounded shadow-sm mb-4 animated-card delay-5 hover-card border-1">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="fw-bold mb-1">{{ $position->title }}</h5>
-                    <span class="badge bg-success">New</span>
+        @foreach ($open_position as $position)
+            <div class="col-12 col-md-6">
+                <div class="card p-3 rounded shadow-sm mb-4 animated-card delay-5 hover-card border-1">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="fw-bold mb-1">{{ $position->title }}</h5>
+                        <span class="badge bg-success">New</span>
+                    </div>
+
+                    <small class="text-muted">{{ $position->department }}</small>
+
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $position->job_description);
+                    @endphp
+
+                    <ul class="list-unstyled mt-2 mb-3">
+                        @foreach ($lines as $line)
+                            <li>{{ ltrim($line, "•- ") }}</li>
+                        @endforeach
+                    </ul>
+
+
+
+                    <div class="mb-3">
+                        @if ($position->employment == "Full-Time")
+                            <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full - Time</span>
+                            <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode }}</span>
+                        @else
+                            <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Part - Time</span>
+                            <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode }}</span>
+                        @endif
+                    </div>
+
+                    <button
+                        onclick="window.location.href='{{ route('guest.jobOpen', $position->id) }}'"
+                        class="btn btn-primary w-100 green-btn"
+                    >
+                        View Details & Apply
+                    </button>
                 </div>
-                <small class="text-muted">{{ $position->department }}</small>
-                <p class="mt-2 mb-3">
-                    {!! nl2br(e($position->job_description)) !!}
-                </p>
-                <div class="mb-3">
-                    @if ($position->employment == "Full-Time")
-                        <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Full - Time</span>
-                        <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode}}</span>
-                    @else
-                        <span class="badge bg-success bg-opacity-25 text-success me-1 bordered-badge">Part - Time</span>
-                        <span class="badge bg-purple-light-opacity me-1">{{ $position->work_mode}}</span>
-                    @endif
-                </div>
-                <button onclick="window.location.href='{{ route('guest.jobOpen', $position->id) }}'" class="btn btn-primary w-100 green-btn">View Details & Apply</button>
             </div>
-        </div>
+        @endforeach
     </div>
-    @endforeach
 </div>
+
 
 
 

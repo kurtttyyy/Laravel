@@ -27,17 +27,15 @@
   <main class="flex-1">
 
     <!-- Header -->
-     @include('components.adminHeader.attendanceHeader')
+     @include('components.adminHeader.positionHeader')
 
     <!-- Dashboard Content -->
     <div class="p-8 space-y-6">
 
-<!-- Page Title -->
+<!-- Page Actions Only -->
 <div class="flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-bold text-slate-800">Job Postings</h1>
-        <p class="text-slate-500 text-sm">Manage and create job openings</p>
-    </div>
+    <!-- Empty placeholder to keep alignment -->
+    <div></div>
 
     <div class="flex items-center gap-4">
         <div class="relative">
@@ -45,7 +43,8 @@
             <input
                 type="text"
                 placeholder="Search applicants..."
-                class="pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                class="pl-9 pr-4 py-2 border rounded-lg text-sm
+                       focus:ring-2 focus:ring-indigo-500 outline-none"
             />
         </div>
 
@@ -55,9 +54,9 @@
         >
             + Add Position
         </button>
-
     </div>
 </div>
+
 
 <!-- Stats -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">

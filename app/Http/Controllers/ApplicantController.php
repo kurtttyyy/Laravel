@@ -78,9 +78,7 @@ class ApplicantController extends Controller
         ]);
 
         if (!Applicant::where('email', $attrs['email'])->exists()) {
-            return back()->withErrors([
-                'email' => 'No application found for this email.',
-            ]);
+            return redirect('/');
         }
 
         $applicants = Applicant::where('email', $attrs['email'])->get();

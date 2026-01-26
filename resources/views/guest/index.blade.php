@@ -129,8 +129,8 @@
                     <span class="badge bg-success">New</span>
                 </div>
                 <small class="text-muted">{{ $position->department }}</small>
-                <p class="mt-2 mb-3 text-truncate">
-                    {{ $position->job_description}}
+                <p class="mt-2 mb-3">
+                    {!! nl2br(e($position->job_description)) !!}
                 </p>
                 <div class="mb-3">
                     @if ($position->employment == "Full-Time")

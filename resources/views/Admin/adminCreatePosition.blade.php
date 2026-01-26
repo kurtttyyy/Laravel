@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Add Position</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PeopleHub – HR Dashboard</title>
 
-  <!-- Tailwind -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Font Awesome -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-</head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
 <body class="bg-slate-100">
+
+<div class="flex min-h-screen">
+
+  <!-- Sidebar -->
+    @include('components.adminSideBar')
+
+
+  <!-- Main Content -->
+  <main class="flex-1">
+
+    <!-- Header -->
+     @include('components.adminHeader.attendanceHeader')
+
+    <!-- Dashboard Content -->
+    <div class="p-8 space-y-6">
 
 <div class="p-6 max-w-7xl mx-auto">
 
@@ -40,7 +57,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input class="input" placeholder="Job Title" name="title">
-            <input class="input" placeholder="Department" name="department">
+            <input class="input" placeholder="College Name" name="department">
 
             <select class="input" name="employment">
               <option>Employment Type</option>
@@ -160,6 +177,12 @@
   </form>
 </div>
 
+
+    </div>
+  </main>
+</div>
+
+</body>
 <!-- Styles -->
 <style>
 .input {
@@ -199,6 +222,4 @@
     });
   });
 </script>
-
-</body>
 </html>

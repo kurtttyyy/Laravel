@@ -49,9 +49,13 @@
             />
         </div>
 
-        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">
+        <button
+            onclick="window.location.href='/system/create/position'"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700"
+        >
             + Add Position
         </button>
+
     </div>
 </div>
 

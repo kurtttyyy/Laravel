@@ -12,8 +12,12 @@ class GuestPageController extends Controller
         return view('guest.application');
     }
 
-    public function display_steps(){
-        return view('guest.applicationSteps');
+    public function display_non_teaching(){
+        return view('guest.applicationNonTeachingSteps');
+    }
+
+    public function display_teaching(){
+        return view('guest.applicationTeachingSteps');
     }
 
     public function display_index(){

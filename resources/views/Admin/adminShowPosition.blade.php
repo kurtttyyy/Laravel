@@ -35,7 +35,6 @@
       <a  href="{{ route('admin.adminPosition') }}" class="text-sm text-slate-500 flex items-center gap-2">
         <i class="fa fa-arrow-left"></i> Back to Jobs
       </a>
-
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- LEFT COLUMN -->
@@ -51,9 +50,9 @@
                 </div>
 
                 <div class="items-start">
-                  <h1 class="text-2xl font-bold text-slate-800">Senior Frontend Developer</h1>
+                  <h1 class="text-2xl font-bold text-slate-800">{{ $open->title }}</h1>
                   <p class="text-sm text-slate-500">
-                    Engineering • Full-Time • Remote
+                    {{ $open->department }} • {{ $open->employment }} • {{ $open->work_mode }}
                   </p>
 
                   <div class="flex gap-3 mt-4">
@@ -77,7 +76,7 @@
             <!-- Stats -->
             <div class="grid grid-cols-3 text-center mt-8 border-t pt-6">
               <div>
-                <p class="text-2xl font-bold">24</p>
+                <p class="text-2xl font-bold">{{ $countApplication }}</p>
                 <p class="text-xs text-slate-500">Total Applicants</p>
               </div>
               <div>
@@ -85,7 +84,7 @@
                 <p class="text-xs text-slate-500">In Review</p>
               </div>
               <div>
-                <p class="text-2xl font-bold">5 days</p>
+                <p class="text-2xl font-bold">{{ $open->created_at->format('M. j, Y') }}</p>
                 <p class="text-xs text-slate-500">Posted</p>
               </div>
             </div>
@@ -97,30 +96,21 @@
             <div>
               <h2 class="font-semibold mb-2">Job Description</h2>
               <p class="text-sm text-slate-600">
-                We're looking for an experienced frontend developer to join our team and build amazing user experiences.
-                You'll work closely with our design and product teams.
+                {{ $open->job_description }}
               </p>
             </div>
 
             <div>
               <h2 class="font-semibold mb-2">Responsibilities</h2>
               <ul class="space-y-2 text-sm text-slate-600">
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Build React applications with TypeScript</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Collaborate with designers</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Write clean and maintainable code</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Optimize for performance</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Mentor junior developers</li>
+                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ $open->responsibilities }}</li>
               </ul>
             </div>
 
             <div>
               <h2 class="font-semibold mb-2">Requirements</h2>
               <ul class="space-y-2 text-sm text-slate-600">
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>5+ years frontend experience</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Expert in React & TypeScript</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Strong CSS knowledge</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Redux or similar tools</li>
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>Excellent communication</li>
+                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ $open->requirements }}</li>
               </ul>
             </div>
 
@@ -136,27 +126,27 @@
 
             <div>
               <p class="text-slate-400">Salary Range</p>
-              <p class="font-medium">$120,000 - $160,000</p>
+              <p class="font-medium">${{ $open->min_salary }} - ${{ $open->max_salary }}</p>
             </div>
 
             <div>
               <p class="text-slate-400">Experience Level</p>
-              <p class="font-medium">Senior Level (5+ years)</p>
+              <p class="font-medium">{{ $open->experience_level }}</p>
             </div>
 
             <div>
               <p class="text-slate-400">Location</p>
-              <p class="font-medium">Remote (US Only)</p>
+              <p class="font-medium">{{ $open->work_mode }} ({{ $open->location }})</p>
             </div>
 
             <div>
               <p class="text-slate-400">Posted Date</p>
-              <p class="font-medium">January 10, 2024</p>
+              <p class="font-medium">{{ \Carbon\Carbon::parse($open->one)->format('F j, Y') }}</p>
             </div>
 
             <div>
               <p class="text-slate-400">Closing Date</p>
-              <p class="font-medium">February 10, 2024</p>
+              <p class="font-medium">{{ \Carbon\Carbon::parse($open->two)->format('F j, Y') }}</p>
             </div>
           </div>
 
@@ -164,27 +154,15 @@
           <div class="bg-white rounded-xl p-6 shadow-sm">
             <h3 class="font-semibold mb-3">Required Skills</h3>
             <div class="flex gap-2 flex-wrap">
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">React</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">TypeScript</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">Tailwind CSS</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">Redux</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">Git</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">REST APIs</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">Jest</span>
-              <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">Figma</span>
-            </div>
+                </div>
+                <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">{{ $open->skills }}</span>
           </div>
 
           <!-- Benefits -->
           <div class="bg-white rounded-xl p-6 shadow-sm text-sm">
             <h3 class="font-semibold mb-3">Benefits & Perks</h3>
             <ul class="space-y-2 text-slate-600">
-              <li><i class="fa fa-check text-green-500 mr-2"></i>Health, Dental & Vision</li>
-              <li><i class="fa fa-check text-green-500 mr-2"></i>401(k) with Match</li>
-              <li><i class="fa fa-check text-green-500 mr-2"></i>Unlimited PTO</li>
-              <li><i class="fa fa-check text-green-500 mr-2"></i>Remote Equipment</li>
-              <li><i class="fa fa-check text-green-500 mr-2"></i>Learning Budget</li>
-              <li><i class="fa fa-check text-green-500 mr-2"></i>Stock Options</li>
+              <li><i class="fa fa-check text-green-500 mr-2"></i>{{ $open->benifits }}</li>
             </ul>
           </div>
 
@@ -211,7 +189,6 @@
 
         </div>
       </div>
-
     </div>
   </main>
 </div>

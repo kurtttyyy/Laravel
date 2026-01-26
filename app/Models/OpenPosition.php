@@ -14,6 +14,7 @@ class OpenPosition extends Model
         'title',
         'department',
         'employment',
+        'collage_name',
         'work_mode',
         'job_description',
         'responsibilities',

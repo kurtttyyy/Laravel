@@ -57,8 +57,8 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input class="input" placeholder="Job Title" name="title">
-            <input class="input" placeholder="College Name" name="department">
-
+            <input class="input" placeholder="College Name" name="collage_name">
+            <input class="input" placeholder="Department" name="department">
             <select class="input" name="employment">
               <option>Employment Type</option>
               <option value="Full-Time">Full-Time</option>

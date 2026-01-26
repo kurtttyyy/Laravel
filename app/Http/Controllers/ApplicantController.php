@@ -20,6 +20,7 @@ class ApplicantController extends Controller
             'address' => 'required|string',
             'education' => 'required|string',
             'field_study' => 'required|string',
+            'position' => 'required|string',
             'experience_years' => 'required|string',
             'key_skills' => 'required|string',
             'documents' => 'required|array',
@@ -37,7 +38,7 @@ class ApplicantController extends Controller
             'field_study' => $attrs['field_study'],
             'experience' => $attrs['experience_years'],
             'skills_n_expertise' => $attrs['key_skills'],
-            //'applied_position' => $attrs[''],
+            'applied_position' => $attrs['position'],
         ]);
 
 

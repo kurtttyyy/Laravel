@@ -118,7 +118,7 @@
 
         <div class="flex justify-between items-center mt-6">
             <span class="text-xs text-slate-500">
-                <i class="fa fa-users mr-1"></i> 24 Applicants • Posted 5 days ago
+                <i class="fa fa-users mr-1"></i> {{ $countApplication }} Applicants • Posted {{ $open->created_at->format('m/d/y') }}
             </span>
 
             <div class="flex gap-2">

@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Log;
 
 class GuestPageController extends Controller
 {
+    public function display_application(){
+        return view('guest.Application', [
+                    'applicants' => collect(), // avoid undefined variable
+                ]);
+    }
+
     public function display_non_teaching($id){
         $openPosition = OpenPosition::findOrFail($id);
         return view('guest.applicationNonTeachingSteps', compact('openPosition'));

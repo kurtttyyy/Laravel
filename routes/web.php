@@ -15,7 +15,7 @@ Route::controller(PageController::class)->group(function () {
 });
 
 Route::controller(GuestPageController::class)->group(function () {
-    //Route::get('/application', 'display_application')->name('guest.application');
+    Route::get('/application', 'display_application')->name('guest.application');
     Route::get('/application/non_teaching/procedure/{id}', 'display_non_teaching')->name('guest.applicationNonTeachingSteps');
     Route::get('/application/teaching/procedure', 'display_teaching')->name('guest.applicationTeachingSteps');
     Route::get('/', 'display_index')->name('guest.index');

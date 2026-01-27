@@ -432,13 +432,13 @@
             <h5 class="fw-bold text-success">Documents</h5>
             <p>Resume/CV:</strong> <span id="review-resume-file"></span></p>
             <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
-            <p>Personal Data Sheet:</strong> <span id=""></span></p>
-            <p>Transcript Of Records:</strong> <span id=""></span></p>
-            <p>Diploma, master's, Doctorate</strong> <span id=""></span></p>
-            <p>PRC License/Board Rating</strong> <span id=""></span></p>
-            <p>Certificate Of Eligibility / Cetificate of Passing</strong> <span id=""></span></p>
+            <p>Personal Data Sheet:</strong> <span id="personal"></span></p>
+            <p>Transcript Of Records:</strong> <span id="tor"></span></p>
+            <p>Diploma, master's, Doctorate</strong> <span id="diploma"></span></p>
+            <p>PRC License/Board Rating</strong> <span id="prc"></span></p>
+            <p>Certificate Of Eligibility / Cetificate of Passing</strong> <span id="passing"></span></p>
             <p>Certifications:</strong> <span id="review-certs-file"></span></p>
-            <p>Membership/affiliation</strong> <span id=""></span></p>
+            <p>Membership/affiliation</strong> <span id="membership"></span></p>
         </div>
 
 
@@ -593,6 +593,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const resumeInput = document.getElementById('resume');
         const coverInput  = document.getElementById('cover_letter');
         const certsInput  = document.getElementById('certifications');
+        const personnalInput = document.getElementById('personal_data_sheet');
+        const torInput  = document.getElementById('TOR');
+        const diplomaInput  = document.getElementById('diploma');
+        const boardRatingInput = document.getElementById('board_rating');
+        const certificateEligibilityInput  = document.getElementById('certification_eligibility');
+        const membershipInput  = document.getElementById('Membership/affiliation');
 
         document.getElementById('review-resume-file').textContent =
             resumeInput.files.length ? resumeInput.files[0].name : 'None';
@@ -600,6 +606,20 @@ document.addEventListener('DOMContentLoaded', () => {
             coverInput.files.length ? coverInput.files[0].name : 'None';
         document.getElementById('review-certs-file').textContent =
             certsInput.files.length ? certsInput.files[0].name : 'None';
+
+        document.getElementById('personal').textContent =
+            personnalInput.files.length ? personnalInput.files[0].name : 'None';
+        document.getElementById('tor').textContent =
+            torInput.files.length ? torInput.files[0].name : 'None';
+        document.getElementById('diploma').textContent =
+            diplomaInput.files.length ? diplomaInput.files[0].name : 'None';
+        document.getElementById('prc').textContent =
+            boardRatingInput.files.length ? boardRatingInput.files[0].name : 'None';
+        document.getElementById('passing').textContent =
+            certificateEligibilityInput.files.length ? certificateEligibilityInput.files[0].name : 'None';
+        document.getElementById('membership').textContent =
+            membershipInput.files.length ? membershipInput.files[0].name : 'None';
+
 
         transitionForms(documentsForm, reviewForm, 'forward');
         certifyCheckbox.checked = false;

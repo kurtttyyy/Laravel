@@ -326,7 +326,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Certificate Of Eligibility / Cetificate of Passing(If Applicable)</label>
 
-                <label for="certification_eligibility" class="upload-area">
+                <label for="cover_letter" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Cetificate of Passing </div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>

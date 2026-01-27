@@ -21,8 +21,8 @@ return new class extends Migration
             $table->text('job_description');
             $table->text('responsibilities');
             $table->text('requirements');
-            $table->string('min_salary');
-            $table->string('max_salary');
+            // $table->string('min_salary');
+            // $table->string('max_salary');
             $table->string('experience_level');
             $table->string('location');
             $table->string('skills');

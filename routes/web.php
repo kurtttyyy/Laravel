@@ -51,7 +51,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');
 
     Route::get('system/applicant', 'display_applicant')->name('admin.adminApplicant');
-    Route::get('system/edit/position', 'display_edit_position')->name('admin.adminEditPosition');
+    Route::get('system/edit/position/{id}', 'display_edit_position')->name('admin.adminEditPosition');
     Route::get('system/interview', 'display_interview')->name('admin.adminInterview');
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');
     Route::get('system/position', 'display_position')->name('admin.adminPosition');
@@ -69,5 +69,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
 
 Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/store/new/position', 'store_new_position')->name('admin.createPositionStore');
+    Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
+    Route::delete('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
 });
 

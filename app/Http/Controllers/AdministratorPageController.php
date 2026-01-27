@@ -38,8 +38,9 @@ class AdministratorPageController extends Controller
         return view('admin.adminApplicant');
     }
 
-    public function display_edit_position(){
-        return view('admin.adminEditPosition');
+    public function display_edit_position($id){
+        $open = OpenPosition::findOrFail($id);
+        return view('admin.adminEditPosition', compact('open'));
     }
 
     public function display_interview(){

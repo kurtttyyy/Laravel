@@ -53,7 +53,7 @@ class ApplicantController extends Controller
             'work_position' => $attrs['work_position'],
             'work_employer' => $attrs['work_employer'],
             'work_location' => $attrs['work_location'],
-            'work_duration' => $attrs['educawork_durationtion'],
+            'work_duration' => $attrs['work_duration'],
             'experience_years' => $attrs['experience_years'],
         ]);
 

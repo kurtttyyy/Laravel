@@ -93,26 +93,47 @@
           <!-- Job Description -->
           <div class="bg-white rounded-xl p-6 shadow-sm space-y-6">
 
-            <div>
-              <h2 class="font-semibold mb-2">Job Description</h2>
-              <p class="text-sm text-slate-600">
-                {{ $open->job_description }}
-              </p>
-            </div>
+                <div class="[&_ul]:list-none [&_ul]:pl-0 [&_ul]:ml-0 [&_li]:pl-0 [&_li]:ml-0">
+                  <h2 class="font-bold mb-2">Job Description</h2>
 
-            <div>
-              <h2 class="font-semibold mb-2">Responsibilities</h2>
-              <ul class="space-y-2 text-sm text-slate-600">
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ $open->responsibilities }}</li>
-              </ul>
-            </div>
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $open->job_description);
+                    @endphp
 
-            <div>
-              <h2 class="font-semibold mb-2">Requirements</h2>
-              <ul class="space-y-2 text-sm text-slate-600">
-                <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ $open->requirements }}</li>
-              </ul>
-            </div>
+                    <ul class="text-m text-slate-600">
+                        @foreach ($lines as $line)
+                            <li>{{ ltrim($line, "•- ") }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="[&_ul]:list-none [&_ul]:pl-0 [&_ul]:ml-0 [&_li]:pl-0 [&_li]:ml-0">
+                  <h2 class="font-bold mb-2">Responsibilities</h2>
+
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $open->responsibilities);
+                    @endphp
+
+                    <ul class="text-m text-slate-600">
+                        @foreach ($lines as $line)
+                            <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ ltrim($line, "•- ") }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div class="[&_ul]:list-none [&_ul]:pl-0 [&_ul]:ml-0 [&_li]:pl-0 [&_li]:ml-0">
+                  <h2 class="font-bold mb-2">Requirements</h2>
+
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $open->requirements);
+                    @endphp
+
+                    <ul class="text-m text-slate-600">
+                        @foreach ($lines as $line)
+                            <li><i class="fa fa-check-circle text-indigo-500 mr-2"></i>{{ ltrim($line, "•- ") }}</li>
+                        @endforeach
+                    </ul>
+                </div>
 
           </div>
         </div>
@@ -123,11 +144,6 @@
           <!-- Job Details -->
           <div class="bg-white rounded-xl p-6 shadow-sm text-sm space-y-4">
             <h3 class="font-semibold">Job Details</h3>
-
-            <div>
-              <p class="text-slate-400">Salary Range</p>
-              <p class="font-medium">${{ $open->min_salary }} - ${{ $open->max_salary }}</p>
-            </div>
 
             <div>
               <p class="text-slate-400">Experience Level</p>
@@ -160,11 +176,21 @@
 
           <!-- Benefits -->
           <div class="bg-white rounded-xl p-6 shadow-sm text-sm">
-            <h3 class="font-semibold mb-3">Benefits & Perks</h3>
-            <ul class="space-y-2 text-slate-600">
-              <li><i class="fa fa-check text-green-500 mr-2"></i>{{ $open->benifits }}</li>
-            </ul>
+                <div class="[&_ul]:list-none [&_ul]:pl-0 [&_ul]:ml-0 [&_li]:pl-0 [&_li]:ml-0">
+                  <h2 class="font-bold mb-2">Benefits & Perks</h2>
+
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $open->benifits);
+                    @endphp
+
+                    <ul class="text-m text-slate-600">
+                        @foreach ($lines as $line)
+                            <li><i class="fa fa-check text-green-500 mr-2"></i>{{ ltrim($line, "•- ") }}</li>
+                        @endforeach
+                    </ul>
+                </div>
           </div>
+
 
           <!-- Hiring Team -->
           <div class="bg-white rounded-xl p-6 shadow-sm">

@@ -250,7 +250,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Personal Data Sheet*</label>
 
-                <label for="cover_letter" class="upload-area">
+                <label for="personal_data_sheet" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Personal Data Sheet</div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
@@ -269,7 +269,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Transcript Of Records*</label>
 
-                <label for="cover_letter" class="upload-area">
+                <label for="TOR" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Transcript Of Records</div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
@@ -288,7 +288,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Diploma, Master's (if available), Doctorate (if available)</label>
 
-                <label for="cover_letter" class="upload-area">
+                <label for="diploma" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate</div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
@@ -307,7 +307,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">PRC License/Board Rating (if Applicable)</label>
 
-                <label for="cover_letter" class="upload-area">
+                <label for="board_rating" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your PRC License/Board Rating</div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
@@ -326,7 +326,7 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Certificate Of Eligibility / Cetificate of Passing(If Applicable)</label>
 
-                <label for="cover_letter" class="upload-area">
+                <label for="certificate_eligibility" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Cetificate of Passing </div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>

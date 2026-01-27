@@ -131,19 +131,18 @@
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">University Name*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
-                </select>
+                    <input class="form-select" id="field_study" name="university_name" required>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Address*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                    <input class="form-select" id="field_study" name="university_address" required>
                 </select>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Year Complete*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                    <input class="form-select" id="field_study" name="year_complete" required>
                 </select>
             </div>
 
@@ -152,23 +151,23 @@
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Position*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                    <input class="form-select" id="field_study" name="work_position" required>
                 </select>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Employer*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                <input class="form-select" id="field_study" name="work_employer" required>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="field_study" class="form-label">Location*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                <input class="form-select" id="field_study" name="work_location" required>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="field_study" class="form-label">Duration*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
+                    <input class="form-select" id="field_study" name="work_duration" required>
                 </select>
             </div>
 
@@ -224,7 +223,7 @@
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[0][type]" value="resume">
+                    <input type="hidden" name="documents[0][type]" value="Resume/CV">
                 </label>
             </div>
 
@@ -243,7 +242,7 @@
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[1][type]" value="Cover Letter">
                 </label>
             </div>
 
@@ -257,12 +256,12 @@
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
+                        id="personal_data_sheet"
+                        name="documents[2][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[2][type]" value="Personal Data Sheet">
                 </label>
             </div>
 
@@ -276,12 +275,12 @@
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
+                        id="TOR"
+                        name="documents[3][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[3][type]" value="Transcript Of Records">
                 </label>
             </div>
 
@@ -295,12 +294,12 @@
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
+                        id="diploma"
+                        name="documents[4][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[4][type]" value="Diploma">
                 </label>
             </div>
 
@@ -314,12 +313,12 @@
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
+                        id="board_rating"
+                        name="documents[5][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[5][type]" value="PRC License/Board Rating">
                 </label>
             </div>
 
@@ -333,12 +332,12 @@
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
+                        id="certificate_eligibility"
+                        name="documents[6][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                    <input type="hidden" name="documents[6][type]" value="certificatCertificate Of Eligibility / Cetificate of Passinge_eligibility">
                 </label>
             </div>
 
@@ -353,11 +352,11 @@
                     <input
                         type="file"
                         id="certifications"
-                        name="documents[2][file]"
+                        name="documents[7][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[2][type]" value="certifications">
+                    <input type="hidden" name="documents[7][type]" value="Certifications & Supporting Document">
                 </label>
             </div>
 
@@ -372,11 +371,11 @@
                     <input
                         type="file"
                         id="Membership/affiliation"
-                        name="documents[2][file]"
+                        name="documents[8][file]"
                         accept=".pdf,.doc,.docx"
                         required
                     >
-                    <input type="hidden" name="documents[2][type]" value="Membership/affiliation">
+                    <input type="hidden" name="documents[8][type]" value="Membership/Affiliation">
                 </label>
             </div>
 

@@ -21,7 +21,14 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('education_attainment');
             $table->string('field_study');
-            $table->string('experience');
+            $table->string('university_name');
+            $table->string('university_address');
+            $table->string('year_complete');
+            $table->string('work_position');
+            $table->string('work_employer');
+            $table->string('work_location');
+            $table->string('work_duration');
+            $table->string('experience_years');
             $table->string('skills_n_expertise');
             $table->string('applied_position')->nullable();
             $table->string('application_status')->default('Under Review');

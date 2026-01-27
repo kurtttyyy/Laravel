@@ -18,11 +18,18 @@ class Applicant extends Model
         'address',
         'education_attainment',
         'field_study',
-        'experience',
         'skills_n_expertise',
         'applied_position',
         'application_status',
         'user_id',
+        'university_name',
+        'university_address',
+        'year_complete',
+        'work_position',
+        'work_employer',
+        'work_location',
+        'work_duration',
+        'experience_years',
     ];
 
     public function user()

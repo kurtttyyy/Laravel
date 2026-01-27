@@ -26,6 +26,14 @@ class ApplicantController extends Controller
             'documents' => 'required|array',
             'documents.*.file' => 'required|file|mimes:pdf,doc,docx|max:5120',
             'documents.*.type' => 'required',
+            'university_name' => 'required',
+            'university_address' => 'required',
+            'year_complete' => 'required',
+            'work_position' => 'required',
+            'work_employer' => 'required',
+            'work_location' => 'required',
+            'work_duration' => 'required',
+            'experience_years' => 'required',
         ]);
 
         $applicant_store = Applicant::create([
@@ -36,9 +44,17 @@ class ApplicantController extends Controller
             'address' => $attrs['address'],
             'education_attainment' => $attrs['education'],
             'field_study' => $attrs['field_study'],
-            'experience' => $attrs['experience_years'],
+            'experience_years' => $attrs['experience_years'],
             'skills_n_expertise' => $attrs['key_skills'],
             'applied_position' => $attrs['position'],
+            'university_name' => $attrs['university_name'],
+            'university_address' => $attrs['university_address'],
+            'year_complete' => $attrs['year_complete'],
+            'work_position' => $attrs['work_position'],
+            'work_employer' => $attrs['work_employer'],
+            'work_location' => $attrs['work_location'],
+            'work_duration' => $attrs['educawork_durationtion'],
+            'experience_years' => $attrs['experience_years'],
         ]);
 
 

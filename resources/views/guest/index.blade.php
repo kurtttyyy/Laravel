@@ -55,17 +55,17 @@
 
         <div class="carousel-inner h-100">
             <div class="carousel-item active h-100">
-                <img src="{{ asset('images/banner.png') }}"
+                <img src="{{ asset('images/banner2.png') }}"
                      class="d-block w-100 h-90 object-fit-cover"
                      alt="Careers">
             </div>
             <div class="carousel-item h-100">
-                <img src="{{ asset('images/banner2.jpg') }}"
+                <img src="{{ asset('images/Banner1.png') }}"
                      class="d-block w-100 h-90 object-fit-cover"
                      alt="Team">
             </div>
             <div class="carousel-item h-100">
-                <img src="{{ asset('images/banner5.jpg') }}"
+                <img src="{{ asset('images/banner3.png') }}"
                      class="d-block w-100 h-90 object-fit-cover"
                      alt="Growth">
             </div>
@@ -173,7 +173,7 @@
 
                     <ul class="list-unstyled mt-2 mb-3">
                         @foreach ($lines as $line)
-                            <li>{{ ltrim($line, "•- ") }}</li>
+                            <li>{{ substr(ltrim($line, "•- "), 0, 150) }}{{ strlen($line) > 150 ? '......' : '' }}</li>
                         @endforeach
                     </ul>
 
@@ -190,7 +190,7 @@
                     </div>
 
                     <button
-                        onclick="window.location.href='{{ route('guest.jobOpen', $position->id) }}'"
+                        onclick="window.location.href='{{ route('guest.jobOpen', $position->id) }}'";
                         class="btn btn-primary w-100 green-btn"
                     >
                         View Details & Apply

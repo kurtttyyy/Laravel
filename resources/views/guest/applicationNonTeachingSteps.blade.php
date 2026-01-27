@@ -93,7 +93,7 @@
                 <input type="text" id="address" name="address" class="form-control" placeholder="Enter your address" required>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-end mt-auto">
                 <div></div>
                 <button type="button" id="btnToExperience" class="btn btn-primary">Proceed</button>
             </div>
@@ -102,7 +102,7 @@
 
     <!-- Work Experience & Education Form -->
     <div id="experienceForm" class="mt-4 d-none form-step">
-        <h4 class="fw-bold mb-3">Work Experience & Education</h4>
+        <h4 class="fw-bold mb-3">Educational Background</h4>
             <div class="mb-3">
                 <label for="education" class="form-label">Highest Educational Attainment*</label>
                 <select class="form-select" id="education" name="education" required>
@@ -111,7 +111,9 @@
                     <option value="Associate Degree">Associate Degree</option>
                     <option value="Bachelor's Degree">Bachelor's Degree</option>
                     <option value="Master's Degree">Master's Degree</option>
-                    <option value="Doctorate">Doctorate</option>
+                    <option value="Master's Degree">Master of Science (MSc)</option>
+                    <option value="Master's Degree">Master of Arts (MA)</option>
+                    <option value="Doctorate">Doctor of Philosophy (PhD)</option>
                 </select>
             </div>
 
@@ -124,6 +126,49 @@
                     <option value="Engineering">Engineering</option>
                     <option value="Education">Education</option>
                     <option value="Health Sciences">Health Sciences</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="field_study" class="form-label">University Name*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Address*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Year Complete*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+
+        <br>
+        <h4 class="fw-bold mb-3">Work Experience</h4>
+
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Position*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Employer*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Location*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="field_study" class="form-label">Duration*</label>
+                <select class="form-select" id="field_study" name="field_study" required>
                 </select>
             </div>
 
@@ -155,7 +200,7 @@
                 </datalist>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mt-auto ">
                 <button type="button" id="btnBackToPersonal" class="btn btn-secondary">Previous</button>
                 <button type="button" id="btnToDocuments" class="btn btn-primary">Proceed</button>
             </div>
@@ -202,6 +247,101 @@
                 </label>
             </div>
 
+            <!-- Personal Data Sheet -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Personal Data Sheet*</label>
+
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your Personal Data Sheet</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
+
+            <!-- Transcript Of Records -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Transcript Of Records*</label>
+
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your Transcript Of Records</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
+
+            <!-- Diploma, Master's, Doctorate -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Diploma, Master's (if available), Doctorate (if available)</label>
+
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
+
+            <!-- PRC License/Board Rating -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">PRC License/Board Rating (if Applicable)</label>
+
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your PRC License/Board Rating</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
+
+            <!-- Certificate Of Eligibility / Cetificate of Passing  -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Certificate Of Eligibility / Cetificate of Passing(If Applicable)</label>
+
+                <label for="cover_letter" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Cetificate of Passing </div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="cover_letter"
+                        name="documents[1][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[1][type]" value="cover_letter">
+                </label>
+            </div>
+
             <!-- Certifications -->
             <div class="mb-4">
                 <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
@@ -218,6 +358,25 @@
                         required
                     >
                     <input type="hidden" name="documents[2][type]" value="certifications">
+                </label>
+            </div>
+
+            <!-- Membership/affiliation -->
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Membership/affiliation(If Applicable)</label>
+
+                <label for="Membership/affiliation" class="upload-area">
+                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+                    <div class="upload-main-text">Click to upload your documents</div>
+                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+                    <input
+                        type="file"
+                        id="Membership/affiliation"
+                        name="documents[2][file]"
+                        accept=".pdf,.doc,.docx"
+                        required
+                    >
+                    <input type="hidden" name="documents[2][type]" value="Membership/affiliation">
                 </label>
             </div>
 
@@ -253,11 +412,18 @@
             <p>Address:</strong> <span id="review-address"></span></p>
         </div>
 
-        <!-- Experience & Education Summary -->
+        <!-- Education & Experience Summary -->
         <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-            <h5 class="fw-bold text-success">Experience & Education</h5>
+            <h5 class="fw-bold text-success">Education & Experience</h5>
             <p>Highest Educational Attainment:</strong> <span id="review-education"></span></p>
             <p>Field of Study:</strong> <span id="review-field-study"></span></p>
+            <p>University:</strong> <span id=""></span></p>
+            <p>Address:</strong> <span id=""></span></p>
+            <p>Year Complete:</strong> <span id=""></span></p>
+            <p>Position</strong> <span id=""></span></p>
+            <p>Employer</strong> <span id=""></span></p>
+            <p>Location</strong> <span id=""></span></p>
+            <p>Duration</strong> <span id=""></span></p>
             <p>Years of Relevant Experience:</strong> <span id="review-experience-years"></span></p>
             <p>Key Skills & Expertise:</strong> <span id="review-key-skills"></span></p>
         </div>
@@ -267,7 +433,13 @@
             <h5 class="fw-bold text-success">Documents</h5>
             <p>Resume/CV:</strong> <span id="review-resume-file"></span></p>
             <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
+            <p>Personal Data Sheet:</strong> <span id=""></span></p>
+            <p>Transcript Of Records:</strong> <span id=""></span></p>
+            <p>Diploma, master's, Doctorate</strong> <span id=""></span></p>
+            <p>PRC License/Board Rating</strong> <span id=""></span></p>
+            <p>Certificate Of Eligibility / Cetificate of Passing</strong> <span id=""></span></p>
             <p>Certifications:</strong> <span id="review-certs-file"></span></p>
+            <p>Membership/affiliation</strong> <span id=""></span></p>
         </div>
 
 

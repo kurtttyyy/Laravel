@@ -127,8 +127,6 @@
           <h2 class="font-semibold text-lg mb-4">Job Details</h2>
 
           <div class="space-y-3">
-            <input class="input" placeholder="Salary Min ($)" name="min">
-            <input class="input" placeholder="Salary Max ($)" name="max">
 
             <select class="input" name="level">
               <option>Experience Level</option>

@@ -131,18 +131,18 @@
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">University Name*</label>
-                    <input class="form-select" id="field_study" name="university_name" required>
+                    <input class="form-select" id="university_name" name="university_name" required>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Address*</label>
-                    <input class="form-select" id="field_study" name="university_address" required>
+                    <input class="form-select" id="university_address" name="university_address" required>
                 </select>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Year Complete*</label>
-                    <input class="form-select" id="field_study" name="year_complete" required>
+                    <input class="form-select" id="year_complete" name="year_complete" required>
                 </select>
             </div>
 
@@ -151,23 +151,23 @@
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Position*</label>
-                    <input class="form-select" id="field_study" name="work_position" required>
+                    <input class="form-select" id="work_position" name="work_position" required>
                 </select>
             </div>
 
             <div class="mb-3">
                 <label for="field_study" class="form-label">Employer*</label>
-                <input class="form-select" id="field_study" name="work_employer" required>
+                <input class="form-select" id="work_employer" name="work_employer" required>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="field_study" class="form-label">Location*</label>
-                <input class="form-select" id="field_study" name="work_location" required>
+                <input class="form-select" id="work_location" name="work_location" required>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="field_study" class="form-label">Duration*</label>
-                    <input class="form-select" id="field_study" name="work_duration" required>
+                    <input class="form-select" id="work_duration" name="work_duration" required>
                 </select>
             </div>
 
@@ -416,13 +416,13 @@
             <h5 class="fw-bold text-success">Education & Experience</h5>
             <p>Highest Educational Attainment:</strong> <span id="review-education"></span></p>
             <p>Field of Study:</strong> <span id="review-field-study"></span></p>
-            <p>University:</strong> <span id=""></span></p>
-            <p>Address:</strong> <span id=""></span></p>
-            <p>Year Complete:</strong> <span id=""></span></p>
-            <p>Position</strong> <span id=""></span></p>
-            <p>Employer</strong> <span id=""></span></p>
-            <p>Location</strong> <span id=""></span></p>
-            <p>Duration</strong> <span id=""></span></p>
+            <p>University:</strong> <span id="uni"></span></p>
+            <p>Address:</strong> <span id="uni_add"></span></p>
+            <p>Year Complete:</strong> <span id="year_com"></span></p>
+            <p>Position</strong> <span id="work_po"></span></p>
+            <p>Employer</strong> <span id="work_em"></span></p>
+            <p>Location</strong> <span id="work_lo"></span></p>
+            <p>Duration</strong> <span id="work_du"></span></p>
             <p>Years of Relevant Experience:</strong> <span id="review-experience-years"></span></p>
             <p>Key Skills & Expertise:</strong> <span id="review-key-skills"></span></p>
         </div>
@@ -589,6 +589,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('review-field-study').textContent = document.getElementById('field_study').value;
         document.getElementById('review-experience-years').textContent = document.getElementById('experience_years').value;
         document.getElementById('review-key-skills').textContent = document.getElementById('key_skills').value;
+
+        document.getElementById('uni').textContent = document.getElementById('university_name').value;
+        document.getElementById('uni_add').textContent = document.getElementById('university_address').value;
+        document.getElementById('year_com').textContent = document.getElementById('year_complete').value;
+        document.getElementById('work_po').textContent = document.getElementById('work_position').value;
+        document.getElementById('work_em').textContent = document.getElementById('work_employer').value;
+        document.getElementById('work_lo').textContent = document.getElementById('work_location').value;
+        document.getElementById('work_du').textContent = document.getElementById('work_duration').value;
 
         const resumeInput = document.getElementById('resume');
         const coverInput  = document.getElementById('cover_letter');

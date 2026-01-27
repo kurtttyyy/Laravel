@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('collage_name');
             $table->string('employment');
             $table->string('work_mode');
-            $table->string('job_description');
-            $table->string('responsibilities');
-            $table->string('requirements');
+            $table->text('job_description');
+            $table->text('responsibilities');
+            $table->text('requirements');
             $table->string('min_salary');
             $table->string('max_salary');
             $table->string('experience_level');
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('skills');
             $table->string('benifits');
             $table->string('job_type');
-            $table->string('passionate');
+            $table->text('passionate');
             $table->timestamp('one')->nullable();
             $table->timestamp('two')->nullable();
             $table->softDeletes();

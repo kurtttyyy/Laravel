@@ -56,14 +56,16 @@
                   </p>
 
                   <div class="flex gap-3 mt-4">
-                    <a href="{{ route('admin.adminEditPosition') }}"
+                    <a href="{{ route('admin.adminEditPosition', $open->id) }}"
                       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm inline-flex items-center">
                         <i class="fa fa-pen mr-1"></i> Edit Job
                     </a>
 
-                    <button class="border border-red-300 text-red-500 px-4 py-2 rounded-lg text-sm">
-                      Close Position
-                    </button>
+                    <a href="{{ route('admin.destroyPosition', $open->id) }}"
+                     class="border border-red-300 text-red-500 px-4 py-2 rounded-lg text-sm">
+                        Close Position
+                    </a>
+
                   </div>
                 </div>
               </div>

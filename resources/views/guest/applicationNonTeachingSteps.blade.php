@@ -326,13 +326,13 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Certificate Of Eligibility / Cetificate of Passing(If Applicable)</label>
 
-                <label for="certificate_eligibility" class="upload-area">
+                <label for="cover_letter" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Cetificate of Passing </div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="certificate_eligibility"
+                        id="certification_eligibility"
                         name="documents[6][file]"
                         accept=".pdf,.doc,.docx"
                         required
@@ -364,13 +364,13 @@
             <div class="mb-4">
                 <label class="form-label fw-semibold">Membership/affiliation(If Applicable)</label>
 
-                <label for="Membership/affiliation" class="upload-area">
+                <label for="membership_affiliation" class="upload-area">
                     <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
                     <div class="upload-main-text">Click to upload your documents</div>
                     <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
                     <input
                         type="file"
-                        id="Membership/affiliation"
+                        id="membership_affiliation"
                         name="documents[8][file]"
                         accept=".pdf,.doc,.docx"
                         required
@@ -434,11 +434,11 @@
             <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
             <p>Personal Data Sheet:</strong> <span id="personal"></span></p>
             <p>Transcript Of Records:</strong> <span id="tor"></span></p>
-            <p>Diploma, master's, Doctorate</strong> <span id="diploma"></span></p>
-            <p>PRC License/Board Rating</strong> <span id="prc"></span></p>
-            <p>Certificate Of Eligibility / Cetificate of Passing</strong> <span id="passing"></span></p>
+            <p>Diploma, master's, Doctorate:</strong> <span id="dip"></span></p>
+            <p>PRC License/Board Rating:</strong> <span id="prc"></span></p>
+            <p>Certificate Of Eligibility / Cetificate of Passing:</strong> <span id="passing"></span></p>
             <p>Certifications:</strong> <span id="review-certs-file"></span></p>
-            <p>Membership/affiliation</strong> <span id="membership"></span></p>
+            <p>Membership/affiliation:</strong> <span id="membership"></span></p>
         </div>
 
 
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diplomaInput  = document.getElementById('diploma');
         const boardRatingInput = document.getElementById('board_rating');
         const certificateEligibilityInput  = document.getElementById('certification_eligibility');
-        const membershipInput  = document.getElementById('Membership/affiliation');
+        const membershipInput  = document.getElementById('membership_affiliation');
 
         document.getElementById('review-resume-file').textContent =
             resumeInput.files.length ? resumeInput.files[0].name : 'None';
@@ -606,12 +606,11 @@ document.addEventListener('DOMContentLoaded', () => {
             coverInput.files.length ? coverInput.files[0].name : 'None';
         document.getElementById('review-certs-file').textContent =
             certsInput.files.length ? certsInput.files[0].name : 'None';
-
         document.getElementById('personal').textContent =
             personnalInput.files.length ? personnalInput.files[0].name : 'None';
         document.getElementById('tor').textContent =
             torInput.files.length ? torInput.files[0].name : 'None';
-        document.getElementById('diploma').textContent =
+        document.getElementById('dip').textContent =
             diplomaInput.files.length ? diplomaInput.files[0].name : 'None';
         document.getElementById('prc').textContent =
             boardRatingInput.files.length ? boardRatingInput.files[0].name : 'None';

@@ -228,7 +228,7 @@
                             <input
                                 type="date"
                                 name="one"
-                                value="{{ old('one', optional($open->one)->format('Y-m-d')) }}"
+                                 value="{{ old('one', $open->one ? \Carbon\Carbon::parse($open->one)->format('Y-m-d') : '') }}"
                                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-800
                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
@@ -255,7 +255,7 @@
                             <input
                                 type="date"
                                 name="two"
-                                value="{{ old('two', optional($open->two)->format('Y-m-d')) }}"
+                                 value="{{ old('two', $open->two ? \Carbon\Carbon::parse($open->two)->format('Y-m-d') : '') }}"
                                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-800
                                     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />

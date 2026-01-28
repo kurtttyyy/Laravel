@@ -70,6 +70,6 @@ Route::controller(AdministratorPageController::class)->group(function () {
 Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/store/new/position', 'store_new_position')->name('admin.createPositionStore');
     Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
-    Route::delete('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
+    Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
 });
 

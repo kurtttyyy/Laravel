@@ -96,8 +96,8 @@ class AdministratorStoreController extends Controller
             'skills' => $attrs['skills'],
             //'benifits' => $attrs['benefits'],
             //'job_type' => $attrs['job_type'],
-            'one' => $attrs['start_date'],
-            'two' => $attrs['end_date'],
+            'one' => $attrs['one'],
+            'two' => $attrs['two'],
             'passionate' => $attrs['passionate'],
         ]);
 

@@ -219,47 +219,61 @@
       <div class="col-span-2 space-y-6">
 
         <!-- Profile Header -->
-        <div class="flex items-start gap-4">
+<div class="flex items-start gap-4">
 
-          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600
-                      text-white flex items-center justify-center text-xl font-bold">
-            SM
-          </div>
+  <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600
+              text-white flex items-center justify-center text-xl font-bold">
+    SM
+  </div>
 
-          <div class="flex-1">
-            <h3 class="text-xl font-semibold">Sarah Mitchell</h3>
-            <p class="text-sm text-gray-400">sarah.m@email.com</p>
+  <div class="flex-1">
+    <h3 class="text-xl font-semibold">Sarah Mitchell</h3>
+    <p class="text-sm text-gray-400">sarah.m@email.com</p>
 
-            <div class="flex flex-wrap gap-2 mt-2">
-              <span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">
-                Senior Frontend Developer
-              </span>
-              <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-500">
-                Interview
-              </span>
-            </div>
+    <div class="flex flex-wrap gap-2 mt-2">
+      <span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">
+        Senior Frontend Developer
+      </span>
+      <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-500">
+        Interview
+      </span>
+    </div>
 
-            <div class="flex gap-4 mt-2 text-sm text-gray-400">
-              <span>
-                <i class="fa-regular fa-calendar mr-1"></i>
-                Applied: Jan 15, 2024
-              </span>
-              <span>
-                <i class="fa-solid fa-location-dot mr-1"></i>
-                San Francisco, CA
-              </span>
-            </div>
-          </div>
+    <div class="flex gap-4 mt-2 text-sm text-gray-400">
+      <span>
+        <i class="fa-regular fa-calendar mr-1"></i>
+        Applied: Jan 15, 2024
+      </span>
+      <span>
+        <i class="fa-solid fa-location-dot mr-1"></i>
+        San Francisco, CA
+      </span>
+    </div>
+  </div>
 
-          <div class="flex gap-2">
-            <button onclick="openScheduleModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            Schedule Interview
-            </button>
+  <!-- ACTIONS -->
+  <div class="flex flex-col gap-2">
+    <button
+      onclick="openScheduleModal()"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+    >
+      Schedule Interview
+    </button>
 
+    <!-- STATUS SELECT -->
+    <select
+      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+    >
+      <option>Under Review</option>
+      <option>Initial Interview</option>
+      <option>Final Interview</option>
+      <option>Hired</option>
+      <option class="text-red-600">Rejected</option>
+    </select>
+  </div>
 
-          </div>
+</div>
 
-        </div>
 
         <!-- Professional Summary -->
         <div class="bg-slate-50 rounded-xl p-5">
@@ -389,22 +403,74 @@
 
         </div>
 
-        <!-- Rating Container -->
-        <div class="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm mt-4">
-        <div>
-            <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
-            <div class="text-yellow-400 flex gap-1 text-lg mt-1">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star-half-stroke"></i>
-            <i class="fa-regular fa-star"></i>
-            </div>
-        </div>
-        <div class="text-sm text-gray-500 font-medium">
-            3.5 / 5
-        </div>
-        </div>
+<!-- Rating Container (Clickable) -->
+<div
+  onclick="openRatingModal()"
+  class="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm mt-4
+         cursor-pointer hover:border-indigo-500 transition"
+>
+  <div>
+    <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
+
+    <div class="text-yellow-400 flex gap-1 text-lg mt-1">
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star-half-stroke"></i>
+      <i class="fa-regular fa-star"></i>
+    </div>
+  </div>
+
+  <div class="text-sm text-gray-500 font-medium">
+    3.5 / 5
+  </div>
+</div>
+
+
+<!-- Rating Modal -->
+<div
+  id="ratingModal"
+  class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+>
+  <div class="bg-white rounded-xl p-6 w-80 shadow-lg relative">
+
+    <!-- Close (X) -->
+    <button
+      onclick="closeRatingModal()"
+      class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+    >
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+
+    <h3 class="text-lg font-semibold mb-4 text-center">
+      Rate Applicant
+    </h3>
+
+    <!-- Stars -->
+<!-- Stars -->
+<div id="ratingStars" class="flex justify-center gap-2 text-2xl mb-6">
+  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(1)"></i>
+  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(2)"></i>
+  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(3)"></i>
+  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(4)"></i>
+  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(5)"></i>
+</div>
+
+
+    <!-- Save Button (Centered) -->
+    <div class="flex justify-center">
+      <button
+        onclick="saveRating()"
+        class="px-6 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+      >
+        Save Rating
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
 
 
       </div>
@@ -512,6 +578,45 @@
 
 
 </body>
+
+<script>
+  let selectedRating = 0;
+
+  function openRatingModal() {
+    const modal = document.getElementById('ratingModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeRatingModal() {
+    const modal = document.getElementById('ratingModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+function setRating(rating) {
+  selectedRating = rating;
+
+  const stars = document.querySelectorAll('#ratingStars i');
+
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.classList.remove('fa-regular', 'text-gray-400');
+      star.classList.add('fa-solid', 'text-yellow-400');
+    } else {
+      star.classList.remove('fa-solid', 'text-yellow-400');
+      star.classList.add('fa-regular', 'text-gray-400');
+    }
+  });
+}
+
+
+  function saveRating() {
+    console.log('Saved rating:', selectedRating);
+    closeRatingModal();
+  }
+</script>
+
 <script>
   // Open/Close Schedule Interview Modal
   function openScheduleModal() {

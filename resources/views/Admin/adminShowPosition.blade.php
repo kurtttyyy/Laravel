@@ -170,11 +170,17 @@
 
           <!-- Skills -->
           <div class="bg-white rounded-xl p-6 shadow-sm">
-            <h3 class="font-semibold mb-3">Required Skills</h3>
-            <div class="flex gap-2 flex-wrap">
-                </div>
-                <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">{{ $open->skills }}</span>
+              <h3 class="font-semibold mb-3">Required Skills</h3>
+
+              <div class="flex gap-2 flex-wrap">
+                  @foreach (explode(',', $open->skills) as $skill)
+                      <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-600 rounded-full">
+                          {{ trim($skill) }}
+                      </span>
+                  @endforeach
+              </div>
           </div>
+
 
           <!-- Benefits -->
           <div class="bg-white rounded-xl p-6 shadow-sm text-sm">

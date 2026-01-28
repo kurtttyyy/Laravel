@@ -56,6 +56,7 @@ class AdministratorStoreController extends Controller
     }
 
     public function update_position(Request $request, $id){
+        Log::info($request);
         $attrs = $request->validate([
             'title' => 'required',
             //'department' => 'required',
@@ -103,7 +104,7 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Position');
     }
 
-    public function desttroy_position($id){
+    public function destroy_position($id){
         $delete = OpenPosition::findOrFail($id);
 
         $delete->delete();

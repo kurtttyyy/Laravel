@@ -35,7 +35,17 @@ class AdministratorPageController extends Controller
     }
 
     public function display_applicant(){
-        return view('admin.adminApplicant');
+        $applicant = Applicant::all();
+        $count_applicant = Applicant::count();
+        $count_under_review = $applicant->where('application_status','Under Review')->count();
+        $count_final_interview = $applicant->where('application_status','Final Interview')->count();
+        $hired = Applicant::where('application_status', 'Hired')->whereMonth('created_at', now()->month)
+                                        ->whereYear('created_at', now()->year)
+                                        ->count();
+
+        return view('admin.adminApplicant', compact('applicant', 'hired',
+                                            'count_applicant','count_under_review'
+                                            ,'count_final_interview'));
     }
 
     public function display_edit_position($id){

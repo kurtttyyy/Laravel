@@ -31,14 +31,14 @@
 
     <!-- Dashboard Content -->
     <div class="p-8 space-y-6">
-        
+
     <!-- ===================== STATS ===================== -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 
         <!-- Card -->
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">248</p>
+                <p class="text-3xl font-bold text-gray-900">{{ $count_applicant }}</p>
                 <p class="text-sm text-gray-500">Total Applicants</p>
             </div>
             <div class="text-right">
@@ -51,7 +51,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">64</p>
+                <p class="text-3xl font-bold text-gray-900">{{ $count_under_review }}</p>
                 <p class="text-sm text-gray-500">Under Review</p>
             </div>
             <div class="text-right">
@@ -64,7 +64,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">18</p>
+                <p class="text-3xl font-bold text-gray-900">{{ $count_final_interview }}</p>
                 <p class="text-sm text-gray-500">Interviews Scheduled</p>
             </div>
             <div class="text-right">
@@ -77,7 +77,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">32</p>
+                <p class="text-3xl font-bold text-gray-900">{{ $hired }}</p>
                 <p class="text-sm text-gray-500">Hired This Month</p>
             </div>
             <div class="text-right">
@@ -124,18 +124,19 @@
 
             <!-- Row -->
             <tr class="hover:bg-slate-50">
+                @foreach($applicant as $app)
                 <td class="py-4 flex items-center gap-3">
                     <div class="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center">SM</div>
                     <div>
-                        <p class="font-medium">Sarah Mitchell</p>
-                        <p class="text-xs text-gray-400">sarah.m@email.com</p>
+                        <p class="font-medium">{{$app->first_name}} {{$app->last_name}}</p>
+                        <p class="text-xs text-gray-400">{{$app->email}}</p>
                     </div>
                 </td>
                 <td>
-                    <p class="font-medium">Senior Frontend Developer</p>
-                    <p class="text-xs text-gray-400">Engineering</p>
+                    <p class="font-medium">{{$app->applied_position}}</p>
+                    <p class="text-xs text-gray-400">{{$app->collage_name}}</p>
                 </td>
-                <td>Jan 15, 2024</td>
+                <td>{{$app->created_at->format('F d, Y') }}</td>
                 <td><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">Interview</span></td>
                 <td class="text-yellow-400">
                     ★★★★★
@@ -149,29 +150,7 @@
 
                 <i class="fa-solid fa-xmark cursor-pointer"></i>
               </td>
-            </tr>
-
-            <!-- Copy rows (static) -->
-            <tr>
-                <td class="py-4 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center">JC</div>
-                    <div>
-                        <p class="font-medium">James Chen</p>
-                        <p class="text-xs text-gray-400">james.chen@email.com</p>
-                    </div>
-                </td>
-                <td>
-                    <p class="font-medium">Backend Developer</p>
-                    <p class="text-xs text-gray-400">Engineering</p>
-                </td>
-                <td>Jan 14, 2024</td>
-                <td><span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600">Screening</span></td>
-                <td class="text-yellow-400">★★★★☆</td>
-                <td class="text-gray-400 space-x-3">
-                    <i class="fa-regular fa-eye"></i>
-                    <i class="fa-regular fa-calendar"></i>
-                    <i class="fa-solid fa-xmark"></i>
-                </td>
+              @endforeach
             </tr>
 
             </tbody>

@@ -61,7 +61,7 @@
 <!-- Personal Info Form -->
 <form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
-    <input type="text" id="last_name" name="position" class="form-control" value="{{ $openPosition->title}}" hidden>
+    <input type="text" name="position" class="form-control" value="{{ $openPosition->title}}" hidden>
     <div id="personalForm" class="mt-4 form-step">
         <h4 class="fw-bold mb-3">Personal Information</h4>
             <div class="row mb-3">
@@ -206,185 +206,125 @@
     </div>
 
     <!--Documents Form-->
-    <div id="documentsForm" class="mt-4 d-none form-step">
-        <h4 class="fw-bold mb-3">Required Document</h4>
-            <!-- Resume/CV -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Resume/CV*</label>
+ <div id="documentsForm" class="mt-4 d-none form-step">
+    <h4 class="fw-bold mb-3">Required Document</h4>
 
-                <label for="resume" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your resume</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="resume"
-                        name="documents[0][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[0][type]" value="Resume/CV">
-                </label>
-            </div>
+    <!-- Resume/CV -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Resume/CV*</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your resume</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="resume" name="documents[0][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[0][type]" value="Resume/CV">
+        </label>
+    </div>
 
-            <!-- Cover Letter -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Cover Letter*</label>
+    <!-- Cover Letter -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Cover Letter*</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your cover letter</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="cover_letter" name="documents[1][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[1][type]" value="Cover Letter">
+        </label>
+    </div>
 
-                <label for="cover_letter" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your cover letter</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="cover_letter"
-                        name="documents[1][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[1][type]" value="Cover Letter">
-                </label>
-            </div>
+    <!-- Personal Data Sheet -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Personal Data Sheet*</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your Personal Data Sheet</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="personal_data_sheet" name="documents[2][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[2][type]" value="Personal Data Sheet">
+        </label>
+    </div>
 
-            <!-- Personal Data Sheet -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Personal Data Sheet*</label>
+    <!-- Transcript Of Records -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Transcript Of Records*</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your Transcript Of Records</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="TOR" name="documents[3][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[3][type]" value="Transcript Of Records">
+        </label>
+    </div>
 
-                <label for="personal_data_sheet" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your Personal Data Sheet</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="personal_data_sheet"
-                        name="documents[2][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[2][type]" value="Personal Data Sheet">
-                </label>
-            </div>
+    <!-- Diploma, Master's, Doctorate -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Diploma, Master's (if available), Doctorate (if available)</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="diploma" name="documents[4][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[4][type]" value="Diploma">
+        </label>
+    </div>
 
-            <!-- Transcript Of Records -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Transcript Of Records*</label>
+    <!-- PRC License/Board Rating -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">PRC License/Board Rating (if Applicable)</label>
+        <label  class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your PRC License/Board Rating</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="board_rating" name="documents[5][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[5][type]" value="PRC License/Board Rating">
+        </label>
+    </div>
 
-                <label for="TOR" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your Transcript Of Records</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="TOR"
-                        name="documents[3][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[3][type]" value="Transcript Of Records">
-                </label>
-            </div>
+    <!-- Certificate Of Eligibility / Certificate of Passing -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Certificate Of Eligibility / Certificate of Passing (If Applicable)</label>
+        <label  class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Certificate of Passing</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="certification_eligibility" name="documents[6][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[6][type]" value="Certificate Of Eligibility / Certificate of Passing">
+        </label>
+    </div>
 
-            <!-- Diploma, Master's, Doctorate -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Diploma, Master's (if available), Doctorate (if available)</label>
+    <!-- Certifications -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your documents</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="certifications" name="documents[7][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[7][type]" value="Certifications & Supporting Document">
+        </label>
+    </div>
 
-                <label for="diploma" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="diploma"
-                        name="documents[4][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[4][type]" value="Diploma">
-                </label>
-            </div>
+    <!-- Membership/Affiliation -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Membership/affiliation (If Applicable)</label>
+        <label class="upload-area">
+            <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
+            <div class="upload-main-text">Click to upload your documents</div>
+            <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
+            <input type="file" id="membership_affiliation" name="documents[8][file]" accept=".pdf,.doc,.docx" required>
+            <input type="hidden" name="documents[8][type]" value="Membership/Affiliation">
+        </label>
+    </div>
 
-            <!-- PRC License/Board Rating -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">PRC License/Board Rating (if Applicable)</label>
-
-                <label for="board_rating" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your PRC License/Board Rating</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="board_rating"
-                        name="documents[5][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[5][type]" value="PRC License/Board Rating">
-                </label>
-            </div>
-
-            <!-- Certificate Of Eligibility / Cetificate of Passing  -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Certificate Of Eligibility / Cetificate of Passing(If Applicable)</label>
-
-                <label for="certification_eligibility" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your Certificate Of Eligibility / Cetificate of Passing </div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="certification_eligibility"
-                        name="documents[6][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[6][type]" value="certificatCertificate Of Eligibility / Cetificate of Passinge_eligibility">
-                </label>
-            </div>
-
-            <!-- Certifications -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
-
-                <label for="certifications" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your documents</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="certifications"
-                        name="documents[7][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[7][type]" value="Certifications & Supporting Document">
-                </label>
-            </div>
-
-            <!-- Membership/affiliation -->
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Membership/affiliation(If Applicable)</label>
-
-                <label for="membership_affiliation" class="upload-area">
-                    <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-                    <div class="upload-main-text">Click to upload your documents</div>
-                    <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
-                    <input
-                        type="file"
-                        id="membership_affiliation"
-                        name="documents[8][file]"
-                        accept=".pdf,.doc,.docx"
-                        required
-                    >
-                    <input type="hidden" name="documents[8][type]" value="Membership/Affiliation">
-                </label>
-            </div>
+    <div class="d-flex justify-content-between">
+        <button type="button" id="btnBackToExperience" class="btn btn-secondary">Previous</button>
+        <button type="button" id="btnToReview" class="btn btn-primary">Proceed</button>
+    </div>
+</div>
 
 
-                <div class="d-flex justify-content-between">
-                    <button type="button" id="btnBackToExperience" class="btn btn-secondary">Previous</button>
-                    <button type="button" id="btnToReview" class="btn btn-primary">Proceed</button>
-                </div>
-            </div>
+
 
         <!-- Review & Submit Form (to be implemented) -->
     <!-- Review Your Application Form -->
@@ -403,43 +343,146 @@
 
         <!-- Personal Information Summary -->
         <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-            <h5 class="fw-bold text-success">Personal Information</h5>
-            <p>First Name:</strong> <span id="review-first-name"></span></p>
-            <p>Last Name:</strong> <span id="review-last-name"></span></p>
-            <p>Email Address:</strong> <span id="review-email"></span></p>
-            <p>Phone Number:</strong> <span id="review-phone"></span></p>
-            <p>Address:</strong> <span id="review-address"></span></p>
+            <h5 class="text-uppercase text-success">Personal Information</h5>
+
+            <p class="text-uppercase fw-semibold">
+                First Name:
+                <span id="review-first-name" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Last Name:
+                <span id="review-last-name" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Email Address:
+                <span id="review-email" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Phone Number:
+                <span id="review-phone" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Address:
+                <span id="review-address" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
         </div>
+
 
         <!-- Education & Experience Summary -->
         <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-            <h5 class="fw-bold text-success">Education & Experience</h5>
-            <p>Highest Educational Attainment:</strong> <span id="review-education"></span></p>
-            <p>Field of Study:</strong> <span id="review-field-study"></span></p>
-            <p>University:</strong> <span id="uni"></span></p>
-            <p>Address:</strong> <span id="uni_add"></span></p>
-            <p>Year Complete:</strong> <span id="year_com"></span></p>
-            <p>Position</strong> <span id="work_po"></span></p>
-            <p>Employer</strong> <span id="work_em"></span></p>
-            <p>Location</strong> <span id="work_lo"></span></p>
-            <p>Duration</strong> <span id="work_du"></span></p>
-            <p>Years of Relevant Experience:</strong> <span id="review-experience-years"></span></p>
-            <p>Key Skills & Expertise:</strong> <span id="review-key-skills"></span></p>
+            <h5 class="text-uppercase text-success">Education & Experience</h5>
+
+            <p class="text-uppercase fw-semibold">
+                Highest Educational Attainment:
+                <span id="review-education" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Field of Study:
+                <span id="review-field-study" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                University:
+                <span id="uni" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Address:
+                <span id="uni_add" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Year Complete:
+                <span id="year_com" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Position:
+                <span id="work_po" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Employer:
+                <span id="work_em" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Location:
+                <span id="work_lo" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Duration:
+                <span id="work_du" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Years of Relevant Experience:
+                <span id="review-experience-years" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Key Skills & Expertise:
+                <span id="review-key-skills" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
         </div>
+
 
         <!-- Documents Summary -->
         <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-            <h5 class="fw-bold text-success">Documents</h5>
-            <p>Resume/CV:</strong> <span id="review-resume-file"></span></p>
-            <p>Cover Letter:</strong> <span id="review-cover-file"></span></p>
-            <p>Personal Data Sheet:</strong> <span id="personal"></span></p>
-            <p>Transcript Of Records:</strong> <span id="tor"></span></p>
-            <p>Diploma, master's, Doctorate:</strong> <span id="dip"></span></p>
-            <p>PRC License/Board Rating:</strong> <span id="prc"></span></p>
-            <p>Certificate Of Eligibility / Cetificate of Passing:</strong> <span id="passing"></span></p>
-            <p>Certifications:</strong> <span id="review-certs-file"></span></p>
-            <p>Membership/affiliation:</strong> <span id="membership"></span></p>
+            <h5 class="text-uppercase text-success">Documents</h5>
+
+            <p class="text-uppercase fw-semibold">
+                Resume/CV:
+                <span id="review-resume-file" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Cover Letter:
+                <span id="review-cover-file" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Personal Data Sheet:
+                <span id="personal" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Transcript Of Records:
+                <span id="tor" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Diploma, Master's, Doctorate:
+                <span id="dip" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                PRC License / Board Rating:
+                <span id="prc" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Certificate Of Eligibility / Certificate of Passing:
+                <span id="passing" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Certifications:
+                <span id="review-certs-file" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
+
+            <p class="text-uppercase fw-semibold">
+                Membership / Affiliation:
+                <span id="membership" class="d-block text-uppercase text-secondary fw-semibold"></span>
+            </p>
         </div>
+
 
 
 
@@ -473,6 +516,37 @@
         </div>
     </div>
 </main>
+
+<!-- JS for Dynamic File Name Display with Truncation -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInputs = document.querySelectorAll('#documentsForm input[type="file"]');
+
+    fileInputs.forEach(input => {
+        const uploadArea = input.closest('.upload-area');
+        const uploadText = uploadArea.querySelector('.upload-main-text');
+        const uploadSubText = uploadArea.querySelector('.upload-sub-text');
+
+        // ONLY handle change event, DO NOT trigger input.click()
+        input.addEventListener('change', function () {
+            if (this.files && this.files.length > 0) {
+                let fileName = this.files[0].name;
+
+                // truncate long names
+                if (fileName.length > 30) {
+                    const ext = fileName.split('.').pop();
+                    fileName = fileName.substring(0, 25) + '...' + '.' + ext;
+                }
+
+                uploadText.textContent = fileName;
+                uploadSubText.textContent = 'File selected successfully';
+            }
+        });
+    });
+});
+</script>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

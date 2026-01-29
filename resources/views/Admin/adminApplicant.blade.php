@@ -230,13 +230,23 @@
             </div>
           </div>
 
-          <div class="flex gap-2">
-            <button onclick="scheduleInterview()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            Schedule Interview
+          <div class="flex gap-2 items-center">
+            <button 
+              onclick="scheduleInterview()" 
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Schedule Interview
             </button>
 
-
+            <select 
+              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="under_review">Under Review</option>
+              <option value="hired">Hired</option>
+              <option value="rejected">Rejected</option>
+            </select>
           </div>
+
 
         </div>
 

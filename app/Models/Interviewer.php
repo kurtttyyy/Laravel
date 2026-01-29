@@ -21,4 +21,8 @@ class Interviewer extends Model
         'url',
         'notes',
     ];
+
+    public function applicants(){
+        return $this->belongsTo(Applicant::class, 'applicant_id');
+    }
 }

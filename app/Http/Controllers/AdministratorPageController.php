@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Applicant;
 use App\Models\GuestLog;
+use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
 
@@ -87,7 +88,24 @@ class AdministratorPageController extends Controller
     }
 
     public function display_interview(){
-        return view('admin.adminInterview');
+        $interview = Interviewer::with('applicants')->get();
+
+        $count_daily = Interviewer::whereDate('date', today())
+                                    ->whereYear('date', now()->year)
+                                    ->whereTime('time', '<', now())
+                                    ->count();
+        $count_month = Interviewer::whereMonth('date', now()->month)
+                                    ->whereYear('date', now()->year) // IMPORTANT
+                                    ->whereDate('date', '<', today())
+                                    ->count();
+        $count_year = Interviewer::whereYear('date', now()->year)
+                                    ->count();
+        $count_upcoming = Interviewer::whereDate('date', today())
+                                    ->whereYear('date', now()->year)
+                                    ->whereTime('time', '>', now())
+                                    ->count();
+        return view('admin.adminInterview', compact('interview','count_daily','count_month',
+                                                    'count_year','count_upcoming'));
     }
 
     public function display_meeting(){

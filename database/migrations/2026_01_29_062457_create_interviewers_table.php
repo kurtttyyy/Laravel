@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('email_link');
             $table->string('url')->nullable();
             $table->text('notes')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('applicant_id')->references('id')->on('applicants')->onDelete('cascade');

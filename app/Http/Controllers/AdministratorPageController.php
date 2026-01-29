@@ -91,17 +91,16 @@ class AdministratorPageController extends Controller
         $interview = Interviewer::with('applicants')->get();
 
         $count_daily = Interviewer::whereDate('date', today())
-                                    ->whereYear('date', now()->year)
                                     ->whereTime('time', '<', now())
                                     ->count();
         $count_month = Interviewer::whereMonth('date', now()->month)
-                                    ->whereYear('date', now()->year) // IMPORTANT
+                                    ->whereYear('date', now()->year)
                                     ->whereDate('date', '<', today())
                                     ->count();
         $count_year = Interviewer::whereYear('date', now()->year)
+                                    ->whereDate('date', '<', today())
                                     ->count();
         $count_upcoming = Interviewer::whereDate('date', today())
-                                    ->whereYear('date', now()->year)
                                     ->whereTime('time', '>', now())
                                     ->count();
         return view('admin.adminInterview', compact('interview','count_daily','count_month',

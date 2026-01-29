@@ -113,7 +113,7 @@
 
                         <div class="mt-3 flex gap-3">
                             <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">
-                                Join Meeting
+                                Reschedule
                             </button>
                             <button class="border px-4 py-2 rounded-lg text-sm">
                                 View Details
@@ -143,7 +143,7 @@
                         </p>
 
                         <div class="mt-3 flex gap-3">
-                            <button class="bg-slate-100 px-4 py-2 rounded-lg text-sm">
+                            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">
                                 Reschedule
                             </button>
                             <button class="border px-4 py-2 rounded-lg text-sm">

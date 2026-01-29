@@ -72,5 +72,6 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/store/new/position', 'store_new_position')->name('admin.createPositionStore');
     Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
     Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
+    Route::post('system/store/interview', 'store_interview')->name('admin.storeNewInterview');
 });
 

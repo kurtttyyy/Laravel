@@ -123,6 +123,8 @@
             <tbody class="divide-y">
             @foreach($applicant as $app)
             <!-- Row -->
+             <input type="hidden" id="applicant_id" name="applicant_id" value="{{$app->id}}">
+
             <tr class="hover:bg-slate-50">
                 <td class="py-4 flex items-center gap-3">
                     <div class="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center">SM</div>
@@ -229,7 +231,7 @@
           </div>
 
           <div class="flex gap-2">
-            <button onclick="openScheduleModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            <button onclick="scheduleInterview()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
             Schedule Interview
             </button>
 
@@ -353,22 +355,22 @@
       <div class="flex items-center gap-4 bg-purple-50 p-4 rounded-lg">
         <div class="w-12 h-12 bg-blue-400 text-white rounded-full flex items-center justify-center font-bold">SM</div>
         <div>
-          <p class="font-medium text-gray-800">Sarah Mitchell</p>
-          <p class="text-sm text-gray-500">Senior Frontend Developer</p>
+          <p class="font-medium text-gray-800" id ="names"></p>
+          <p class="text-sm text-gray-500" id ="titles"></p>
         </div>
       </div>
 
       <!-- Form -->
-      <form class="space-y-4">
-
+      <form class="space-y-4" action = "{{ route('admin.storeNewInterview') }}" method="POST">
+        @csrf
         <!-- Interview Type -->
+         <input type="hidden" id="applicants_id" name="applicants_id">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
-            <option>Phone Screening</option>
-            <option>Technical Interview</option>
-            <option>HR Interview</option>
-            <option>Final Interview</option>
+          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name = "interview_type">
+            <option value="HR Interview">HR Interview</option>
+            <option value="Final Interview">Final Interview</option>
           </select>
         </div>
 
@@ -376,47 +378,54 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            name="date">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <input type="time" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+            <input type="time" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            name="time">
           </div>
         </div>
 
         <!-- Duration -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
-            <option>30 minutes</option>
-            <option>45 minutes</option>
-            <option>60 minutes</option>
-            <option>90 minutes</option>
+          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="duration">
+            <option value="30 minutes">30 minutes</option>
+            <option value="40 minutes">45 minutes</option>
+            <option value="60 minutes">60 minutes</option>
+            <option value="90 minutes">90 minutes</option>
           </select>
         </div>
 
         <!-- Interviewers -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Interviewer(s)</label>
-          <input type="text" placeholder="Enter interviewer name(s)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="text" placeholder="Enter interviewer name(s)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="interviewers">
         </div>
 
         <!-- Email Link -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email Link</label>
-          <input type="url" placeholder="Enter Email Address: " class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="url" placeholder="Enter Email Address: " class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="email_link">
         </div>
 
         <!-- Meeting Link -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Meeting Link (Optional)</label>
-          <input type="url" placeholder="https://meet.google.com/..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="url" placeholder="https://meet.google.com/..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="url">
         </div>
 
         <!-- Notes -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-          <textarea placeholder="Add any additional notes or instructions..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 h-24 resize-none"></textarea>
+          <textarea placeholder="Add any additional notes or instructions..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 h-24 resize-none"
+          name="notes"></textarea>
         </div>
 
         <!-- Buttons -->
@@ -441,9 +450,45 @@
 </body>
 <script>
   // Open/Close Schedule Interview Modal
-  function openScheduleModal() {
+  function openScheduleModal(appId) {
+
+    if (!appId) {
+        alert('No applicant selected');
+        return;
+    }
+    document.getElementById('applicants_id').innerText = appId;
+    fetch(`/system/applicants/ID/${appId}`)
+        .then(res => res.json())
+        .then(data => {
+        // Basic applicant info
+        document.getElementById('names').innerText = data.name;
+        document.getElementById('titles').innerText = data.title;
+        });
+
     document.getElementById('scheduleInterviewModal').classList.remove('hidden');
   }
+
+  function scheduleInterview() {
+    const appId = document.getElementById('applicant_id').value;
+
+    if (!appId) {
+        alert('Please select an applicant first.');
+        return;
+    }
+    document.getElementById('applicants_id').innerText = appId;
+
+    fetch(`/system/applicants/ID/${appId}`)
+        .then(res => res.json())
+        .then(data => {
+        // Basic applicant info
+        document.getElementById('names').innerText = data.name;
+        document.getElementById('titles').innerText = data.title;
+        });
+
+    document.getElementById('scheduleInterviewModal').classList.remove('hidden');
+    }
+
+
   function closeScheduleModal() {
     document.getElementById('scheduleInterviewModal').classList.add('hidden');
   }

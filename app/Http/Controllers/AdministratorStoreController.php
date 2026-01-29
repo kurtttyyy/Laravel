@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -126,7 +127,7 @@ class AdministratorStoreController extends Controller
             'notes' => 'nullable',
         ]);
 
-        $store = OpenPosition::create([
+        $store = Interviewer::create([
             'applicant_id' => $attrs['applicants_id'],
             'interview_type' => $attrs['interview_type'],
             'date' => $attrs['date'],

@@ -51,6 +51,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');
 
     Route::get('system/applicant', 'display_applicant')->name('admin.adminApplicant');
+    Route::get('system/applicants/ID/{id}', 'display_applicant_ID');
     Route::get('system/edit/position/{id}', 'display_edit_position')->name('admin.adminEditPosition');
     Route::get('system/interview', 'display_interview')->name('admin.adminInterview');
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');

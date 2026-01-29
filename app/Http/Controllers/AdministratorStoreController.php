@@ -112,4 +112,32 @@ class AdministratorStoreController extends Controller
         return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
 
     }
+
+    public function store_interview(Request $request){
+        $attrs = $request->validate([
+            'applicants_id' => 'required',
+            'interview_type' => 'required',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i:s',
+            'duration' => 'required',
+            'interviewers' => 'required',
+            'email_link' => 'required',
+            'url' => 'required',
+            'notes' => 'required',
+        ]);
+
+        $store = OpenPosition::create([
+            'applicant_id' => $attrs['applicants_id'],
+            'interview_type' => $attrs['interview_type'],
+            'date' => $attrs['date'],
+            'time' => $attrs['time'],
+            'duration' => $attrs['duration'],
+            'interviewers' => $attrs['interviewers'],
+            'email_link' => $attrs['email_link'],
+            'url' => $attrs['url'],
+            'notes' => $attrs['notes'],
+        ]);
+
+        return redirect()->back()->with('success','Success Added Interview');
+    }
 }

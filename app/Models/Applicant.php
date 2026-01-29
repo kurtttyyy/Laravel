@@ -37,7 +37,7 @@ class Applicant extends Model
         return $this->belongsTo(User::class, 'user_id'); // Adjust 'user_id' if your column name differs
     }
 
-    public function applicants(){
-        return $this->belongsTo(ApplicantDocument::class, 'applicant_id', 'id');
+    public function documents(){
+        return $this->hasMany(ApplicantDocument::class, 'applicant_id', 'id');
     }
 }

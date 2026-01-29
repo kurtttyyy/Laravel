@@ -48,6 +48,39 @@ class AdministratorPageController extends Controller
                                             ,'count_final_interview'));
     }
 
+    public function display_applicant_ID($id){
+        $app = Applicant::with(
+            'documents:id,filename,applicant_id'
+            )->findOrFail($id);
+
+        return response()->json([
+            'id' => $app->id,
+            'name' => $app->first_name.' '.$app->last_name,
+            'email' => $app->email,
+            'title' => $app->applied_position,
+            'status' => $app->application_status,
+            'location' => $app->address,
+            'one' => $app->created_at->format('F d, Y'),
+            'passionate' => $app->passionate,
+            'work_position' => $app->work_position,
+            'work_employer' => $app->work_employer,
+            'work_location' => $app->work_location,
+            'work_duration' => $app->work_duration,
+            'university_name' => $app->university_name,
+            'university_address' => $app->university_address,
+            'university_year' => $app->year_complete,
+            'skills' => $app->skills_n_expertise,
+            'number' => $app->phone,
+            'documents' => $app->documents->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'name' => $doc->filename,
+                    'type' => $doc->type,
+                ];
+            }),
+        ]);
+    }
+
     public function display_edit_position($id){
         $open = OpenPosition::findOrFail($id);
         return view('admin.adminEditPosition', compact('open'));

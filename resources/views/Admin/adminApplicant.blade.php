@@ -38,7 +38,7 @@
         <!-- Card -->
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">{{ $count_applicant }}</p>
+                <p class="text-3xl font-bold text-gray-900">{{$count_applicant}}</p>
                 <p class="text-sm text-gray-500">Total Applicants</p>
             </div>
             <div class="text-right">
@@ -51,7 +51,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">{{ $count_under_review }}</p>
+                <p class="text-3xl font-bold text-gray-900">{{$count_under_review}}</p>
                 <p class="text-sm text-gray-500">Under Review</p>
             </div>
             <div class="text-right">
@@ -64,7 +64,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">{{ $count_final_interview }}</p>
+                <p class="text-3xl font-bold text-gray-900">{{$count_final_interview}}</p>
                 <p class="text-sm text-gray-500">Interviews Scheduled</p>
             </div>
             <div class="text-right">
@@ -77,7 +77,7 @@
 
         <div class="bg-white rounded-xl p-5 shadow-sm flex justify-between items-center">
             <div>
-                <p class="text-3xl font-bold text-gray-900">{{ $hired }}</p>
+                <p class="text-3xl font-bold text-gray-900">{{$hired}}</p>
                 <p class="text-sm text-gray-500">Hired This Month</p>
             </div>
             <div class="text-right">
@@ -121,10 +121,11 @@
             </thead>
 
             <tbody class="divide-y">
-
+            @foreach($applicant as $app)
             <!-- Row -->
+             <input type="hidden" id="applicant_id" name="applicant_id" value="{{$app->id}}">
+
             <tr class="hover:bg-slate-50">
-                @foreach($applicant as $app)
                 <td class="py-4 flex items-center gap-3">
                     <div class="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center">SM</div>
                     <div>
@@ -136,23 +137,22 @@
                     <p class="font-medium">{{$app->applied_position}}</p>
                     <p class="text-xs text-gray-400">{{$app->collage_name}}</p>
                 </td>
-                <td>{{$app->created_at->format('F d, Y') }}</td>
-                <td><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">Interview</span></td>
+                <td>{{$app->created_at->format('F d, Y')}}</td>
+                <td><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">{{$app->application_status}}</span></td>
                 <td class="text-yellow-400">
                     ★★★★★
                 </td>
               <td class="text-gray-400 space-x-3">
                 <!-- 👁 OPEN MODAL -->
                 <i class="fa-regular fa-eye cursor-pointer hover:text-indigo-600"
-                   onclick="openApplicantModal()"></i>
+                   onclick="openApplicantModal({{ $app->id }})"></i>
                 <i class="fa-regular fa-calendar cursor-pointer hover:text-indigo-600"
-                onclick="openScheduleModal()"></i>
+                onclick="openScheduleModal({{ $app->id }})"></i>
 
                 <i class="fa-solid fa-xmark cursor-pointer"></i>
               </td>
-              @endforeach
             </tr>
-
+            @endforeach
             </tbody>
         </table>
 
@@ -198,61 +198,47 @@
       <div class="col-span-2 space-y-6">
 
         <!-- Profile Header -->
-<div class="flex items-start gap-4">
+        <div class="flex items-start gap-4">
 
-  <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600
-              text-white flex items-center justify-center text-xl font-bold">
-    SM
-  </div>
+          <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600
+                      text-white flex items-center justify-center text-xl font-bold">
+            SM
+          </div>
 
-  <div class="flex-1">
-    <h3 class="text-xl font-semibold">Sarah Mitchell</h3>
-    <p class="text-sm text-gray-400">sarah.m@email.com</p>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold" id="name"></h3>
+            <p class="text-sm text-gray-400" id="email"></p>
 
-    <div class="flex flex-wrap gap-2 mt-2">
-      <span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">
-        Senior Frontend Developer
-      </span>
-      <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-500">
-        Interview
-      </span>
-    </div>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600" id="title">
 
-    <div class="flex gap-4 mt-2 text-sm text-gray-400">
-      <span>
-        <i class="fa-regular fa-calendar mr-1"></i>
-        Applied: Jan 15, 2024
-      </span>
-      <span>
-        <i class="fa-solid fa-location-dot mr-1"></i>
-        San Francisco, CA
-      </span>
-    </div>
-  </div>
+              </span>
+              <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-500" id="status">
 
-  <!-- ACTIONS -->
-  <div class="flex flex-col gap-2">
-    <button
-      onclick="openScheduleModal()"
-      class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-    >
-      Schedule Interview
-    </button>
+              </span>
+            </div>
 
-    <!-- STATUS SELECT -->
-    <select
-      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-    >
-      <option>Under Review</option>
-      <option>Initial Interview</option>
-      <option>Final Interview</option>
-      <option>Hired</option>
-      <option class="text-red-600">Rejected</option>
-    </select>
-  </div>
+            <div class="flex gap-4 mt-2 text-sm text-gray-400">
+              <span>
+                <i class="fa-regular fa-calendar mr-1"></i>
+                Applied: <p id="one"></p>
+              </span>
+              <span>
+                <i class="fa-solid fa-location-dot mr-1"></i>
+                <p id="location"></p>
+              </span>
+            </div>
+          </div>
 
-</div>
+          <div class="flex gap-2">
+            <button onclick="scheduleInterview()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            Schedule Interview
+            </button>
 
+
+          </div>
+
+        </div>
 
         <!-- Professional Summary -->
         <div class="bg-slate-50 rounded-xl p-5">
@@ -260,10 +246,8 @@
             <i class="fa-regular fa-user text-indigo-500"></i>
             Professional Summary
           </h4>
-          <p class="text-sm text-gray-600 leading-relaxed">
-            Experienced frontend developer with 7+ years building scalable web applications.
-            Specialized in React, TypeScript, and modern web technologies.
-            Led teams of 5+ developers and delivered 20+ successful projects for Fortune 500 companies.
+          <p class="text-sm text-gray-600 leading-relaxed" id="passionate">
+
           </p>
         </div>
 
@@ -279,24 +263,10 @@
               <i class="fa-solid fa-code text-indigo-600"></i>
             </div>
             <div>
-              <p class="font-medium">Senior Frontend Developer</p>
-              <p class="text-sm text-gray-400">TechStart Inc • 2020 – Present</p>
+              <p class="font-medium" id="work_info"></p>
               <p class="text-sm text-gray-600 mt-1">
                 Led development of customer portal serving 100K+ users.
                 Reduced development time by 40%.
-              </p>
-            </div>
-          </div>
-
-          <div class="flex gap-4">
-            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-              <i class="fa-solid fa-laptop-code text-green-600"></i>
-            </div>
-            <div>
-              <p class="font-medium">Frontend Developer</p>
-              <p class="text-sm text-gray-400">Digital Solutions • 2017 – 2020</p>
-              <p class="text-sm text-gray-600 mt-1">
-                Built responsive applications using React and modern JavaScript frameworks.
               </p>
             </div>
           </div>
@@ -308,9 +278,7 @@
             <i class="fa-solid fa-graduation-cap text-indigo-500"></i>
             Education
           </h4>
-          <p class="font-medium">BS in Computer Science</p>
-          <p class="text-sm text-gray-400">Stanford University • 2013 – 2017</p>
-          <p class="text-sm text-gray-500">GPA: 3.8 / 4.0</p>
+          <p class="font-medium" id="university_info"></p>
         </div>
 
       </div>
@@ -322,14 +290,7 @@
         <div class="bg-white border rounded-xl p-5">
           <h4 class="font-semibold mb-3">Skills</h4>
           <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">React</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">TypeScript</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">JavaScript</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">Next.js</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">Tailwind CSS</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">Git</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">REST APIs</span>
-            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600">GraphQL</span>
+            <span class="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600" id="skills"></span>
           </div>
         </div>
 
@@ -337,16 +298,10 @@
         <div class="bg-white border rounded-xl p-5 space-y-2">
           <h4 class="font-semibold mb-2">Contact Information</h4>
           <p class="text-sm text-gray-600">
-            <i class="fa-regular fa-envelope mr-2"></i> sarah.m@email.com
+            <i class="fa-regular fa-envelope mr-2"></i> <p id="contact_email"></p>
           </p>
           <p class="text-sm text-gray-600">
-            <i class="fa-solid fa-phone mr-2"></i> +1 (555) 123-4567
-          </p>
-          <p class="text-sm text-indigo-600">
-            <i class="fa-brands fa-linkedin mr-2"></i> linkedin.com/in/sarahmitchell
-          </p>
-          <p class="text-sm text-gray-600">
-            <i class="fa-brands fa-github mr-2"></i> github.com/sarahmitchell
+            <i class="fa-solid fa-phone mr-2"></i> <p id="number"></p>
           </p>
         </div>
 
@@ -354,102 +309,25 @@
         <div class="bg-white border rounded-xl p-5">
           <h4 class="font-semibold mb-3">Documents</h4>
 
-          <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center">
-                <i class="fa-regular fa-file-pdf text-red-600"></i>
-              </div>
-              <div>
-                <p class="text-sm font-medium">Resume.pdf</p>
-                <p class="text-xs text-gray-400">245 KB</p>
-              </div>
-            </div>
-            <i class="fa-solid fa-download text-gray-400 cursor-pointer"></i>
-          </div>
-
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
-                <i class="fa-regular fa-file text-blue-600"></i>
-              </div>
-              <div>
-                <p class="text-sm font-medium">Cover_Letter.pdf</p>
-                <p class="text-xs text-gray-400">128 KB</p>
-              </div>
-            </div>
-            <i class="fa-solid fa-download text-gray-400 cursor-pointer"></i>
-          </div>
-
+          <div id="documents" class="space-y-3"></div>
         </div>
 
-<!-- Rating Container (Clickable) -->
-<div
-  onclick="openRatingModal()"
-  class="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm mt-4
-         cursor-pointer hover:border-indigo-500 transition"
->
-  <div>
-    <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
-
-    <div class="text-yellow-400 flex gap-1 text-lg mt-1">
-      <i class="fa-solid fa-star"></i>
-      <i class="fa-solid fa-star"></i>
-      <i class="fa-solid fa-star"></i>
-      <i class="fa-solid fa-star-half-stroke"></i>
-      <i class="fa-regular fa-star"></i>
-    </div>
-  </div>
-
-  <div class="text-sm text-gray-500 font-medium">
-    3.5 / 5
-  </div>
-</div>
-
-
-<!-- Rating Modal -->
-<div
-  id="ratingModal"
-  class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
->
-  <div class="bg-white rounded-xl p-6 w-80 shadow-lg relative">
-
-    <!-- Close (X) -->
-    <button
-      onclick="closeRatingModal()"
-      class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-    >
-      <i class="fa-solid fa-xmark text-lg"></i>
-    </button>
-
-    <h3 class="text-lg font-semibold mb-4 text-center">
-      Rate Applicant
-    </h3>
-
-    <!-- Stars -->
-<!-- Stars -->
-<div id="ratingStars" class="flex justify-center gap-2 text-2xl mb-6">
-  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(1)"></i>
-  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(2)"></i>
-  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(3)"></i>
-  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(4)"></i>
-  <i class="fa-regular fa-star cursor-pointer text-gray-400" onclick="setRating(5)"></i>
-</div>
-
-
-    <!-- Save Button (Centered) -->
-    <div class="flex justify-center">
-      <button
-        onclick="saveRating()"
-        class="px-6 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-      >
-        Save Rating
-      </button>
-    </div>
-
-  </div>
-</div>
-
-
+        <!-- Rating Container -->
+        <div class="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm mt-4">
+        <div>
+            <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
+            <div class="text-yellow-400 flex gap-1 text-lg mt-1">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star-half-stroke"></i>
+            <i class="fa-regular fa-star"></i>
+            </div>
+        </div>
+        <div class="text-sm text-gray-500 font-medium">
+            3.5 / 5
+        </div>
+        </div>
 
 
       </div>
@@ -477,22 +355,22 @@
       <div class="flex items-center gap-4 bg-purple-50 p-4 rounded-lg">
         <div class="w-12 h-12 bg-blue-400 text-white rounded-full flex items-center justify-center font-bold">SM</div>
         <div>
-          <p class="font-medium text-gray-800">Sarah Mitchell</p>
-          <p class="text-sm text-gray-500">Senior Frontend Developer</p>
+          <p class="font-medium text-gray-800" id ="names"></p>
+          <p class="text-sm text-gray-500" id ="titles"></p>
         </div>
       </div>
 
       <!-- Form -->
-      <form class="space-y-4">
-
+      <form class="space-y-4" action = "{{ route('admin.storeNewInterview') }}" method="POST">
+        @csrf
         <!-- Interview Type -->
+         <input type="hidden" id="applicants_id" name="applicants_id">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
-            <option>Phone Screening</option>
-            <option>Technical Interview</option>
-            <option>HR Interview</option>
-            <option>Final Interview</option>
+          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name = "interview_type">
+            <option value="HR Interview">HR Interview</option>
+            <option value="Final Interview">Final Interview</option>
           </select>
         </div>
 
@@ -500,47 +378,54 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+            <input type="date" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            name="date">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <input type="time" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+            <input type="time" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            name="time">
           </div>
         </div>
 
         <!-- Duration -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
-            <option>30 minutes</option>
-            <option>45 minutes</option>
-            <option>60 minutes</option>
-            <option>90 minutes</option>
+          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="duration">
+            <option value="30 minutes">30 minutes</option>
+            <option value="40 minutes">45 minutes</option>
+            <option value="60 minutes">60 minutes</option>
+            <option value="90 minutes">90 minutes</option>
           </select>
         </div>
 
         <!-- Interviewers -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Interviewer(s)</label>
-          <input type="text" placeholder="Enter interviewer name(s)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="text" placeholder="Enter interviewer name(s)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="interviewers">
         </div>
 
         <!-- Email Link -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email Link</label>
-          <input type="url" placeholder="Enter Email Address: " class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="url" placeholder="Enter Email Address: " class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="email_link">
         </div>
 
         <!-- Meeting Link -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Meeting Link (Optional)</label>
-          <input type="url" placeholder="https://meet.google.com/..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+          <input type="url" placeholder="https://meet.google.com/..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+          name="url">
         </div>
 
         <!-- Notes -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-          <textarea placeholder="Add any additional notes or instructions..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 h-24 resize-none"></textarea>
+          <textarea placeholder="Add any additional notes or instructions..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 h-24 resize-none"
+          name="notes"></textarea>
         </div>
 
         <!-- Buttons -->
@@ -563,72 +448,123 @@
 
 
 </body>
-
-<script>
-  let selectedRating = 0;
-
-  function openRatingModal() {
-    const modal = document.getElementById('ratingModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-
-  function closeRatingModal() {
-    const modal = document.getElementById('ratingModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-
-function setRating(rating) {
-  selectedRating = rating;
-
-  const stars = document.querySelectorAll('#ratingStars i');
-
-  stars.forEach((star, index) => {
-    if (index < rating) {
-      star.classList.remove('fa-regular', 'text-gray-400');
-      star.classList.add('fa-solid', 'text-yellow-400');
-    } else {
-      star.classList.remove('fa-solid', 'text-yellow-400');
-      star.classList.add('fa-regular', 'text-gray-400');
-    }
-  });
-}
-
-
-  function saveRating() {
-    console.log('Saved rating:', selectedRating);
-    closeRatingModal();
-  }
-</script>
-
 <script>
   // Open/Close Schedule Interview Modal
-  function openScheduleModal() {
+  function openScheduleModal(appId) {
+
+    if (!appId) {
+        alert('No applicant selected');
+        return;
+    }
+    document.getElementById('applicants_id').innerText = appId;
+    fetch(`/system/applicants/ID/${appId}`)
+        .then(res => res.json())
+        .then(data => {
+        // Basic applicant info
+        document.getElementById('names').innerText = data.name;
+        document.getElementById('titles').innerText = data.title;
+        });
+
     document.getElementById('scheduleInterviewModal').classList.remove('hidden');
   }
+
+  function scheduleInterview() {
+    const appId = document.getElementById('applicant_id').value;
+
+    if (!appId) {
+        alert('Please select an applicant first.');
+        return;
+    }
+    document.getElementById('applicants_id').innerText = appId;
+
+    fetch(`/system/applicants/ID/${appId}`)
+        .then(res => res.json())
+        .then(data => {
+        // Basic applicant info
+        document.getElementById('names').innerText = data.name;
+        document.getElementById('titles').innerText = data.title;
+        });
+
+    document.getElementById('scheduleInterviewModal').classList.remove('hidden');
+    }
+
+
   function closeScheduleModal() {
     document.getElementById('scheduleInterviewModal').classList.add('hidden');
   }
 
   // Open/Close Applicant Modal (existing)
-  function openApplicantModal() {
-    document.getElementById('applicantModal').classList.remove('hidden');
-  }
+  function openApplicantModal(applicantId) {
+    fetch(`/system/applicants/ID/${applicantId}`)
+        .then(res => res.json())
+        .then(data => {
+        // Basic applicant info
+        document.getElementById('name').innerText = data.name;
+        document.getElementById('email').innerText = data.email;
+        document.getElementById('contact_email').innerText = data.email;
+        document.getElementById('title').innerText = data.title;
+        document.getElementById('status').innerText = data.status;
+        document.getElementById('location').innerText = data.location;
+        document.getElementById('one').innerText = data.one;
+        document.getElementById('passionate').innerText = data.passionate;
+        document.getElementById('skills').innerText = data.skills;
+        document.getElementById('number').innerText = data.number;
+
+        const workInfo = [
+            data.work_position,
+            data.work_employer,
+            data.work_location,
+            data.work_duration
+        ].filter(Boolean).join(' • ');
+
+        const universityInfo = [
+            data.university_name,
+            data.university_address,
+            data.university_year
+        ].filter(Boolean).join(' • ');
+
+        document.getElementById('work_info').innerText = workInfo;
+        document.getElementById('university_info').innerText = universityInfo;
+        // ✅ Documents
+        const docsContainer = document.getElementById('documents');
+        docsContainer.innerHTML = '';
+
+        if (data.documents && data.documents.length > 0) {
+            data.documents.forEach(doc => {
+            docsContainer.innerHTML += `
+                <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <i class="fa-regular fa-file text-blue-600"></i>
+                    </div>
+
+                    <div>
+                    <p class="text-sm font-medium">${doc.name}</p>
+                    <p class="text-xs text-gray-400">${doc.type ?? ''}</p>
+                    </div>
+                </div>
+
+                <a href="${doc.url}" target="_blank"
+                    class="fa-solid fa-download text-gray-400 hover:text-indigo-600 cursor-pointer"></a>
+                </div>
+            `;
+            });
+        } else {
+            docsContainer.innerHTML = `
+            <p class="text-sm text-gray-400">No documents uploaded</p>
+            `;
+        }
+
+        // Open modal LAST
+        document.getElementById('applicantModal').classList.remove('hidden');
+        });
+    }
+
+
   function closeApplicantModal() {
     document.getElementById('applicantModal').classList.add('hidden');
   }
 </script>
 
-
-<script>
-  function openApplicantModal() {
-    document.getElementById('applicantModal').classList.remove('hidden');
-  }
-
-  function closeApplicantModal() {
-    document.getElementById('applicantModal').classList.add('hidden');
-  }
-</script>
 
 </html>

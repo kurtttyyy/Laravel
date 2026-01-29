@@ -401,6 +401,12 @@
           <input type="text" placeholder="Enter interviewer name(s)" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
         </div>
 
+        <!-- Email Link -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email Link</label>
+          <input type="url" placeholder="Enter Email Address: " class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500">
+        </div>
+
         <!-- Meeting Link -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Meeting Link (Optional)</label>

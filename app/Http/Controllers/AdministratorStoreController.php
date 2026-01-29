@@ -120,7 +120,7 @@ class AdministratorStoreController extends Controller
             'applicants_id' => 'required',
             'interview_type' => 'required',
             'date' => 'required|date',
-            'time' => 'required|date_format:H:i:s',
+            'time' => 'required|date_format:H:i',
             'duration' => 'required',
             'interviewers' => 'required',
             'email_link' => 'required',

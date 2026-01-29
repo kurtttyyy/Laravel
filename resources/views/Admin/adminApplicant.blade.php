@@ -456,7 +456,7 @@
         alert('No applicant selected');
         return;
     }
-    document.getElementById('applicants_id').innerText = appId;
+    document.getElementById('applicants_id').value = appId;
     fetch(`/system/applicants/ID/${appId}`)
         .then(res => res.json())
         .then(data => {
@@ -475,7 +475,7 @@
         alert('Please select an applicant first.');
         return;
     }
-    document.getElementById('applicants_id').innerText = appId;
+    document.getElementById('applicants_id').value = appId;
 
     fetch(`/system/applicants/ID/${appId}`)
         .then(res => res.json())

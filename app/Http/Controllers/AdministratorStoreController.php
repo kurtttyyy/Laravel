@@ -115,6 +115,7 @@ class AdministratorStoreController extends Controller
     }
 
     public function store_interview(Request $request){
+        Log::info($request);
         $attrs = $request->validate([
             'applicants_id' => 'required',
             'interview_type' => 'required',

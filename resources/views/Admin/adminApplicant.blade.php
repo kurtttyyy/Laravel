@@ -394,7 +394,7 @@
           <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
           name="duration">
             <option value="30 minutes">30 minutes</option>
-            <option value="40 minutes">45 minutes</option>
+            <option value="45 minutes">45 minutes</option>
             <option value="60 minutes">60 minutes</option>
             <option value="90 minutes">90 minutes</option>
           </select>

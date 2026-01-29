@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('duration');
             $table->string('interviewers');
             $table->string('email_link');
-            $table->string('url');
-            $table->text('notes');
+            $table->string('url')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->foreign('applicant_id')->references('id')->on('applicants')->onDelete('cascade');

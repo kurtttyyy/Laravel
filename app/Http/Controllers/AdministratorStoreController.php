@@ -122,8 +122,8 @@ class AdministratorStoreController extends Controller
             'duration' => 'required',
             'interviewers' => 'required',
             'email_link' => 'required',
-            'url' => 'required',
-            'notes' => 'required',
+            'url' => 'nullable',
+            'notes' => 'nullable',
         ]);
 
         $store = OpenPosition::create([

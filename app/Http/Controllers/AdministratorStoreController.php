@@ -168,7 +168,7 @@ class AdministratorStoreController extends Controller
         $review = Applicant::findOrFail($attrs['ratingId']);
 
         $review->update([
-            'application_status' => $attrs['status'],
+            'starRatings' => $attrs['rating'],
         ]);
 
         return redirect()->back()->with('success','Success Rating Store');

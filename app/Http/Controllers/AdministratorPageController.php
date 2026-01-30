@@ -127,8 +127,8 @@ class AdministratorPageController extends Controller
 
     public function display_show_position($id){
         $open = OpenPosition::findOrFail($id);
-        $titles = OpenPosition::pluck('title');
-        $countApplication = Applicant::whereIn('applied_position', $titles)->count();
+        $titles = OpenPosition::pluck('id');
+        $countApplication = Applicant::whereIn('open_position_id', $titles)->count();
         return view('admin.adminShowPosition', compact('open','countApplication'));
     }
 

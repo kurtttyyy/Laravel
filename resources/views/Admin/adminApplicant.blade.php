@@ -254,6 +254,8 @@
                 <option value="Under Review">Under Review</option>
                 <option value="Hired">Hired</option>
                 <option value="Rejected">Rejected</option>
+                <option value="Passing Document">Passing Document</option>
+                <option value="Completed">Completed</option>
                 </select>
             </form>
           </div>

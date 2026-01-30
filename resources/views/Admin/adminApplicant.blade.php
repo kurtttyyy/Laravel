@@ -140,7 +140,13 @@
                 <td>{{$app->created_at->format('F d, Y')}}</td>
                 <td><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">{{$app->application_status}}</span></td>
                 <td class="text-yellow-400">
-                    ★★★★★
+                    @for ($i = 0; $i < 5; $i++)
+                        @if ($i < $app->starRatings)
+                            <span class="text-yellow-400">&#9733;</span>
+                        @else
+                            <span class="text-gray-300">&#9733;</span>
+                        @endif
+                    @endfor
                 </td>
               <td class="text-gray-400 space-x-3">
                 <!-- 👁 OPEN MODAL -->

@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <p class="text-sm text-slate-400 mb-4">TODAY – JANUARY 15, 2024</p>
+            <p class="text-sm text-slate-400 mb-4">TODAY – {{ now()->format('F j, Y') }}</p>
 
             <!-- CARD 1 -->
             <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between">

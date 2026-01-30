@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Log;
 
 class AdministratorStoreController extends Controller
 {
+
+    //STORE
     public function store_new_position(Request $request){
         Log::info($request);
         $attrs = $request->validate([
@@ -57,6 +59,51 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Position');
     }
 
+    public function store_interview(Request $request){
+        Log::info($request);
+        $attrs = $request->validate([
+            'applicants_id' => 'required',
+            'interview_type' => 'required',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i',
+            'duration' => 'required',
+            'interviewers' => 'required',
+            'email_link' => 'required',
+            'url' => 'nullable',
+            'notes' => 'nullable',
+        ]);
+
+        $store = Interviewer::create([
+            'applicant_id' => $attrs['applicants_id'],
+            'interview_type' => $attrs['interview_type'],
+            'date' => $attrs['date'],
+            'time' => $attrs['time'],
+            'duration' => $attrs['duration'],
+            'interviewers' => $attrs['interviewers'],
+            'email_link' => $attrs['email_link'],
+            'url' => $attrs['url'],
+            'notes' => $attrs['notes'],
+        ]);
+
+        return redirect()->back()->with('success','Success Added Interview');
+    }
+
+    public function store_star_ratings(Request $request){
+        $attrs = $request->validate([
+            'ratingId' => 'required',
+            'rating' => 'required|string',
+        ]);
+
+        $review = Applicant::findOrFail($attrs['ratingId']);
+
+        $review->update([
+            'starRatings' => $attrs['rating'],
+        ]);
+
+        return redirect()->back()->with('success','Success Rating Store');
+    }
+
+    //UPDATE
     public function update_position(Request $request, $id){
         Log::info($request);
         $attrs = $request->validate([
@@ -106,44 +153,6 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Position');
     }
 
-    public function destroy_position($id){
-        $delete = OpenPosition::findOrFail($id);
-
-        $delete->delete();
-
-        return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
-
-    }
-
-    public function store_interview(Request $request){
-        Log::info($request);
-        $attrs = $request->validate([
-            'applicants_id' => 'required',
-            'interview_type' => 'required',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
-            'duration' => 'required',
-            'interviewers' => 'required',
-            'email_link' => 'required',
-            'url' => 'nullable',
-            'notes' => 'nullable',
-        ]);
-
-        $store = Interviewer::create([
-            'applicant_id' => $attrs['applicants_id'],
-            'interview_type' => $attrs['interview_type'],
-            'date' => $attrs['date'],
-            'time' => $attrs['time'],
-            'duration' => $attrs['duration'],
-            'interviewers' => $attrs['interviewers'],
-            'email_link' => $attrs['email_link'],
-            'url' => $attrs['url'],
-            'notes' => $attrs['notes'],
-        ]);
-
-        return redirect()->back()->with('success','Success Added Interview');
-    }
-
     public function update_application_status(Request $request){
         $attrs = $request->validate([
             'reviewId' => 'required',
@@ -159,18 +168,48 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Update Application Status');
     }
 
-    public function store_star_ratings(Request $request){
+    public function updated_interview(Request $request){
+        Log::info($request);
         $attrs = $request->validate([
-            'ratingId' => 'required',
-            'rating' => 'required|string',
+            'interviewId' => 'required',
+            'applicantId' => 'required',
+            'interview_type' => 'required',
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i:s',
+            'duration' => 'required',
+            'interviewers' => 'required',
+            'email_link' => 'required',
+            'url' => 'nullable',
+            'notes' => 'nullable',
         ]);
 
-        $review = Applicant::findOrFail($attrs['ratingId']);
+        $interview = Interviewer::findOrFail($attrs['interviewId']);
 
-        $review->update([
-            'starRatings' => $attrs['rating'],
+        $interview->update([
+            'applicant_id' => $attrs['applicantId'],
+            'interview_type' => $attrs['interview_type'],
+            'date' => $attrs['date'],
+            'time' => $attrs['time'],
+            'duration' => $attrs['duration'],
+            'interviewers' => $attrs['interviewers'],
+            'email_link' => $attrs['email_link'],
+            'url' => $attrs['url'],
+            'notes' => $attrs['notes'],
         ]);
 
-        return redirect()->back()->with('success','Success Rating Store');
+        return redirect()->back()->with('success','Success Added Interview');
     }
+
+
+    //DELETE
+    public function destroy_position($id){
+        $delete = OpenPosition::findOrFail($id);
+
+        $delete->delete();
+
+        return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
+
+    }
+
+
 }

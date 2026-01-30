@@ -52,6 +52,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
 
     Route::get('system/applicant', 'display_applicant')->name('admin.adminApplicant');
     Route::get('system/applicants/ID/{id}', 'display_applicant_ID');
+    Route::get('system/interviewers/ID/{id}', 'display_interview_ID');
     Route::get('system/edit/position/{id}', 'display_edit_position')->name('admin.adminEditPosition');
     Route::get('system/interview', 'display_interview')->name('admin.adminInterview');
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');
@@ -69,11 +70,19 @@ Route::controller(AdministratorPageController::class)->group(function () {
 });
 
 Route::controller(AdministratorStoreController::class)->group(function () {
+
+    //STORE
     Route::post('system/store/new/position', 'store_new_position')->name('admin.createPositionStore');
-    Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
-    Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
-    Route::post('system/store/interview', 'store_interview')->name('admin.storeNewInterview');
-    Route::post('system/update/application/status', 'update_application_status')->name('admin.updateStatus');
     Route::post('system/store/ratings', 'store_star_ratings')->name('admin.adminStarStore');
+    Route::post('system/store/interview', 'store_interview')->name('admin.storeNewInterview');
+
+    //UPDATE
+    Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
+    Route::post('system/update/application/status', 'update_application_status')->name('admin.updateStatus');
+    Route::post('system/update/interview', 'updated_interview')->name('admin.storeUpdatedInterview');
+
+    //DELETE
+    Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
+
 });
 

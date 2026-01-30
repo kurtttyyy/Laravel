@@ -92,7 +92,7 @@ class AdministratorPageController extends Controller
     }
 
     public function display_interview(){
-        $interview = Interviewer::with('applicants')->get();
+        $interview = Interviewer::with('applicant')->get();
 
         $count_daily = Interviewer::whereDate('date', today())
                                     ->whereTime('time', '<', now())
@@ -109,6 +109,31 @@ class AdministratorPageController extends Controller
                                     ->count();
         return view('admin.adminInterview', compact('interview','count_daily','count_month',
                                                     'count_year','count_upcoming'));
+    }
+
+    public function display_interview_ID($id){
+        $app = Interviewer::with([
+            'applicant:id,first_name,last_name,open_position_id',
+            'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
+        ])->where('applicant_id', $id)->firstOrFail();
+
+
+        return response()->json([
+            'id' => $app->id,
+            'name' => $app->applicant->first_name.' '.$app->applicant->last_name,
+            'email' => $app->email_link,
+            'title' => $app->applicant->position->title,
+            'status' => $app->application_status,
+            'applicant_id' => $app->applicant_id,
+            'interview_type' => $app->interview_type,
+            'date' => $app->date->format('Y-m-d'),
+            'time' => $app->time,
+            'duration' => $app->duration,
+            'interviewers' => $app->interviewers,
+            'email_link' => $app->email_link,
+            'url' => $app->url,
+            'notes' => $app->notes,
+        ]);
     }
 
     public function display_meeting(){

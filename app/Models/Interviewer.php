@@ -22,7 +22,11 @@ class Interviewer extends Model
         'notes',
     ];
 
-    public function applicants(){
-        return $this->belongsTo(Applicant::class, 'applicant_id');
+    public function applicant(){
+        return $this->belongsTo(Applicant::class, 'applicant_id', 'id');
     }
+
+    protected $casts = [
+        'date' => 'date',
+    ];
 }

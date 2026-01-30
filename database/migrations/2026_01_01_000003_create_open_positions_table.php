@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('benifits');
             $table->string('job_type');
             $table->text('passionate');
+            $table->string('application_status')->default('Under Review');
             $table->timestamp('one')->nullable();
             $table->timestamp('two')->nullable();
             $table->softDeletes();

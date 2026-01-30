@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('applicants', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('open_position_id');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
@@ -30,12 +31,13 @@ return new class extends Migration
             $table->string('work_duration');
             $table->string('experience_years');
             $table->string('skills_n_expertise');
-            $table->string('applied_position')->nullable();
+            $table->string('starRatings');
             $table->string('application_status')->default('Under Review');
             $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('open_position_id')->references('id')->on('open_positions')->onDelete('cascade');
         });
     }
 

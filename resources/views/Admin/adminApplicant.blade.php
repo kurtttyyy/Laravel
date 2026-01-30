@@ -10,7 +10,7 @@
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
   </style>
@@ -134,7 +134,7 @@
                     </div>
                 </td>
                 <td>
-                    <p class="font-medium">{{$app->applied_position}}</p>
+                    <p class="font-medium">{{$app->position->title}}</p>
                     <p class="text-xs text-gray-400">{{$app->collage_name}}</p>
                 </td>
                 <td>{{$app->created_at->format('F d, Y')}}</td>
@@ -231,20 +231,25 @@
           </div>
 
           <div class="flex gap-2 items-center">
-            <button 
-              onclick="scheduleInterview()" 
+            <button
+              onclick="scheduleInterview()"
               class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
             >
               Schedule Interview
             </button>
-
-            <select 
-              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="under_review">Under Review</option>
-              <option value="hired">Hired</option>
-              <option value="rejected">Rejected</option>
-            </select>
+            <form action="{{ route('admin.updateStatus')}}" id="updateStatus"  method="POST">
+                @csrf
+                <input type="hidden" name="reviewId" id="statusId">
+                <select name ="status"
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onchange="confirmStatusChange(this)"
+                >
+                <option value="-- Choose Option --">-- Choose Option --</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Hired">Hired</option>
+                <option value="Rejected">Rejected</option>
+                </select>
+            </form>
           </div>
 
 
@@ -321,22 +326,28 @@
 
           <div id="documents" class="space-y-3"></div>
         </div>
-
+        <form action="{{ route('admin.adminStarStore') }}" method="POST" id="starRatings">
+            @csrf
+            <input type="hidden" name="ratingId" id="ratingStarId">
+            <input type="hidden" name="rating" id="ratingValue">
+        </form>
         <!-- Rating Container -->
         <div class="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm mt-4">
-        <div>
-            <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
-            <div class="text-yellow-400 flex gap-1 text-lg mt-1">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star-half-stroke"></i>
-            <i class="fa-regular fa-star"></i>
+            <div>
+                <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
+
+                <div class="text-yellow-400 flex gap-1 text-lg mt-1 cursor-pointer">
+                    <i class="fa-regular fa-star star" data-value="1"></i>
+                    <i class="fa-regular fa-star star" data-value="2"></i>
+                    <i class="fa-regular fa-star star" data-value="3"></i>
+                    <i class="fa-regular fa-star star" data-value="4"></i>
+                    <i class="fa-regular fa-star star" data-value="5"></i>
+                </div>
             </div>
-        </div>
-        <div class="text-sm text-gray-500 font-medium">
-            3.5 / 5
-        </div>
+
+            <div class="text-sm text-gray-500 font-medium" id="ratingText">
+                0 / 5
+            </div>
         </div>
 
 
@@ -371,7 +382,7 @@
       </div>
 
       <!-- Form -->
-      <form class="space-y-4" action = "{{ route('admin.storeNewInterview') }}" method="POST">
+      <form class="space-y-4" action = "{{ route('admin.storeNewInterview') }}" method="POST" id="form">
         @csrf
         <!-- Interview Type -->
          <input type="hidden" id="applicants_id" name="applicants_id">
@@ -505,6 +516,9 @@
 
   // Open/Close Applicant Modal (existing)
   function openApplicantModal(applicantId) {
+    document.getElementById('statusId').value = applicantId;
+    document.getElementById('ratingStarId').value = applicantId;
+    console.log(document.getElementById('statusId').value);
     fetch(`/system/applicants/ID/${applicantId}`)
         .then(res => res.json())
         .then(data => {
@@ -574,6 +588,87 @@
   function closeApplicantModal() {
     document.getElementById('applicantModal').classList.add('hidden');
   }
+
+
+    //for start clickable
+    const stars = document.querySelectorAll('.star');
+    const ratingText = document.getElementById('ratingText');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach((star) => {
+        star.addEventListener('click', function () {
+            const rating = parseInt(this.dataset.value);
+
+            // build star HTML for popup
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += i <= rating
+                    ? '<i class="fa-solid fa-star text-yellow-400 text-2xl mx-1"></i>'
+                    : '<i class="fa-regular fa-star text-gray-300 text-2xl mx-1"></i>';
+            }
+
+            Swal.fire({
+                title: 'Confirm Rating',
+                html: `
+                    <div class="flex justify-center mb-2">
+                        ${starsHtml}
+                    </div>
+                    <p class="text-sm text-gray-600">Rate this applicant ${rating} / 5</p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Yes, rate',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setRating(rating);
+                    document.getElementById('starRatings').submit();
+                }
+            });
+        });
+    });
+
+    function setRating(rating) {
+        ratingInput.value = rating;
+
+        stars.forEach((star) => {
+            if (star.dataset.value <= rating) {
+                star.classList.remove('fa-regular');
+                star.classList.add('fa-solid');
+            } else {
+                star.classList.remove('fa-solid');
+                star.classList.add('fa-regular');
+            }
+        });
+
+        ratingText.textContent = `${rating} / 5`;
+    }
+
+    //for pop up
+    function confirmStatusChange(select) {
+        const newStatus = select.value;
+
+        // If user selects "Choose Option", do nothing
+        if (newStatus === '-- Choose Option --') {
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Change applicant status to "${newStatus}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                // revert back to "-- Choose Option --"
+                select.value = '-- Choose Option --';
+            } else {
+                // submit or process change
+                document.getElementById('ratingForm').submit();
+            }
+        });
+    }
 </script>
 
 

@@ -36,7 +36,9 @@ class AdministratorPageController extends Controller
     }
 
     public function display_applicant(){
-        $applicant = Applicant::all();
+        $applicant = Applicant::with(
+            'position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
+        )->get();
         $count_applicant = Applicant::count();
         $count_under_review = $applicant->where('application_status','Under Review')->count();
         $count_final_interview = $applicant->where('application_status','Final Interview')->count();
@@ -51,18 +53,19 @@ class AdministratorPageController extends Controller
 
     public function display_applicant_ID($id){
         $app = Applicant::with(
-            'documents:id,filename,applicant_id'
+            'documents:id,filename,applicant_id',
+            'position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
             )->findOrFail($id);
 
         return response()->json([
             'id' => $app->id,
             'name' => $app->first_name.' '.$app->last_name,
             'email' => $app->email,
-            'title' => $app->applied_position,
+            'title' => $app->position->title,
             'status' => $app->application_status,
             'location' => $app->address,
             'one' => $app->created_at->format('F d, Y'),
-            'passionate' => $app->passionate,
+            'passionate' => $app->position->passionate,
             'work_position' => $app->work_position,
             'work_employer' => $app->work_employer,
             'work_location' => $app->work_location,

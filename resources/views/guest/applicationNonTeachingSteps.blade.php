@@ -61,7 +61,7 @@
 <!-- Personal Info Form -->
 <form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
-    <input type="text" name="position" class="form-control" value="{{ $openPosition->title}}" hidden>
+    <input type="text" name="position" class="form-control" value="{{ $openPosition->id}}" hidden>
     <div id="personalForm" class="mt-4 form-step">
         <h4 class="fw-bold mb-3">Personal Information</h4>
             <div class="row mb-3">

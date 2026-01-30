@@ -19,7 +19,7 @@ class Applicant extends Model
         'education_attainment',
         'field_study',
         'skills_n_expertise',
-        'applied_position',
+        'open_position_id',
         'application_status',
         'user_id',
         'university_name',
@@ -29,12 +29,17 @@ class Applicant extends Model
         'work_employer',
         'work_location',
         'work_duration',
+        'starRatings',
         'experience_years',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id'); // Adjust 'user_id' if your column name differs
+    }
+
+    public function position(){
+        return $this->belongsTo(OpenPosition::class, 'open_position_id', 'id');
     }
 
     public function documents(){

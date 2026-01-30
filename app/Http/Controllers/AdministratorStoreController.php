@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Applicant;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
@@ -141,5 +142,35 @@ class AdministratorStoreController extends Controller
         ]);
 
         return redirect()->back()->with('success','Success Added Interview');
+    }
+
+    public function update_application_status(Request $request){
+        $attrs = $request->validate([
+            'reviewId' => 'required',
+            'status' => 'required|string',
+        ]);
+
+        $review = Applicant::findOrFail($attrs['reviewId']);
+
+        $review->update([
+            'application_status' => $attrs['status'],
+        ]);
+
+        return redirect()->back()->with('success','Success Update Application Status');
+    }
+
+    public function store_star_ratings(Request $request){
+        $attrs = $request->validate([
+            'ratingId' => 'required',
+            'rating' => 'required|string',
+        ]);
+
+        $review = Applicant::findOrFail($attrs['reviewId']);
+
+        $review->update([
+            'application_status' => $attrs['status'],
+        ]);
+
+        return redirect()->back()->with('success','Success Rating Store');
     }
 }

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('work_duration');
             $table->string('experience_years');
             $table->string('skills_n_expertise');
-            $table->string('starRatings');
+            $table->string('starRatings')->nullable();
             $table->string('application_status')->default('Under Review');
             $table->softDeletes();
             $table->timestamps();

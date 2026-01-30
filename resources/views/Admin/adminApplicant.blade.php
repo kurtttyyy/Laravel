@@ -671,7 +671,7 @@
                 select.value = '-- Choose Option --';
             } else {
                 // submit or process change
-                document.getElementById('ratingForm').submit();
+                document.getElementById('updateStatus').submit();
             }
         });
     }

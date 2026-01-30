@@ -97,7 +97,9 @@ class ApplicantController extends Controller
             return redirect('/');
         }
 
-        $applicants = Applicant::where('email', $attrs['email'])->get();
+        $applicants = Applicant::with(
+            'position'
+        )->where('email', $attrs['email'])->get();
 
 
         return view('guest.Application', compact('applicants'));

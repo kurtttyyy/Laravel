@@ -19,7 +19,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                    <h5 class="mb-1">{{ $applicant->applied_position }}</h5>
+                    <h5 class="mb-1">{{ $applicant->position->title }}</h5>
                     <small class="text-muted">Submitted: {{ $applicant->created_at->format('m/d/y') }}</small>
                 </div>
                 <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
@@ -28,34 +28,30 @@
             </div>
 
             {{-- Progress --}}
-            <div class="stepper">
-                <div class="step completed">
-                    <div class="circle">✓</div>
+            <div class="stepper" data-status="{{ $applicant->application_status }}">
+                <div class="step">
+                    <div class="circle">1</div>
                     <div class="line"></div>
                 </div>
-
-                <div class="step completed">
-                    <div class="circle">✓</div>
+                <div class="step">
+                    <div class="circle">2</div>
                     <div class="line"></div>
                 </div>
-
                 <div class="step">
                     <div class="circle">3</div>
                     <div class="line"></div>
                 </div>
-
                 <div class="step">
                     <div class="circle">4</div>
+                    <div class="line"></div>
+                </div>
+                <div class="step">
+                    <div class="circle">5</div>
                 </div>
             </div>
 
-
             <div class="d-flex justify-content-between align-items-center">
-                <span class="text-success">Next: Final Interview</span>
-                <!--<a href="#" class="fw-semibold text-success text-decoration-none">
-                    View Details →
-                </a>
-                -->
+                <span class="text-success next-step-text"></span>
             </div>
 
         </div>
@@ -85,3 +81,49 @@
 </main>
 @endforeach
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const steps = [
+        'Under Review',
+        'Initial Interview',
+        'Final Interview',
+        'Passing Document',
+        'Completed'
+    ];
+
+    document.querySelectorAll('.stepper').forEach(stepper => {
+        const status = stepper.dataset.status;
+        const stepElements = stepper.querySelectorAll('.step');
+        const nextText = stepper
+            .closest('.card-body')
+            .querySelector('.next-step-text');
+
+        const currentStep = steps.indexOf(status);
+
+        stepElements.forEach((step, index) => {
+            const circle = step.querySelector('.circle');
+
+            if (index < currentStep) {
+                step.classList.add('completed');
+                circle.innerText = '✓';
+            }
+            else if (index === currentStep) {
+                step.classList.add('completed');
+                circle.innerText = index + 1;
+            }
+            else {
+                step.classList.remove('completed');
+                circle.innerText = index + 1;
+            }
+        });
+
+        nextText.innerText =
+            currentStep < steps.length - 1
+                ? `Next: ${steps[currentStep + 1]}`
+                : 'Process Completed';
+    });
+
+});
+</script>

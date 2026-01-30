@@ -165,7 +165,7 @@ class AdministratorStoreController extends Controller
             'rating' => 'required|string',
         ]);
 
-        $review = Applicant::findOrFail($attrs['reviewId']);
+        $review = Applicant::findOrFail($attrs['ratingId']);
 
         $review->update([
             'application_status' => $attrs['status'],

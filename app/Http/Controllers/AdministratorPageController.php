@@ -75,6 +75,7 @@ class AdministratorPageController extends Controller
             'university_year' => $app->year_complete,
             'skills' => $app->skills_n_expertise,
             'number' => $app->phone,
+            'star' => $app->starRatings,
             'documents' => $app->documents->map(function ($doc) {
                 return [
                     'id' => $doc->id,

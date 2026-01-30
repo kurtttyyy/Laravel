@@ -342,7 +342,7 @@
             <div>
                 <p class="text-sm font-medium text-gray-700">Applicant Rating</p>
 
-                <div class="text-yellow-400 flex gap-1 text-lg mt-1 cursor-pointer">
+                <div class="text-yellow-400 flex gap-1 text-lg mt-1 cursor-pointer" id="ratingStars">
                     <i class="fa-regular fa-star star" data-value="1"></i>
                     <i class="fa-regular fa-star star" data-value="2"></i>
                     <i class="fa-regular fa-star star" data-value="3"></i>
@@ -354,6 +354,7 @@
             <div class="text-sm text-gray-500 font-medium" id="ratingText">
                 0 / 5
             </div>
+            <input type="hidden" id="ratingStarId" value="">
         </div>
 
 
@@ -584,6 +585,23 @@
             <p class="text-sm text-gray-400">No documents uploaded</p>
             `;
         }
+
+        // ⭐ Update stars
+        const stars = document.querySelectorAll('#ratingStars .star');
+        const ratingText = document.getElementById('ratingText');
+        const rating = data.star || 0; // from backend
+
+        stars.forEach(star => {
+            if (star.dataset.value <= rating) {
+                star.classList.remove('fa-regular');
+                star.classList.add('fa-solid');
+            } else {
+                star.classList.remove('fa-solid');
+                star.classList.add('fa-regular');
+            }
+        });
+
+        ratingText.innerText = `${rating} / 5`;
 
         // Open modal LAST
         document.getElementById('applicantModal').classList.remove('hidden');

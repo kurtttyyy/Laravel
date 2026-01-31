@@ -108,7 +108,7 @@
         </div>
 
         <p class="text-slate-600 text-sm mt-4">
-            {{ $open->description }}
+            {{ $open->job_description }}
         </p>
 
         <div class="flex gap-2 mt-4 flex-wrap">

@@ -47,6 +47,7 @@ class ApplicantController extends Controller
             'experience_years' => $attrs['experience_years'],
             'skills_n_expertise' => $attrs['key_skills'],
             'open_position_id' => $attrs['position'],
+            'application_status' => 'pending',
             'university_name' => $attrs['university_name'],
             'university_address' => $attrs['university_address'],
             'year_complete' => $attrs['year_complete'],

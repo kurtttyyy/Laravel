@@ -126,13 +126,13 @@
             <div class="row g-3 text-center">
                 <div class="col-6 col-md-3">
                     <div class="stat-card bg-white rounded p-3">
-                        <div class="stat-number fw-bold display-6">24</div>
+                        <div class="stat-number fw-bold display-6">{{$openCount}}</div>
                         <div class="stat-label small text-muted">Open Positions</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-card bg-white rounded p-3">
-                        <div class="stat-number fw-bold display-6">8</div>
+                        <div class="stat-number fw-bold display-6">{{$department}}</div>
                         <div class="stat-label small text-muted">Departments</div>
                     </div>
                 </div>

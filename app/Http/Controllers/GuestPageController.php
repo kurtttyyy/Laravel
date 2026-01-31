@@ -26,8 +26,10 @@ class GuestPageController extends Controller
 
     public function display_index(){
         $open_position = OpenPosition::all();
+        $openCount = $open_position->count();
+        $department = $open_position->groupBy('department')->count();
         event(new GuestLog('Viewed'));
-        return view('guest.index', compact('open_position'));
+        return view('guest.index', compact('open_position','openCount','department'));
     }
 
     public function display_job($id){

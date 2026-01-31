@@ -39,6 +39,7 @@
                     data-job-college="{{$job->department}}"
                     data-job-type="{{ $job->employment }}"
                     data-job-location="{{ $job->location}}"
+                    data-job-skills='@json($job->skills)'
                     data-job-description='@json($job->job_description)'
                     data-job-responsibilities='@json($job->responsibilities)'
                     data-job-qualifications='@json($job->requirements)'
@@ -84,6 +85,9 @@
 
     <!-- Scrollable Content -->
     <div class="sidebar-body">
+        <h6 class="section-title">Required Skills</h6>
+        <ul id="sidebarSkills"></ul>
+
         <h6 class="section-title">Job Description</h6>
         <ul id="sidebarDescription"></ul>
 
@@ -153,6 +157,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.dataset.jobLocation;
 
             // Job sections
+            populateList(
+                'sidebarSkills',
+                JSON.parse(this.dataset.jobSkills)
+            );
             populateList(
                 'sidebarDescription',
                 JSON.parse(this.dataset.jobDescription)

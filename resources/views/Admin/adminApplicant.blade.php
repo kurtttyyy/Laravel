@@ -162,10 +162,9 @@
             </tbody>
         </table>
 
-        <!-- Footer -->
-        <div class="flex justify-between items-center mt-4 text-sm text-gray-400">
-            <p>Showing 1 to 5 of 248 results</p>
-
+    <!-- Footer -->
+    <div class="flex justify-between items-center mt-4 text-sm text-gray-400">
+        <p>Showing 1 to 5 of 248 results</p>
             <div class="flex items-center gap-2">
                 <span>Previous</span>
                 <span class="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg">1</span>
@@ -176,7 +175,6 @@
                 <span>Next</span>
             </div>
         </div>
-
     </div>
 
 

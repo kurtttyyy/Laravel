@@ -172,8 +172,16 @@
                     @endphp
 
                     <ul class="list-unstyled mt-2 mb-3">
-                        @foreach ($lines as $line)
-                            <li>{{ substr(ltrim($line, "•- "), 0, 150) }}{{ strlen($line) > 150 ? '......' : '' }}</li>
+                        @foreach (array_slice($lines, 0, 3) as $line)
+                            <li>
+                                {{ 
+                                    Str::limit(
+                                        ltrim($line, "•- "),
+                                        150,
+                                        '......'
+                                    )
+                                }}
+                            </li>
                         @endforeach
                     </ul>
 

@@ -26,10 +26,22 @@
             </div>
 
             <div class="mb-3">
-                <p class="mb-0">{{ $job->location}}</p>
+                <p class="mb-0">{{ $job->location }}</p>
 
-                <pre>{{ $job->passionate }}</pre>
+                <div class="ps-3" style="white-space: pre-line;">
+                    {{
+                        collect(preg_split("/\r\n|\n|\r/", $job->passionate))
+                            ->map(fn($line) =>
+                                preg_replace('/^[\s\p{Z}\x{2022}\x{2023}\x{25E6}\-*•–—]+/mu', '', $line)
+                            )
+                            ->filter()
+                            ->take(3)
+                            ->implode("\n")
+                    }}
+                </div>
             </div>
+
+
 
             <div class="d-flex justify-content-between align-items-center">
                 <span class="badge bg-light text-dark">3d ago</span>

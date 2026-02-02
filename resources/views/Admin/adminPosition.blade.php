@@ -107,9 +107,23 @@
             <span class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full">Active</span>
         </div>
 
-        <p class="text-slate-600 text-sm mt-4">
-            {{ $open->job_description }}
-        </p>
+                    @php
+                        $lines = preg_split("/\r\n|\n|\r/", $open->job_description);
+                    @endphp
+
+                    <ul class="text-slate-600 text-sm mt-4">
+                        @foreach (array_slice($lines, 0, 3) as $line)
+                            <li>
+                                {{ 
+                                    Str::limit(
+                                        ltrim($line, "•- "),
+                                        150,
+                                        '......'
+                                    )
+                                }}
+                            </li>
+                        @endforeach
+                    </ul>
 
         <div class="flex gap-2 mt-4 flex-wrap">
             @foreach (explode(',', $open->skills) as $skill)

@@ -323,6 +323,50 @@ body {
     padding: 32px;
 }
 
+.skill-badge {
+    background-color: rgba(59, 130, 246, 0.1); /* light transparent blue */
+    color: #3b82f6; /* blue text */
+    padding: 0.25rem 0.75rem; /* py-1 px-3 */
+    font-size: 0.75rem; /* text-xs */
+    border-radius: 9999px; /* rounded-full */
+    display: inline-block;
+    margin: 0.125rem; /* small gap */
+}
+
+.sidebar-body ul {
+    list-style: none;
+    padding-left: 1.8rem;
+}
+
+.sidebar-body ul li {
+    position: relative;
+    margin-bottom: 0.5rem;
+    padding-left: 2rem; /* space for bullet */
+}
+
+.sidebar-body ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.2rem;
+    height: 1.2rem;
+    background-color: #10b981; /* Tailwind green-500 */
+    border-radius: 50%;
+
+    /* White check mark SVG mask */
+    mask-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7"/></svg>');
+    -webkit-mask-image: url('data:image/svg+xml;utf8,<svg fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l4 4L19 7"/></svg>');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: 70% 70%;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: 70% 70%;
+}
+
+
 
 .application-tips {
     background-color: rgba(40, 167, 69, 0.08); /* light transparent green */

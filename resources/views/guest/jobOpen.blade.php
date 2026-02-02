@@ -98,7 +98,8 @@
     <!-- Scrollable Content -->
     <div class="sidebar-body">
         <h6 class="section-title">Required Skills</h6>
-        <ul id="sidebarSkills"></ul>
+        <div id="sidebarSkills" class="flex gap-2 mt-4 flex-wrap"></div>
+
 
         <h6 class="section-title">Job Description</h6>
         <ul id="sidebarDescription"></ul>
@@ -125,69 +126,108 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('jobSidebar');
     const overlay = document.getElementById('overlay');
     const closeBtn = sidebar.querySelector('.close-btn');
 
+    // ---------- Populate normal UL lists ----------
     function populateList(id, text) {
-    const ul = document.getElementById(id);
-    ul.innerHTML = "";
+        const ul = document.getElementById(id);
+        ul.innerHTML = "";
 
-    if (!text) return;
+        if (!text) return;
 
-    const items = text
-        .split('•')
-        .map(item => item.trim())
-        .filter(item => item.length);
+        let items = [];
 
-    items.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        ul.appendChild(li);
-    });
-}
+        // If text is already an array (from JSON)
+        if (Array.isArray(text)) {
+            items = text;
+        } else {
+            items = text
+                .split('•')
+                .map(item => item.trim())
+                .filter(item => item.length);
+        }
 
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
+        });
+    }
 
+    // ---------- Populate skills as transparent blue pills ----------
+    function populateSkills(id, text) {
+        const container = document.getElementById(id);
+        container.innerHTML = "";
+
+        if (!text) return;
+
+        let skills = [];
+
+        // Handle JSON array or comma-separated string
+        if (Array.isArray(text)) {
+            skills = text;
+        } else {
+            skills = text.split(',');
+        }
+
+        skills
+            .map(skill => skill.trim())
+            .filter(skill => skill.length)
+            .forEach(skill => {
+                const span = document.createElement('span');
+                span.className = 'skill-badge'; // CSS class for blue pill style
+                span.textContent = skill;
+                container.appendChild(span);
+            });
+    }
+
+    // ---------- Open sidebar & populate data ----------
     document.querySelectorAll('.view-details').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
 
-            // Title & college (school icon already in HTML)
+            // Title & College
             document.getElementById('sidebarTitle').textContent =
                 this.dataset.jobTitle;
             document.getElementById('sidebarCollege').textContent =
                 this.dataset.jobCollege;
 
-            // Job type + contract (clock icon already in HTML)
+            // Job Type & Contract
             document.getElementById('sidebarType').textContent =
                 this.dataset.jobType;
             document.getElementById('sidebarContract').textContent =
-                this.dataset.jobContract;
+                this.dataset.jobContract || '';
 
-            // Location (pin icon already in HTML)
+            // Location
             document.getElementById('sidebarLocationText').textContent =
                 this.dataset.jobLocation;
 
-            // Job sections
-            populateList(
+            // Sidebar Sections
+            populateSkills(
                 'sidebarSkills',
-                JSON.parse(this.dataset.jobSkills)
+                JSON.parse(this.dataset.jobSkills || '[]')
             );
+
             populateList(
                 'sidebarDescription',
-                JSON.parse(this.dataset.jobDescription)
+                JSON.parse(this.dataset.jobDescription || '[]')
             );
+
             populateList(
                 'sidebarResponsibilities',
-                JSON.parse(this.dataset.jobResponsibilities)
+                JSON.parse(this.dataset.jobResponsibilities || '[]')
             );
+
             populateList(
                 'sidebarQualifications',
-                JSON.parse(this.dataset.jobQualifications)
+                JSON.parse(this.dataset.jobQualifications || '[]')
             );
+
             populateList(
                 'sidebarBenefits',
-                JSON.parse(this.dataset.jobBenefits)
+                JSON.parse(this.dataset.jobBenefits || '[]')
             );
 
             // Show sidebar
@@ -196,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // ---------- Close sidebar ----------
     function closeSidebar() {
         sidebar.classList.remove('show');
         overlay.style.display = 'none';
@@ -204,7 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
     closeBtn.addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
 });
-
 </script>
 
 

@@ -150,7 +150,7 @@ class AdministratorStoreController extends Controller
             'passionate' => $attrs['passionate'],
         ]);
 
-        return redirect()->back()->with('success','Success Added Position');
+        return redirect()->route('admin.adminPosition')->with('success','Success Added Position');
     }
 
     public function update_application_status(Request $request){

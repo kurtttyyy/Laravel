@@ -12,7 +12,7 @@
 
           <p>
             <span class="block font-semibold text-xs uppercase text-gray-400">Email</span>
-            john.doe@company.com
+             <p x-text="selectedEmployee?.email ?? '—'"></p>
           </p>
         </div>
 
@@ -25,7 +25,7 @@
 
           <p>
             <span class="block font-semibold text-xs uppercase text-gray-400">Phone</span>
-            +1 (555) 123-4567
+            <p x-text="selectedEmployee?.applicant?.phone ?? '—'"></p>
           </p>
         </div>
 
@@ -39,7 +39,7 @@
 
           <p>
             <span class="block font-semibold text-xs uppercase text-gray-400">Location</span>
-            San Francisco, CA
+            <p x-text="selectedEmployee?.applicant?.address ?? '—'"></p>
           </p>
         </div>
       </div>
@@ -72,7 +72,7 @@
 
           <p>
             <span class="block font-semibold text-xs uppercase text-gray-400">Join Date</span>
-            Jan 15, 2022
+            <p x-text="selectedEmployee?.applicant?.formatted_date_hired"></p>
           </p>
         </div>
 
@@ -87,7 +87,7 @@
 
           <p>
             <span class="block font-semibold text-xs uppercase text-gray-400">Position</span>
-            Sarah Williams
+            <p x-text="selectedEmployee?.applicant?.position.title ?? '-'"></p>
           </p>
         </div>
       </div>
@@ -96,11 +96,7 @@
       <div class="bg-slate-50 p-4 rounded-xl text-sm">
         <h3 class="font-semibold mb-5">Skills</h3>
         <div class="flex flex-wrap gap-2">
-          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">JavaScript</span>
-          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">React</span>
-          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">Node.js</span>
-          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">Python</span>
-          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full">AWS</span>
+          <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full" x-text="selectedEmployee?.applicant?.position.skills ?? '-'" ></span>
         </div>
       </div>
 
@@ -135,4 +131,3 @@
       </div>
 
     </div>
-    

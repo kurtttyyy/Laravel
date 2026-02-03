@@ -45,4 +45,15 @@ class Applicant extends Model
     public function documents(){
         return $this->hasMany(ApplicantDocument::class, 'applicant_id', 'id');
     }
+
+    protected $casts = [
+        'date_hired' => 'date',
+    ];
+
+    public function getFormattedDateHiredAttribute()
+    {
+        return $this->date_hired
+            ? $this->date_hired->format('F j, Y')
+            : '';
+    }
 }

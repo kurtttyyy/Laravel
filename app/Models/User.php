@@ -22,6 +22,7 @@ class User extends Authenticatable
         'last_name',
         'role',
         'status',
+        'account_status',
         'email',
         'password',
     ];
@@ -47,5 +48,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function applicant(){
+        return $this->hasOne(Applicant::class, 'user_id', 'id');
+    }
+
+    public function getInitialsAttribute()
+    {
+        return strtoupper(
+            substr($this->first_name, 0, 1) .
+            substr($this->last_name, 0, 1)
+        );
     }
 }

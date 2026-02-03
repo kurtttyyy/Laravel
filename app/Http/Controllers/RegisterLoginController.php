@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Applicant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,17 +23,29 @@ class RegisterLoginController extends Controller
             return redirect()->back()->with('error', 'Password does not match.');
         }
 
-        $status = 'Active';
+        $status = 'Pending';
         $role = 'Employee';
+        $account_status = 'Active';
 
-        User::create([
+
+        $user = User::create([
             'first_name' => $attrs['first_name'],
             'last_name' => $attrs['last_name'],
             'role' => $role,
             'status' => $status,
+            'account_status' => $account_status,
             'email' => $attrs['email'],
             'password' => Hash::make($attrs['password']),
         ]);
+
+
+        $hire = 'hired';
+
+        Applicant::where('email', $user->email)
+                    ->where('application_status', $hire)
+                    ->update([
+                        'user_id' => $user->id,
+                    ]);
 
         return redirect()->route('login');
     }

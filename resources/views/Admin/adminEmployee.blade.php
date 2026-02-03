@@ -106,19 +106,19 @@
 
     <!-- Employee Cards Grid -->
     <div class="flex flex-wrap gap-6">
-      
 
+        @foreach ($employee as $emp)
         <!-- Employee Card -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden w-72">
             <div class="h-24 bg-gradient-to-r from-purple-500 to-indigo-500 flex justify-center items-center">
                 <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24">
-                    JD
+                    {{$emp->initials}}
                 </div>
             </div>
 
             <div class="p-4 mt-7">
-                <h3 class="font-bold text-gray-800 text-lg text-center">John Doe</h3>
-                <p class="text-gray-500 text-sm text-center">Senior Software Engineer</p>
+                <h3 class="font-bold text-gray-800 text-lg text-center">{{$emp->applicant->first_name ?? ''}} {{$emp->applicant->last_name ?? ''}}</h3>
+                <p class="text-gray-500 text-sm text-center">{{$emp->applicant->position->title ?? ''}}</p>
 
                 <div class="mt-4 space-y-1 text-gray-500 text-sm">
                     <div class="flex items-center gap-2">
@@ -131,7 +131,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar"></i>
-                        Hired March 15, 2019
+                        Hired {{$emp->applicant?->formatted_date_hired }}
                     </div>
                 </div>
 
@@ -155,55 +155,10 @@
                 </div>
             </div>
         </div>
-                <!-- Employee Card -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden w-72">
-            <div class="h-24 bg-gradient-to-r from-purple-500 to-indigo-500 flex justify-center items-center">
-                <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24">
-                    JD
-                </div>
-            </div>
-
-            <div class="p-4 mt-7">
-                <h3 class="font-bold text-gray-800 text-lg text-center">John Doe</h3>
-                <p class="text-gray-500 text-sm text-center">Senior Software Engineer</p>
-
-                <div class="mt-4 space-y-1 text-gray-500 text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-regular fa-id-badge"></i>
-                        EMP-2500024-24
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-sitemap"></i>
-                        Engineer
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-calendar"></i>
-                        Hired March 15, 2019
-                    </div>
-                </div>
-
-                <hr class="my-3">
-
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center -space-x-">
-                        <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium z-10">
-                            Active
-                        </span>
-
-
-                    </div>
-                    <button
-                        @click="openProfile = true"
-                        class="text-blue-500 text-sm font-medium hover:underline">
-                        View Profile
-                    </button>
-                </div>
-            </div>
-        </div>
-
+        @endforeach
     </div>
 
-    
+
 </div>
 
 
@@ -242,7 +197,7 @@
           <button @click="tab='documents'" :class="tab==='documents' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Documents</button>
           <button @click="tab='record'" :class="tab==='record' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Service Record</button>
         </div>
-    
+
         @include('Admin.PersonalDetail.adminEmployeeOverview')
         @include('Admin.PersonalDetail.adminEmployeePD')
         @include('Admin.PersonalDetail.adminEmployeePerformance')
@@ -264,7 +219,7 @@
       </div>
     </div>
 
-    
+
 
     <!-- ================= PROFILE EDIT ================= -->
     @include('Admin.PersonalDetail.editProfile')

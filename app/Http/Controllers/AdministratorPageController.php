@@ -6,6 +6,7 @@ use App\Models\Applicant;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdministratorPageController extends Controller
@@ -16,7 +17,12 @@ class AdministratorPageController extends Controller
     }
 
     public function display_employee(){
-        return view('admin.adminEmployee');
+        $employee = User::with(
+            'applicant:id,open_position_id',
+            'applicant',
+            'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
+            )->where('role','Employee')->get();
+        return view('admin.adminEmployee', compact('employee'));
     }
 
     public function display_attendance(){

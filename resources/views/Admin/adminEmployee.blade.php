@@ -127,7 +127,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-sitemap"></i>
-                        Engineer
+                        {{$emp->applicant->position->department }}
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar"></i>

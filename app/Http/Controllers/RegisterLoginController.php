@@ -27,6 +27,15 @@ class RegisterLoginController extends Controller
         $role = 'Employee';
         $account_status = 'Active';
 
+        $hire = 'hired';
+
+        $find = Applicant::where('email', $attrs['email'])
+                            ->where('application_status', $hire)
+                            ->exists();
+
+        if(!$find){
+            return redirect()->back()->with('error', 'Registration not valid.');
+        }
 
         $user = User::create([
             'first_name' => $attrs['first_name'],
@@ -37,9 +46,6 @@ class RegisterLoginController extends Controller
             'email' => $attrs['email'],
             'password' => Hash::make($attrs['password']),
         ]);
-
-
-        $hire = 'hired';
 
         Applicant::where('email', $user->email)
                     ->where('application_status', $hire)

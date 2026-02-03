@@ -34,7 +34,8 @@
         openProfile:false,
         openEditProfile:false,
         tab:'overview',
-        department:'All'
+        department:'All,
+        selectedEmployee: null,'
       }">
 
     <!-- Header -->
@@ -148,7 +149,7 @@
                         </span>
                     </div>
                     <button
-                        @click="openProfile = true"
+                        @click="openProfile = true; selectedEmployee = @js($emp);"
                         class="text-blue-500 text-sm font-medium hover:underline">
                         View Profile
                     </button>
@@ -176,12 +177,18 @@
           <button @click="openProfile=false" class="absolute top-4 right-4 text-2xl">&times;</button>
 
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center font-bold">
-              JD
+            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center font-bold"
+            x-text="selectedEmployee?.initials"
+            >
             </div>
             <div>
-              <h2 class="text-xl font-semibold">John Doe</h2>
-              <p class="text-sm">Senior Software Engineer<br>Engineering</p>
+              <h2 class="text-xl font-semibold"
+              x-text="selectedEmployee?.applicant?.first_name + ' ' + selectedEmployee?.applicant?.last_name"
+              ></h2>
+              <p class="text-sm">
+                <span x-text="selectedEmployee?.applicant?.position?.title"></span><br>
+                <span x-text="selectedEmployee?.applicant?.position?.department"></span>
+              </p>
             </div>
             <span class="ml-auto bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">
               Active

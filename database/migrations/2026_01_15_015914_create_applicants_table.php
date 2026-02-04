@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('work_employer');
             $table->string('work_location');
             $table->string('work_duration');
-            $table->date('date_hired');
+            $table->date('date_hired')->nullable();
             $table->string('experience_years');
             $table->string('skills_n_expertise');
             $table->string('starRatings')->nullable();

@@ -123,29 +123,39 @@
       <div class="space-y-6">
 
         <!-- Job Details -->
-        <div class="bg-white rounded-xl shadow p-6">
-          <h2 class="font-semibold text-lg mb-4">Job Details</h2>
+<div class="bg-white rounded-xl shadow p-6">
+  <h2 class="font-semibold text-lg mb-4">Job Details</h2>
 
-          <div class="space-y-3">
+        <div class="space-y-3">
 
-            <select class="input" name="level">
-              <option>Experience Level</option>
-              <option value="Junior">Junior</option>
-              <option value="Mid">Mid</option>
-              <option value="Senior">Senior</option>
-            </select>
+          <select class="input" name="level">
+            <option>Experience Level</option>
+            <option value="Junior">Junior</option>
+            <option value="Mid">Mid</option>
+            <option value="Senior">Senior</option>
+          </select>
 
-            <select class="input" name="job_type">
-              <option>Job Type</option>
-              <option value="Teaching">Teaching</option>
-              <option value="Non-Teaching">Non-Teaching</option>
-            </select>
+          <select class="input" name="job_type">
+            <option>Job Type</option>
+            <option value="Teaching">Teaching</option>
+            <option value="Non-Teaching">Non-Teaching</option>
+          </select>
 
-            <input class="input" placeholder="Location" name="location">
+          <input class="input" placeholder="Location" name="location">
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Start Date</label>
             <input type="date" class="input" name="start_date">
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Close Date</label>
             <input type="date" class="input" name="end_date">
           </div>
+
         </div>
+      </div>
+
 
         <!-- Skills -->
         <div class="bg-white rounded-xl shadow p-6">

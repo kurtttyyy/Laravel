@@ -19,6 +19,21 @@ class ApplicantDocument extends Model
         'type',
     ];
 
+    protected $casts = [
+        'created_at' => 'date',
+    ];
+
+    protected $appends = [
+        'formatted_created_at',
+    ];
+
+    public function getFormattedCreatedAtAttribute()
+    {
+        return $this->created_at
+            ? $this->created_at->format('F j, Y')
+            : '';
+    }
+
     public function applicants(){
         return $this->belongsTo(Applicant::class, 'applicant_id');
     }

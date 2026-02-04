@@ -34,8 +34,8 @@
         openProfile:false,
         openEditProfile:false,
         tab:'overview',
-        department:'All,
-        selectedEmployee: null,'
+        department:'All',
+        selectedEmployee: null,
       }">
 
     <!-- Header -->

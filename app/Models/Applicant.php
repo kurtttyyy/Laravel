@@ -50,6 +50,10 @@ class Applicant extends Model
         'date_hired' => 'date',
     ];
 
+    protected $appends = [
+        'formatted_date_hired',
+    ];
+
     public function getFormattedDateHiredAttribute()
     {
         return $this->date_hired

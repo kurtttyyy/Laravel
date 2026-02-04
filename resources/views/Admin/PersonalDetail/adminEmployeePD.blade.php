@@ -10,11 +10,11 @@
       Personal Information
     </div>
     <div class="space-y-2 text-sm text-gray-700">
-      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Full Name</span>John Doe</p>
-      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Date of Birth</span>March 15, 1990</p>
-      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Gender</span>Male</p>
-      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Nationality</span>Filipino</p>
-      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Marital Status</span>Single</p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Full Name</span><p x-text="selectedEmployee?.applicant?.first_name + ' ' + selectedEmployee?.applicant?.last_name"></p></p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Date of Birth</span><p x-text="selectedEmployee.applicant.position.title"></p></p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Gender</span><p x-text="selectedEmployee.applicant.position.title"></p></p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Nationality</span><p x-text="selectedEmployee.applicant.position.title"></p></p>
+      <p style="margin-bottom: 20px;"><span class="block font-semibold text-xs uppercase text-gray-400">Marital Status</span><p x-text="selectedEmployee.applicant.position.title"></p></p>
     </div>
   </div>
 

@@ -8,6 +8,7 @@ use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdministratorPageController extends Controller
 {
@@ -18,10 +19,13 @@ class AdministratorPageController extends Controller
 
     public function display_employee(){
         $employee = User::with(
-            'applicant:id,open_position_id',
             'applicant',
+            'applicant.documents:id,applicant_id,filename,filepath,type,mime_type,size,created_at',
             'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
-            )->where('role','Employee')->get();
+            )->where('role','Employee')
+            ->get();
+
+        Log::info($employee);
         return view('admin.adminEmployee', compact('employee'));
     }
 

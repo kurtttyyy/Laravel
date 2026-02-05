@@ -204,24 +204,16 @@
           <!-- Hiring Team -->
           <div class="bg-white rounded-xl p-6 shadow-sm">
             <h3 class="font-semibold mb-4">Hiring Team</h3>
-
+            @foreach($admin as $team)
             <div class="flex items-center gap-3 mb-3">
               <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center">JD</div>
               <div>
-                <p class="text-sm font-medium">John Doe</p>
-                <p class="text-xs text-slate-500">Hiring Manager</p>
+                <p class="text-sm font-medium">{{ $team->first_name}} {{ $team->last_name}}</p>
+                <p class="text-xs text-slate-500">{{$team->role}}</p>
               </div>
             </div>
-
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center">JS</div>
-              <div>
-                <p class="text-sm font-medium">Jane Smith</p>
-                <p class="text-xs text-slate-500">Technical Lead</p>
-              </div>
-            </div>
+            @endforeach
           </div>
-
         </div>
       </div>
     </div>

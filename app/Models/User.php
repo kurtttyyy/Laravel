@@ -50,6 +50,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', '!=', 'Employee');
+    }
+
     public function applicant(){
         return $this->hasOne(Applicant::class, 'user_id', 'id')
                     ->where('application_status', 'Hired');

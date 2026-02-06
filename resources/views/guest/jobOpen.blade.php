@@ -10,8 +10,7 @@
 <main class="container my-5 animated-card2 delay-5">
     <h2 class="fw-bold mb-4">Job Vacancies</h2>
 
-    @foreach($jobOpen as $job)
-        <div class="card shadow-sm mb-4 hover-card ">
+    <div class="card shadow-sm mb-4 hover-card ">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
@@ -30,6 +29,31 @@
                     <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
                     data-job='@json($job)'>
+                        View Details →
+                    </a>
+                </div>
+            </div>
+        </div>
+    @foreach($other as $others)
+        <div class="card shadow-sm mb-4 hover-card ">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="mb-1">{{ $others->title }}</h4>
+                        <h5 class="text-secondary mb-1">{{ $others->department }}</h5>
+                    </div>
+                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+                        {{ $others->employment }}
+                    </span>
+                </div>
+
+                <p class="mb-1">{{ $others->location }}</p>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-light text-dark">3d ago</span>
+                    <a href="javascript:void(0)"
+                    class="fw-semibold text-success text-decoration-none view-details"
+                    data-job='@json($others)'>
                         View Details →
                     </a>
                 </div>

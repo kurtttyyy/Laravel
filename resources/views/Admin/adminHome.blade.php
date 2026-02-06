@@ -151,7 +151,7 @@
     <tr>
       <th class="py-2 text-left">Employee</th>
       <th class="text-left"></th>
-      <th class="text-left">Status</th>
+      <th class="text-left">Action</th>
       <th class="text-left">Join Date</th>
     </tr>
   </thead>

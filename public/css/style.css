@@ -29,6 +29,11 @@ body {
     transition: transform 0.35s ease, box-shadow 0.35s ease;
     animation: fadeUp 0.6s ease both;
 }
+
+.animated-card2 {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    animation: fadeUp 0.6s ease both;
+}
 /* Hover effect */
 .animated-card:hover {
     transform: translateY(-8px) scale(1.02);
@@ -53,6 +58,17 @@ body {
 .animated-card.delay-3 { animation-delay: 0.3s; }
 .animated-card.delay-4 { animation-delay: 0.4s; }
 
+
+
+/* Darken carousel images to make text more readable */
+.carousel-dark-img {
+    position: relative;
+    filter: brightness(40%); /* makes image darker */
+    transition: filter 0.3s ease;
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}
 
 /* Hover animation only */
 .hover-card {

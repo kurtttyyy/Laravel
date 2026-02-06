@@ -54,26 +54,23 @@
          data-bs-ride="carousel" data-bs-interval="4000">
 
         <div class="carousel-inner h-100">
-            <div class="carousel-item active h-100">
+            <div class="carousel-item active h-90">
                 <img src="{{ asset('images/banner2.png') }}"
-                     class="d-block w-100 h-90 object-fit-cover"
+                     class="d-block w-100 h-90 object-fit-cover carousel-dark-img"
                      alt="Careers">
             </div>
-            <div class="carousel-item h-100">
+            <div class="carousel-item h-90">
                 <img src="{{ asset('images/Banner1.png') }}"
-                     class="d-block w-100 h-90 object-fit-cover"
+                     class="d-block w-100 h-90 object-fit-cover "
                      alt="Team">
             </div>
-            <div class="carousel-item h-100">
+            <div class="carousel-item h-90">
                 <img src="{{ asset('images/banner3.png') }}"
-                     class="d-block w-100 h-90 object-fit-cover"
+                     class="d-block w-100 h-90 object-fit-cover carousel-dark-img"
                      alt="Growth">
             </div>
         </div>
     </div>
-
-    <!-- Dark Overlay -->
-    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-75"></div>
 
     <!-- Hero Content -->
     <div class="container text-center py-5 position-relative z-3">
@@ -85,8 +82,7 @@
             Explore career opportunities and take the first step towards your dream job
         </p>
 
-
-        <form class="d-flex justify-content-center mb-4" role="search">
+        <form class="d-flex justify-content-center mb-4 animated-card2 delay-5" role="search">
             <div class="input-group search-input" style="max-width:720px;">
                 <input type="search" class="form-control"
                        placeholder="Search job titles, keywords..."
@@ -97,7 +93,8 @@
     </div>
 </section>
 
-            <div class="container">
+
+            <div class="container mt-4 position-relative z-2 animated-card2 delay-5">
             <div class="filter-card bg-white rounded shadow-sm p-4 mx-auto" style="max-width:1100px; margin-top:-40px;">
                 <div class="row g-3">
                     <div class="col-md-4">
@@ -122,28 +119,28 @@
             </div>
         </div>
 
-        <div class="container stats-section mt-4">
+        <div class="container stats-section mt-4 ">
             <div class="row g-3 text-center">
                 <div class="col-6 col-md-3">
-                    <div class="stat-card bg-white rounded p-3">
+                    <div class="stat-card bg-white rounded p-3 animated-card delay-5">
                         <div class="stat-number fw-bold display-6">{{$openCount}}</div>
                         <div class="stat-label small text-muted">Open Positions</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="stat-card bg-white rounded p-3">
+                    <div class="stat-card bg-white rounded p-3 animated-card delay-5">
                         <div class="stat-number fw-bold display-6">{{$department}}</div>
                         <div class="stat-label small text-muted">Departments</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="stat-card bg-white rounded p-3">
+                    <div class="stat-card bg-white rounded p-3 animated-card delay-5">
                         <div class="stat-number fw-bold display-6">500+</div>
                         <div class="stat-label small text-muted">Employees</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="stat-card bg-white rounded p-3">
+                    <div class="stat-card bg-white rounded p-3 animated-card delay-5">
                         <div class="stat-number fw-bold display-6">
                             4.8<span class="star">★</span>
                         </div>

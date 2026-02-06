@@ -209,7 +209,7 @@
               <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center">JD</div>
               <div>
                 <p class="text-sm font-medium">{{ $team->first_name}} {{ $team->last_name}}</p>
-                <p class="text-xs text-slate-500">{{$team->role}}</p>
+                <p class="text-xs text-slate-500">{{$team->job_role}}</p>
               </div>
             </div>
             @endforeach

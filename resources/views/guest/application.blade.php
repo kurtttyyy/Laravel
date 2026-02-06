@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'Initial Interview',
         'Final Interview',
         'Passing Document',
-        'Completed'
+        'Completed',
+        'Hired',
     ];
 
     document.querySelectorAll('.stepper').forEach(stepper => {
@@ -105,7 +106,11 @@ document.addEventListener('DOMContentLoaded', function () {
         stepElements.forEach((step, index) => {
             const circle = step.querySelector('.circle');
 
-            if (index < currentStep) {
+            if (status === 'Hired') {
+                step.classList.add('completed');
+                circle.innerText = '✓';
+            }
+            else if (index < currentStep) {
                 step.classList.add('completed');
                 circle.innerText = '✓';
             }
@@ -119,10 +124,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        nextText.innerText =
-            currentStep < steps.length - 1
-                ? `Next: ${steps[currentStep + 1]}`
-                : 'Process Completed';
+        // Text below stepper
+        if (status === 'Hired') {
+            nextText.innerText = 'Hired';
+        } else {
+            nextText.innerText =
+                currentStep < steps.length - 1
+                    ? `Next: ${steps[currentStep + 1]}`
+                    : 'Process Completed';
+        }
     });
 
 });

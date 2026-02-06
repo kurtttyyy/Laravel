@@ -29,7 +29,7 @@ class GuestPageController extends Controller
         $open_position = OpenPosition::all();
         $openCount = $open_position->count();
         $department = $open_position->groupBy('department')->count();
-        $employee = User::where('role', 'Employee')->get();
+        $employee = User::where('role', 'Employee')->count();
         event(new GuestLog('Viewed'));
         return view('guest.index', compact('open_position','openCount','department','employee'));
     }

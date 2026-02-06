@@ -116,6 +116,9 @@
                             >
                                 Reschedule
                             </button>
+                            <button class="border px-4 py-2 rounded-lg text-sm">
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -125,21 +125,25 @@
 
         allJobs.filter(j => j.id !== currentId).forEach(job => {
             const div = document.createElement('div');
-            div.className = 'border rounded p-2 mb-2 cursor-pointer';
+            div.className = 'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
 
             div.innerHTML = `
-                <strong>${job.title}</strong><br>
-                <small class="text-muted">${job.department}</small><br>
+                <div>
+                    <strong>${job.title}</strong><br>
+                    <small class="text-muted">${job.department}</small>
+                </div>
                 <a href="javascript:void(0)"
-                   class="text-success open-job"
-                   data-job='${JSON.stringify(job)}'>
-                   View →
+                class="text-success open-job"
+                style="text-decoration: none;"
+                data-job='${JSON.stringify(job)}'>
+                View →
                 </a>
             `;
 
             container.appendChild(div);
         });
     }
+
 
     function openSidebar(job) {
         document.getElementById('sidebarTitle').textContent = job.title;

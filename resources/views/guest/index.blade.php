@@ -100,19 +100,28 @@
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Department</label>
                         <select class="form-select">
-                            <option>All Departments</option>
+                            <option value="">All Departments</option>
+                            @foreach($open_position->pluck('department')->unique() as $departments)
+                                <option value="{{ $department }}">{{ $departments }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Employment Type</label>
                         <select class="form-select">
-                            <option>All Types</option>
+                            <option value="">All Types</option>
+                            @foreach($open_position->pluck('employment')->unique() as $employments)
+                                <option value="{{ $department }}">{{ $employments }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Location</label>
                         <select class="form-select">
-                            <option>All Locations</option>
+                            <option value="">All Location</option>
+                            @foreach($open_position->pluck('location')->unique() as $locations)
+                                <option value="{{ $department }}">{{ $locations }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -135,7 +144,7 @@
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-card bg-white rounded p-3 animated-card delay-5">
-                        <div class="stat-number fw-bold display-6">500+</div>
+                        <div class="stat-number fw-bold display-6">{{$employee}}</div>
                         <div class="stat-label small text-muted">Employees</div>
                     </div>
                 </div>
@@ -171,7 +180,7 @@
                     <ul class="list-unstyled mt-2 mb-3">
                         @foreach (array_slice($lines, 0, 3) as $line)
                             <li>
-                                {{ 
+                                {{
                                     Str::limit(
                                         ltrim($line, "•- "),
                                         150,

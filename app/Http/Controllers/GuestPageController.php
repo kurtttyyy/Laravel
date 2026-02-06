@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\GuestLog;
 use App\Models\OpenPosition;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -28,8 +29,9 @@ class GuestPageController extends Controller
         $open_position = OpenPosition::all();
         $openCount = $open_position->count();
         $department = $open_position->groupBy('department')->count();
+        $employee = User::where('role', 'Employee')->get();
         event(new GuestLog('Viewed'));
-        return view('guest.index', compact('open_position','openCount','department'));
+        return view('guest.index', compact('open_position','openCount','department','employee'));
     }
 
     public function display_job($id){

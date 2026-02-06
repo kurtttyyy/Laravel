@@ -130,6 +130,34 @@ body {
 }
 
 /* Header divider */
+
+header.navbar {
+    position: sticky; /* or fixed */
+    top: 0;
+    z-index: 1030;
+    width: 100%;
+    background-color: #000; /* match your header */
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+header.navbar.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.navbar .nav-home-link {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.navbar .nav-home-link:hover {
+    transform: translateY(-3px);
+    background-color: #ffc107; /* or any accent color */
+    color: #000;
+}
+
+
 .header-divider {
   height: 4px;
   background: linear-gradient(90deg, #fdf903 0%, #fdf903 60%, #fdf903 100%);

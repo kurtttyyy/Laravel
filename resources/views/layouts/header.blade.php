@@ -70,6 +70,14 @@
         });
     });
 
+    document.addEventListener('DOMContentLoaded', function() {
+    const header = document.querySelector('header.navbar');
+    setTimeout(() => {
+        header.classList.add('loaded');
+    }, 100); // small delay for smooth effect
+});
+
+
 </script>
 
 

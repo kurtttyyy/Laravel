@@ -83,6 +83,6 @@ Route::controller(AdministratorStoreController::class)->group(function () {
 
     //DELETE
     Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
-
+    Route::post('system/delete/interview/{id}', 'destroy_interview')->name('admin.interviewCancel');
 });
 

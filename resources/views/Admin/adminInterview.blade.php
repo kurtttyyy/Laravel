@@ -116,9 +116,12 @@
                             >
                                 Reschedule
                             </button>
-                            <button class="border px-4 py-2 rounded-lg text-sm">
+                            <form action="{{ route('admin.interviewCancel', $inter->applicant_id)}}" method="POST">
+                                @csrf
+                            <button class="border px-4 py-2 rounded-lg text-sm" type='submit'>
                                 Cancel
                             </button>
+                            </form>
                         </div>
                     </div>
                 </div>

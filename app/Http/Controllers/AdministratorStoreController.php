@@ -6,6 +6,7 @@ use App\Models\Applicant;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdministratorStoreController extends Controller
@@ -207,6 +208,18 @@ class AdministratorStoreController extends Controller
 
         $delete->delete();
 
+        return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
+
+    }
+
+    public function destroy_interview($id){
+        DB::transaction(function () use ($id) {
+            $applicant = Applicant::findOrFail($id);
+
+            Interviewer::where('applicant_id', $id)->delete();
+
+            $applicant->delete();
+        });
         return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
 
     }

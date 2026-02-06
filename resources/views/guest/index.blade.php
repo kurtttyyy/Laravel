@@ -111,7 +111,7 @@
                         <select class="form-select">
                             <option value="">All Types</option>
                             @foreach($open_position->pluck('employment')->unique() as $employments)
-                                <option value="{{ $department }}">{{ $employments }}</option>
+                                <option value="{{ $employments }}">{{ $employments }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -120,7 +120,7 @@
                         <select class="form-select">
                             <option value="">All Location</option>
                             @foreach($open_position->pluck('location')->unique() as $locations)
-                                <option value="{{ $department }}">{{ $locations }}</option>
+                                <option value="{{ $locations }}">{{ $locations }}</option>
                             @endforeach
                         </select>
                     </div>

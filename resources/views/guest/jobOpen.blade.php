@@ -158,7 +158,7 @@
         populateList('sidebarBenefits', job.benifits);
 
         document.getElementById('applyJobBtn').href =
-            `/guest/application-non-teaching/${job.id}`;
+            `/application/non_teaching/procedure/${job.id}`;
 
         populateOtherJobs(job.id);
 

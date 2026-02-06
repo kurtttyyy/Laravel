@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Employee Record</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-</head>
 
-<body class="bg-gray-100">
 
-<div x-data="{ editOpen: false, emailOpen: false, tab: 'record' }">
 
 
 <!-- ================= PERSONAL DETAILS ================= -->
@@ -323,6 +313,4 @@
   </div>
 </div>
 
-</div>
-</body>
-</html>
+

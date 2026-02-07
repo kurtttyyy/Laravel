@@ -5,12 +5,54 @@
 
 <div class="max-w-5xl mx-auto bg-white px-5 py-8 border border-gray-400 text-[13px] text-black">
 
-  <!-- EDIT BUTTON -->
-  <div class="flex justify-end mb-4">
-    <button @click="openForm = true" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
-      Edit
+<!-- EDIT & DOWNLOAD BUTTONS -->
+<div class="flex justify-between items-center mb-4 space-x-2">
+
+  <!-- Edit Icon -->
+  <div class="relative group">
+    <button @click="openForm = true" class="p-2 bg-green-600 text-white rounded hover:bg-green-700">
+      <!-- Pencil/Edit Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-5M16.5 3.5l4 4-8 8H8v-4l8.5-8.5z" />
+      </svg>
     </button>
+
+    <!-- Bubble Chat Tooltip -->
+    <div
+      class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div class="relative bg-green-600 text-white text-xs rounded-lg px-3 py-1 shadow-lg whitespace-nowrap">
+        Edit Profile
+        <!-- Tail using pseudo-circle -->
+        <div class="absolute left-1/2 -bottom-1 w-2 h-2 bg-green-600 rotate-45 -translate-x-1/2"></div>
+      </div>
+    </div>
   </div>
+
+  <!-- Download Icon -->
+  <div class="relative group">
+    <button @click="downloadProfile()" class="p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      <!-- Download Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
+      </svg>
+    </button>
+
+    <!-- Bubble Chat Tooltip -->
+    <div
+      class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div class="relative bg-blue-600 text-white text-xs rounded-lg px-3 py-1 shadow-lg whitespace-nowrap">
+        Download Profile
+        <!-- Tail -->
+        <div class="absolute left-1/2 -bottom-1 w-2 h-2 bg-blue-600 rotate-45 -translate-x-1/2"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
 
   <!-- HEADER -->
   <div class="text-center mb-6 leading-tight">

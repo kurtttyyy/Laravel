@@ -85,7 +85,19 @@
     </div>
 
     <div class="sidebar-body">
-        <div id="sidebarSkills" class="d-flex flex-wrap gap-2 mb-3"></div>
+        <!-- SKILL REQUIREMENTS BOX -->
+        <div class="card mb-4">
+            <div class="card-body">
+
+            <h6 class=" mb-2">Skill Requirements:</h6>
+
+            <div
+                id="sidebarSkills"
+                class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+            </div>
+
+            </div>
+        </div>
 
         <h6 class="section-title">Job Description</h6>
         <ul id="sidebarDescription"></ul>
@@ -107,7 +119,7 @@
 
         <hr>
 
-        <h6 class="section-title">Other Job Openings</h6>
+        <h6 class="section-title">Related Jobs Open</h6>
         <div id="otherJobs"></div>
     </div>
 </div>
@@ -137,7 +149,7 @@
 
         (Array.isArray(data) ? data : data.split(',')).forEach(skill => {
             const span = document.createElement('span');
-            span.className = 'badge bg-primary-subtle text-primary';
+            span.className = 'badge skill-badge';
             span.textContent = skill.trim();
             el.appendChild(span);
         });

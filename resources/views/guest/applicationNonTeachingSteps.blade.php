@@ -62,42 +62,54 @@
 <form id="formPersonal" action="{{ route('applicant.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <input type="text" name="position" class="form-control" value="{{ $openPosition->id}}" hidden>
-    <div id="personalForm" class="mt-4 form-step">
-        <h4 class="fw-bold mb-3">Personal Information</h4>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="first_name" class="form-label">First Name*</label>
-                    <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Enter your first name" required>
-                </div>
+<div id="personalForm" class="mt-4 form-step">
+    <h4 class="fw-bold mb-3">Personal Information</h4>
 
-                <div class="col-md-6">
-                    <label for="last_name" class="form-label">Last Name*</label>
-                    <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Enter your last name" required>
-                </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="floating-input">
+                <input type="text" id="first_name" name="first_name" class="form-control" placeholder=" " required>
+                <label for="first_name">First Name*</label>
             </div>
+        </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="email" class="form-label">Email Address*</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="phone" class="form-label">Phone Number*</label>
-                    <input type="text" id="phone" name="phone" class="form-control" placeholder="Enter your phone number" required>
-                </div>
+        <div class="col-md-6">
+            <div class="floating-input">
+                <input type="text" id="last_name" name="last_name" class="form-control" placeholder=" " required>
+                <label for="last_name">Last Name*</label>
             </div>
-
-            <div class="mb-3">
-                <label for="address" class="form-label">Address*</label>
-                <input type="text" id="address" name="address" class="form-control" placeholder="Enter your address" required>
-            </div>
-
-            <div class="d-flex justify-content-end mt-auto">
-                <div></div>
-                <button type="button" id="btnToExperience" class="btn btn-primary">Proceed</button>
-            </div>
+        </div>
     </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="floating-input">
+                <input type="email" id="email" name="email" class="form-control" placeholder=" " required>
+                <label for="email">Email Address*</label>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="floating-input">
+                <input type="text" id="phone" name="phone" class="form-control" placeholder=" " required>
+                <label for="phone">Phone Number*</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="floating-input">
+            <input type="text" id="address" name="address" class="form-control" placeholder=" " required>
+            <label for="address">Address*</label>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-auto">
+        <div></div>
+        <button type="button" id="btnToExperience" class="btn btn-primary">Proceed</button>
+    </div>
+</div>
+
 
 
     <!-- Work Experience & Education Form -->

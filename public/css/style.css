@@ -367,15 +367,19 @@ header.navbar.loaded {
     padding: 32px;
 }
 
+
+
 .skill-badge {
-    background-color: rgba(59, 130, 246, 0.1); /* light transparent blue */
-    color: #3b82f6; /* blue text */
-    padding: 0.25rem 0.75rem; /* py-1 px-3 */
-    font-size: 0.75rem; /* text-xs */
-    border-radius: 9999px; /* rounded-full */
-    display: inline-block;
-    margin: 0.125rem; /* small gap */
+  background-color: rgba(25, 135, 84, 0.12); /* transparent green */
+  color: #198754; /* Bootstrap success green */
+  border: 1px solid rgba(25, 135, 84, 0.35);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  margin-bottom: 6px;
 }
+
 
 .sidebar-body ul {
     list-style: none;
@@ -520,6 +524,58 @@ header.navbar.loaded {
     display: none;
 }
 
+.floating-input {
+  position: relative;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.floating-input input {
+  width: 100%;
+  padding: 14px 12px 14px 12px; /* enough space for label */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.floating-input label {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: #777;
+  font-size: 14px;
+  pointer-events: none;
+  transition: 0.2s ease all;
+  background-color: white; /* prevents overlap with border */
+  padding: 0 4px;
+}
+
+
+/* Float label when input has value or is focused */
+.floating-input input:focus + label,
+.floating-input input:not(:placeholder-shown) + label,
+.floating-input select:focus + label,
+.floating-input select:not([value=""]) + label {
+  top: -8px;
+  left: 10px;
+  font-size: 12px;
+  color: #198754; /* green accent */
+}
+
+
+/* Example optional: tooltip colors matching buttons */
+.group-edit:hover span {
+  background-color: #16a34a; /* green-600 */
+}
+
+.group-download:hover span {
+  background-color: #2563eb; /* blue-600 */
+}
+
+
+
+
 /* Sidebar */
 #jobSidebar {
     position: fixed;
@@ -600,12 +656,17 @@ header.navbar.loaded {
     color: #999;
 }
 
+#sidebarTitle {
+  font-weight: normal;
+}
+
+
 .section-title {
     margin-top: 1.25rem;
     font-weight: 700;
     font-size: 1.3rem;
     text-transform: uppercase;
-    color: #198754;
+    color: #8d8d8d;
 }
 
 #jobSidebar ul {

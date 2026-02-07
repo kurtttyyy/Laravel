@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -200,6 +201,18 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Interview');
     }
 
+    public function update_employee($id){
+
+
+        $open = User::findOrFail($id);
+
+        $open->update([
+            'status' => 'Approved',
+        ]);
+
+        return redirect()->back()->with('success','Employee can now login');
+    }
+
 
     //DELETE
     public function destroy_position($id){
@@ -216,6 +229,18 @@ class AdministratorStoreController extends Controller
         $delete->delete();
         return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
 
+    }
+
+    public function destroy_employee($id){
+
+
+        $open = User::findOrFail($id);
+
+        $open->update([
+            'status' => 'Not Approved',
+        ]);
+
+        return redirect()->back()->with('success','Employee not Approve');
     }
 
 

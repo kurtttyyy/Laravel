@@ -80,9 +80,11 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');
     Route::post('system/update/application/status', 'update_application_status')->name('admin.updateStatus');
     Route::post('system/update/interview', 'updated_interview')->name('admin.storeUpdatedInterview');
+    Route::post('system/update/employee/{id}', 'update_employee')->name('admin.updateEmployee');
 
     //DELETE
     Route::post('system/delete/position/{id}', 'destroy_position')->name('admin.destroyPosition');
     Route::post('system/delete/interview/{id}', 'destroy_interview')->name('admin.interviewCancel');
+    Route::post('system/delete/employee/{id}', 'destroy_employee')->name('admin.destroyEmployee');
 });
 

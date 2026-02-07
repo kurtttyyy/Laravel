@@ -57,8 +57,8 @@
   <!-- HEADER -->
   <div class="text-center mb-6 leading-tight">
     <p class="font-semibold uppercase">Northeastern College</p>
-    <p>Santiago City, Philippines</p>
-    <p>Telephone No.: (078) 305-3226</p>
+    <p >Santiago City, Philippines</p>
+    <p >Telephone No.: (078) 305-3226</p>
 
     <p class="mt-4 font-semibold uppercase">Office of the Human Resource</p>
     <p class="font-semibold uppercase">Employees Profile Form</p>
@@ -69,20 +69,20 @@
 
     <!-- LEFT BOX -->
     <div class="border border-gray-500">
-      <div class="row">Last Name:</div>
-      <div class="row">First Name:</div>
-      <div class="row">Middle Name:</div>
-      <div class="row">ID Number:</div>
-      <div class="row">Account No.:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Last Name:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">First Name:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Middle Name:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">ID Number:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Account No.:</div>
     </div>
 
     <!-- RIGHT BOX -->
     <div class="border border-gray-500">
-      <div class="row">Sex:</div>
-      <div class="row">Civil Status:</div>
-      <div class="row">Contact No.:</div>
-      <div class="row">Date of Birth:</div>
-      <div class="row">Address:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Sex:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Civil Status:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Contact No.:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Date of Birth:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Address:</div>
     </div>
   </div>
 
@@ -90,23 +90,37 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row">Employment Date:</div>
-      <div class="row">Position:</div>
-      <div class="row">Department:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Employment Date:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Position:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Department:</div>
       <div class="row">
         Classification:
-        <span class="ml-4">☐ Full-time</span>
-        <span class="ml-3">☐ Part-time</span>
-        <span class="ml-3">☐ NT</span>
-      </div>
+        <label class="ml-4">
+            <input type="checkbox" disabled
+                :checked="selectedEmployee?.applicant?.position.employment === 'Full-Time'">
+            Full-time
+        </label>
+
+        <label class="ml-3">
+            <input type="checkbox" disabled
+                :checked="selectedEmployee?.applicant?.position.employment === 'Part-Time'">
+            Part-time
+        </label>
+
+        <label class="ml-3">
+            <input type="checkbox" disabled
+                :checked="selectedEmployee?.applicant?.position.employment === 'NT'">
+            NT
+        </label>
+    </div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row">SSS:</div>
-      <div class="row">TIN:</div>
-      <div class="row">PhilHealth:</div>
-      <div class="row">Pag-IBIG MID:</div>
-      <div class="row">Pag-IBIG RTN:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">SSS:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">TIN:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">PhilHealth:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Pag-IBIG MID:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Pag-IBIG RTN:</div>
     </div>
   </div>
 
@@ -114,37 +128,37 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row">License:</div>
-      <div class="row">Registration No.:</div>
-      <div class="row">Registration Date:</div>
-      <div class="row">Valid Until:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">License:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Registration No.:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Registration Date:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Valid Until:</div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row">Bachelor’s Degree:</div>
-      <div class="row">Master’s Degree:</div>
-      <div class="row">Doctorate Degree:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Bachelor’s Degree:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Master’s Degree:</div>
+      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Doctorate Degree:</div>
     </div>
   </div>
 
   <!-- SALARY BOX -->
   <div class="border border-gray-500 w-1/2 mt-4" style="width: 502px;">
-    <div class="row">Basic Salary:</div>
-    <div class="row">Rate per Hour:</div>
-    <div class="row">COLA:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Basic Salary:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Rate per Hour:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">COLA:</div>
   </div>
   <br>
 <div class="border-t border-dashed border-gray-500 my-3"></div>
 
   <br>
     <div class="row font-semibold bg-gray-100">Employee Details</div>
-    <div class="row">Full Name:</div>
-    <div class="row">ID Number:</div>
-    <div class="row">Department:</div>
-    <div class="row">Person Contact in case of Emergency:</div>
-    <div class="row">Address:</div>
-    <div class="row">Cellphone Number:</div>
-    
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Full Name:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">ID Number:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Department:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Person Contact in case of Emergency:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Address:</div>
+    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Cellphone Number:</div>
+
 
 
   <!-- FOOTER -->
@@ -319,7 +333,7 @@
       </button>
     </div>
 
-    
+
 
   </div>
 </div>

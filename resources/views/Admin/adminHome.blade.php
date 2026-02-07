@@ -157,51 +157,27 @@
   </thead>
   <tbody class="divide-y">
     <tr>
+        @foreach($employee as $e)
       <td class="py-3 flex items-center gap-3">
-        <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">JD</div>
+        <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">{{$e->initials}}</div>
         <div>
-          <p class="font-medium">John Doe</p>
-          <p class="text-xs text-slate-500">john.doe@company.com</p>
+          <p class="font-medium">{{$e->first_name}} {{$e->last_name}}</p>
+          <p class="text-xs text-slate-500">{{$e->email}}</p>
         </div>
       </td>
       <td></td>
-      <td class="flex gap-2">
-        <button class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-200">Accept</button>
-        <button class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Declined</button>
-      </td>
-      <td>Jan 15, 2024</td>
-    </tr>
-
-    <tr>
-      <td class="py-3 flex items-center gap-3">
-        <div class="w-9 h-9 bg-pink-500 rounded-full text-white flex items-center justify-center">SW</div>
-        <div>
-          <p class="font-medium">Sarah Wilson</p>
-          <p class="text-xs text-slate-500">sarah.w@company.com</p>
-        </div>
-      </td>
-      <td></td>
-      <td class="flex gap-2">
-        <button class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-200">Accept</button>
-        <button class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Declined</button>
-      </td>
-      <td>Jan 12, 2024</td>
-    </tr>
-
-    <tr>
-      <td class="py-3 flex items-center gap-3">
-        <div class="w-9 h-9 bg-orange-500 rounded-full text-white flex items-center justify-center">MC</div>
-        <div>
-          <p class="font-medium">Mike Chen</p>
-          <p class="text-xs text-slate-500">mike.chen@company.com</p>
-        </div>
-      </td>
-      <td></td>
-      <td class="flex gap-2">
-        <button class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-200">Accept</button>
-        <button class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Declined</button>
-      </td>
-      <td>Jan 10, 2024</td>
+        <td class="flex gap-2">
+            <form action="{{ route('admin.updateEmployee', $e->id)}}" method="POST">
+                @csrf
+                <button type="submit" class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-200">Accept</button>
+            </form>
+            <form action="{{ route('admin.destroyEmployee', $e->id)}}" method="POST">
+                @csrf
+                <button type="submit" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Declined</button>
+            </form>
+        </td>
+      <td>{{$e->created_at_formatted}}</td>
+      @endforeach
     </tr>
   </tbody>
 </table>
@@ -209,7 +185,7 @@
         </div>
 
 
-        
+
 
         <!-- Right Column -->
         <div class="space-y-6">

@@ -203,6 +203,7 @@
           <button @click="tab='performance'" :class="tab==='performance' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Performance</button>
           <button @click="tab='documents'" :class="tab==='documents' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Documents</button>
           <button @click="tab='record'" :class="tab==='record' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Service Record</button>
+          <button @click="tab='biometric'" :class="tab==='biometric' ? 'text-indigo-600 font-semibold border-b-2 border-indigo-600 pb-2' : 'text-gray-500'">Biometric</button>
         </div>
 
         @include('Admin.PersonalDetail.adminEmployeeOverview')
@@ -210,6 +211,8 @@
         @include('Admin.PersonalDetail.adminEmployeePerformance')
         @include('Admin.PersonalDetail.adminEmployeeDocuments')
         @include('Admin.PersonalDetail.adminServiceRecord')
+        @include('Admin.PersonalDetail.adminbioMetric')
+
 
 
         <!-- Footer -->

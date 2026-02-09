@@ -194,15 +194,15 @@
   </div>
 
   <!-- Skills -->
-  <div class="bg-slate-50 p-4 rounded-xl text-sm">
-    <h3 class="font-semibold mb-5">Skills</h3>
-    <div class="flex flex-wrap gap-2">
-      <span
-        class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full"
-        x-text="selectedEmployee?.applicant?.position?.skills ?? '—'"
-      ></span>
-    </div>
+<div class="bg-slate-50 p-4 rounded-xl text-sm">
+  <h3 class="font-semibold mb-5">Skills</h3>
+  <div class="flex flex-wrap gap-2">
+    <template x-for="skill in (selectedEmployee?.applicant?.position?.skills ?? '').split(',')" :key="skill">
+      <span class="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full" x-text="skill.trim()"></span>
+    </template>
   </div>
+</div>
+
 
   <!-- Recent Activity -->
   <div class="bg-slate-50 p-4 rounded-xl text-sm">

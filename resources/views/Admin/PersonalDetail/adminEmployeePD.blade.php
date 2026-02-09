@@ -187,9 +187,9 @@
 
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25a7.5 7.5 0 0115 0" />
-    <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7.5 7.5 0 00-7.5 6.75" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.25a7.5 7.5 0 0115 0" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7.5 7.5 0 00-7.5 6.75" />
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Relationship</span>

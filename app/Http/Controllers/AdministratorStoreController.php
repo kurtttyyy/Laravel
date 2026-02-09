@@ -3,8 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\Education;
+use App\Models\Employee;
+use App\Models\Government;
 use App\Models\Interviewer;
+use App\Models\License;
 use App\Models\OpenPosition;
+use App\Models\Salary;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -200,6 +206,147 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Interview');
     }
 
+    public function update_employee($id){
+
+
+        $open = User::findOrFail($id);
+
+        $open->update([
+            'status' => 'Approved',
+        ]);
+
+        return redirect()->back()->with('success','Employee can now login');
+    }
+
+    public function update_bio(Request $request){
+        $attrs = $request->validate([
+            //User Model
+            'user_id' => 'required|exists:users,id',
+            'first' => 'required',
+            'middle' => 'required',
+            'last' => 'required',
+
+            //Employee Model
+            'employee_id' => 'required',
+            'account_number' => 'required',
+            'gender' => 'required',
+            'civil_status' => 'required',
+            'contact_number' => 'required',
+            'birthday' => 'required|date',
+            'address' => 'required',
+            'employment_date' => 'required|date',
+            'position' => 'required',
+            'department' => 'required',
+            'classification' => 'required',
+
+            //Government Model
+            'SSS' => 'required',
+            'TIN' => 'required',
+            'PhilHealth' => 'required',
+            'MID' => 'required',
+            'RTN' => 'required',
+
+            //License Model
+            'license' => 'required',
+            'registration_number' => 'required',
+            'registration_date' => 'required',
+            'valid_until' => 'required',
+
+            //Education Model
+            'bachelor' => 'required',
+            'master' => 'required',
+            'doctorate' => 'required',
+
+            //Salary Model
+            'salary' => 'required',
+            'rate_per_hour' => 'required',
+            'cola' => 'required',
+        ]);
+
+        $user = User::findOrFail($attrs['user_id']);
+
+        $user->update([
+            //'' => $attrs[''],
+            'first_name' => $attrs['first'],
+            'middle_name' => $attrs['middle'],
+            'last_name' => $attrs['last'],
+        ]);
+
+        Employee::updateOrCreate(
+            // 1️⃣ Condition to find the record
+            ['user_id' => $attrs['user_id']],
+
+            // 2️⃣ Values to create or update
+            [
+                'user_id' => $attrs['user_id'],
+                'employee_id' => $attrs['employee_id'],
+                'employement_date' => $attrs['employement_date'],
+                'birthday' => $attrs['birthday'],
+                'account_number' => $attrs['account_number'],
+                'sex' => $attrs['gender'],
+                'civil_status' => $attrs['civil_status'],
+                'contact_number' => $attrs['contact_number'],
+                'address' => $attrs['address'],
+                'department' => $attrs['department'],
+                'position' => $attrs['position'],
+                'classification' => $attrs['classification'],
+            ]
+        );
+
+        Government::updateOrCreate(
+            // 1️⃣ Condition to find the record
+            ['user_id' => $attrs['user_id']],
+
+            // 2️⃣ Values to create or update
+            [
+                'SSS' => $attrs['SSS'],
+                'TIN' => $attrs['TIN'],
+                'PhilHealth' => $attrs['PhilHealth'],
+                'RTN' => $attrs['RTN'],
+                'MID' => $attrs['MID'],
+            ]
+        );
+
+        License::updateOrCreate(
+            // 1️⃣ Condition to find the record
+            ['user_id' => $attrs['user_id']],
+
+            // 2️⃣ Values to create or update
+            [
+                'license' => $attrs['license'],
+                'registration_number' => $attrs['registration_number'],
+                'registration_date' => $attrs['registration_date'],
+                'valid_until' => $attrs['valid_until'],
+            ]
+        );
+
+        Education::updateOrCreate(
+            // 1️⃣ Condition to find the record
+            ['user_id' => $attrs['user_id']],
+
+            // 2️⃣ Values to create or update
+            [
+                'bachelor' => $attrs['bachelor'],
+                'master' => $attrs['master'],
+                'doctorate' => $attrs['doctorate'],
+            ]
+        );
+
+        Salary::updateOrCreate(
+            // 1️⃣ Condition to find the record
+            ['user_id' => $attrs['user_id']],
+
+            // 2️⃣ Values to create or update
+            [
+                'bachelor' => $attrs['bachelor'],
+                'master' => $attrs['master'],
+                'doctorate' => $attrs['doctorate'],
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Save Successfully');
+    }
+
 
     //DELETE
     public function destroy_position($id){
@@ -216,6 +363,18 @@ class AdministratorStoreController extends Controller
         $delete->delete();
         return redirect()->route('admin.adminPosition')->with('success','Successfully deleted Position');
 
+    }
+
+    public function destroy_employee($id){
+
+
+        $open = User::findOrFail($id);
+
+        $open->update([
+            'status' => 'Not Approved',
+        ]);
+
+        return redirect()->back()->with('success','Employee not Approve');
     }
 
 

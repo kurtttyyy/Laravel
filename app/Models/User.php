@@ -20,6 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
+        'middle_name',
         'role',
         'job_role',
         'status',
@@ -51,15 +52,22 @@ class User extends Authenticatable
         ];
     }
 
+    public function applicant(){
+        return $this->hasOne(Applicant::class, 'user_id', 'id')
+                    ->where('application_status', 'Hired');
+    }
+
     public function scopeAdmins($query)
     {
         return $query->where('role', '!=', 'Employee');
     }
 
-    public function applicant(){
-        return $this->hasOne(Applicant::class, 'user_id', 'id')
-                    ->where('application_status', 'Hired');
+    public function getCreatedAtFormattedAttribute()
+    {
+        return $this->created_at ? $this->created_at->format('F j, Y') : null;
     }
+
+
 
     public function getInitialsAttribute()
     {
@@ -67,5 +75,25 @@ class User extends Authenticatable
             substr($this->first_name, 0, 1) .
             substr($this->last_name, 0, 1)
         );
+    }
+
+    public function employee(){
+        return $this->hasOne(Employee::class, 'user_id', 'id');
+    }
+
+    public function education(){
+        return $this->hasOne(Education::class, 'user_id', 'id');
+    }
+
+    public function government(){
+        return $this->hasOne(Government::class, 'user_id', 'id');
+    }
+
+    public function license(){
+        return $this->hasOne(License::class, 'user_id', 'id');
+    }
+
+    public function salary(){
+        return $this->hasOne(Salary::class, 'user_id', 'id');
     }
 }

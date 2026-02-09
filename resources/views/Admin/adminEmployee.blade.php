@@ -118,7 +118,7 @@
             </div>
 
             <div class="p-4 mt-7">
-                <h3 class="font-bold text-gray-800 text-lg text-center">{{$emp->applicant->first_name ?? ''}} {{$emp->applicant->last_name ?? ''}}</h3>
+                <h3 class="font-bold text-gray-800 text-lg text-center">{{$emp->first_name ?? ''}} {{$emp->last_name ?? ''}}</h3>
                 <p class="text-gray-500 text-sm text-center">{{$emp->applicant->position->title ?? ''}}</p>
 
                 <div class="mt-4 space-y-1 text-gray-500 text-sm">

@@ -109,6 +109,8 @@
                     <div class="grid grid-cols-2 gap-4">
                         <input type="text" placeholder="First Name" name = "first_name"
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
+                        <input type="text" placeholder="Middle Name" name = "middle_name"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
                         <input type="text" placeholder="Last Name" name = "last_name"
                                class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-600 focus:outline-none">
                     </div>

@@ -14,6 +14,7 @@ class RegisterLoginController extends Controller
         $attrs = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
+            'middle_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|max:255',
             'confirmation_password' => 'required|string|max:255',
@@ -40,6 +41,7 @@ class RegisterLoginController extends Controller
         $user = User::create([
             'first_name' => $attrs['first_name'],
             'last_name' => $attrs['last_name'],
+            'middle_name' => $attrs['middle_name'],
             'role' => $role,
             'status' => $status,
             'account_status' => $account_status,

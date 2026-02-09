@@ -281,7 +281,7 @@ class AdministratorStoreController extends Controller
             [
                 'user_id' => $attrs['user_id'],
                 'employee_id' => $attrs['employee_id'],
-                'employement_date' => $attrs['employement_date'],
+                'employement_date' => $attrs['employment_date'],
                 'birthday' => $attrs['birthday'],
                 'account_number' => $attrs['account_number'],
                 'sex' => $attrs['gender'],
@@ -339,9 +339,9 @@ class AdministratorStoreController extends Controller
 
             // 2️⃣ Values to create or update
             [
-                'bachelor' => $attrs['bachelor'],
-                'master' => $attrs['master'],
-                'doctorate' => $attrs['doctorate'],
+                'salary' => $attrs['salary'],
+                'rate_per_hour' => $attrs['rate_per_hour'],
+                'cola' => $attrs['cola'],
             ]
         );
 

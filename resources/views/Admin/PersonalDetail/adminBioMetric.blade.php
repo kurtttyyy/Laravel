@@ -78,7 +78,7 @@
 
     <!-- RIGHT BOX -->
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.employee.gender">Sex:</div>
+      <div class="row" x-text="selectedEmployee?.employee.sex">Sex:</div>
       <div class="row" x-text="selectedEmployee?.employee.civil_status">Civil Status:</div>
       <div class="row" x-text="selectedEmployee?.employee.contact_number">Contact No.:</div>
       <div class="row" x-text="selectedEmployee?.employee.birthday">Date of Birth:</div>
@@ -90,7 +90,7 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.employee.employment_date">Employment Date:</div>
+      <div class="row" x-text="selectedEmployee?.employee.employement_date">Employment Date:</div>
       <div class="row" x-text="selectedEmployee?.employee.position">Position:</div>
       <div class="row" x-text="selectedEmployee?.employee.department">Department:</div>
       <div class="row">
@@ -136,7 +136,7 @@
 
     <div class="border border-gray-500">
       <div class="row" x-text="selectedEmployee?.education.bachelor">Bachelor’s Degree:</div>
-      <div class="row" x-text="selectedEmployee?.education.masater">Master’s Degree:</div>
+      <div class="row" x-text="selectedEmployee?.education.master">Master’s Degree:</div>
       <div class="row" x-text="selectedEmployee?.education.doctorate">Doctorate Degree:</div>
     </div>
   </div>
@@ -266,7 +266,7 @@
 
     <!-- ACTIONS -->
     <div class="flex justify-end gap-2 mt-6">
-      <button
+      <button type="button"
         @click="openForm = false"
         class="px-4 py-1 border rounded">
         Cancel
@@ -283,61 +283,6 @@
   </div>
 </div>
 
-
-
-<div class="space-y-3" style="visibility: hidden;">
-    <h3 class="font-semibold mt-6">Employee Details</h3>
-  <div>
-    <label class="block text-xs text-gray-600">Full Name</label>
-    <input
-      type="text"
-      class="w-full border px-2 py-1"
-      placeholder="e.g. Juan Dela Cruz">
-  </div>
-
-  <div>
-    <label class="block text-xs text-gray-600">ID Number</label>
-    <input
-      type="text"
-      class="w-full border px-2 py-1"
-      placeholder="Employee ID">
-  </div>
-
-  <div>
-    <label class="block text-xs text-gray-600">Department</label>
-    <input
-      type="text"
-      class="w-full border px-2 py-1"
-      placeholder="e.g. Human Resource">
-  </div>
-
-  <div>
-    <label class="block text-xs text-gray-600">
-      Person to Contact in Case of Emergency
-    </label>
-    <input
-      type="text"
-      class="w-full border px-2 py-1"
-      placeholder="Full name of emergency contact">
-  </div>
-
-  <div>
-    <label class="block text-xs text-gray-600">Address</label>
-    <input
-      type="text"
-      class="w-full border px-2 py-1"
-      placeholder="Complete address">
-  </div>
-
-  <div>
-    <label class="block text-xs text-gray-600">Cellphone Number</label>
-    <input
-      type="tel"
-      class="w-full border px-2 py-1"
-      placeholder="09XXXXXXXXX">
-  </div>
-
-</div>
 
 <style>
   .row {

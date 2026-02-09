@@ -120,7 +120,7 @@
             </tr>
             </thead>
 
-            <tbody class="divide-y">
+            <tbody class="divide-y" id="applicantsTableBody">
             @foreach($applicant as $app)
             <!-- Row -->
              <input type="hidden" id="applicant_id" name="applicant_id" value="{{$app->id}}">
@@ -138,7 +138,22 @@
                     <p class="text-xs text-gray-400">{{$app->collage_name}}</p>
                 </td>
                 <td>{{$app->created_at->format('F d, Y')}}</td>
-                <td><span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-600">{{$app->application_status}}</span></td>
+                @php
+                    $statusStyles = [
+                        'pending' => 'background-color: rgba(255, 193, 7, 0.3); color: #ff9307;', // yellow
+                        'Hired' => 'background-color: rgba(25, 135, 84, 0.2); color: #198754;',  // green
+                        'Rejected' => 'background-color: rgba(220, 53, 69, 0.2); color: #dc3545;', // red
+                        'default' => 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;' // blue
+                    ];
+
+                    $badgeStyle = $statusStyles[$app->application_status] ?? $statusStyles['default'];
+                @endphp
+
+                <td>
+                    <span class="px-3 py-1 text-xs rounded-full" style="{{ $badgeStyle }}">
+                        {{ $app->application_status }}
+                    </span>
+                </td>
                 <td class="text-yellow-400">
                     @for ($i = 0; $i < 5; $i++)
                         @if ($i < $app->starRatings)
@@ -162,19 +177,10 @@
             </tbody>
         </table>
 
-    <!-- Footer -->
-    <div class="flex justify-between items-center mt-4 text-sm text-gray-400">
-        <p>Showing 1 to 5 of 248 results</p>
-            <div class="flex items-center gap-2">
-                <span>Previous</span>
-                <span class="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg">1</span>
-                <span>2</span>
-                <span>3</span>
-                <span>...</span>
-                <span>50</span>
-                <span>Next</span>
-            </div>
-        </div>
+   <!-- Pagination Controls -->
+<div class="mt-4 flex justify-end items-center gap-2" id="paginationControls"></div>
+
+
     </div>
 
 
@@ -693,6 +699,80 @@
             }
         });
     }
+</script>
+<script>
+  // Get applicants from Blade as JSON
+  const applicants = @json($applicant); // Pass your Laravel collection to JS
+  const rowsPerPage = 5; // Number of rows per page
+  let currentPage = 1;
+
+  function renderTable(page = 1) {
+    const tbody = document.getElementById('applicantsTableBody');
+    tbody.innerHTML = '';
+
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedItems = applicants.slice(start, end);
+
+    paginatedItems.forEach(app => {
+      const statusStyles = {
+        'pending': 'background-color: rgba(255, 193, 7, 0.3); color: #ff9307;',
+        'Hired': 'background-color: rgba(25, 135, 84, 0.2); color: #198754;',
+        'Rejected': 'background-color: rgba(220, 53, 69, 0.2); color: #dc3545;',
+        'default': 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;'
+      };
+      const badgeStyle = statusStyles[app.application_status] || statusStyles['default'];
+
+      tbody.innerHTML += `
+      <tr class="hover:bg-slate-50">
+        <td class="py-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center">SM</div>
+          <div>
+            <p class="font-medium">${app.first_name} ${app.last_name}</p>
+            <p class="text-xs text-gray-400">${app.email}</p>
+          </div>
+        </td>
+        <td>
+          <p class="font-medium">${app.position.title}</p>
+          <p class="text-xs text-gray-400">${app.collage_name}</p>
+        </td>
+        <td>${new Date(app.created_at).toLocaleDateString()}</td>
+        <td>
+          <span class="px-3 py-1 text-xs rounded-full" style="${badgeStyle}">${app.application_status}</span>
+        </td>
+        <td class="text-yellow-400">
+          ${[...Array(5)].map((_, i) => i < app.starRatings ? '&#9733;' : '&#9733;').join('')}
+        </td>
+        <td class="text-gray-400 space-x-3">
+          <i class="fa-regular fa-eye cursor-pointer hover:text-indigo-600" onclick="openApplicantModal(${app.id})"></i>
+          <i class="fa-regular fa-calendar cursor-pointer hover:text-indigo-600" onclick="openScheduleModal(${app.id})"></i>
+          <i class="fa-solid fa-xmark cursor-pointer"></i>
+        </td>
+      </tr>`;
+    });
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const pagination = document.getElementById('paginationControls');
+    pagination.innerHTML = '';
+    const pageCount = Math.ceil(applicants.length / rowsPerPage);
+
+    for (let i = 1; i <= pageCount; i++) {
+      const btn = document.createElement('button');
+      btn.innerText = i;
+      btn.className = `px-3 py-1 border rounded ${i === currentPage ? 'bg-indigo-600 text-white' : 'bg-white'}`;
+      btn.addEventListener('click', () => {
+        currentPage = i;
+        renderTable(currentPage);
+      });
+      pagination.appendChild(btn);
+    }
+  }
+
+  // Initial render
+  renderTable();
 </script>
 
 

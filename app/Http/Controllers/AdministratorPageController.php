@@ -197,5 +197,6 @@ class AdministratorPageController extends Controller
     public function display_create_position(){
         return view('admin.adminCreatePosition');
     }
+    
 }
 

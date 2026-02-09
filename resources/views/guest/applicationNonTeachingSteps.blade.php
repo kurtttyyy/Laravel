@@ -69,14 +69,15 @@
         <div class="col-md-6">
             <div class="floating-input">
                 <input type="text" id="first_name" name="first_name" class="form-control" placeholder=" " required>
-                <label for="first_name">First Name*</label>
+                <label for="first_name">First Name<span class="required-asterisk"> *</span></label>
             </div>
         </div>
+
 
         <div class="col-md-6">
             <div class="floating-input">
                 <input type="text" id="last_name" name="last_name" class="form-control" placeholder=" " required>
-                <label for="last_name">Last Name*</label>
+                <label for="last_name">Last Name<span class="required-asterisk"> *</span></label>
             </div>
         </div>
     </div>
@@ -85,14 +86,14 @@
         <div class="col-md-6">
             <div class="floating-input">
                 <input type="email" id="email" name="email" class="form-control" placeholder=" " required>
-                <label for="email">Email Address*</label>
+                <label for="email">Email Address<span class="required-asterisk"> *</span></label>
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="floating-input">
                 <input type="text" id="phone" name="phone" class="form-control" placeholder=" " required>
-                <label for="phone">Phone Number*</label>
+                <label for="phone">Phone Number<span class="required-asterisk"> *</span></label>
             </div>
         </div>
     </div>
@@ -100,7 +101,7 @@
     <div class="mb-3">
         <div class="floating-input">
             <input type="text" id="address" name="address" class="form-control" placeholder=" " required>
-            <label for="address">Address*</label>
+            <label for="address">Address<span class="required-asterisk"> *</span></label>
         </div>
     </div>
 
@@ -113,109 +114,107 @@
 
 
     <!-- Work Experience & Education Form -->
-    <div id="experienceForm" class="mt-4 d-none form-step">
-        <h4 class="fw-bold mb-3">Educational Background</h4>
-            <div class="mb-3">
-                <label for="education" class="form-label">Highest Educational Attainment*</label>
-                <select class="form-select" id="education" name="education" required>
-                    <option value="">Select one</option>
-                    <option value="High School">High School</option>
-                    <option value="Associate Degree">Associate Degree</option>
-                    <option value="Bachelor's Degree">Bachelor's Degree</option>
-                    <option value="Master's Degree">Master's Degree</option>
-                    <option value="Master's Degree">Master of Science (MSc)</option>
-                    <option value="Master's Degree">Master of Arts (MA)</option>
-                    <option value="Doctorate">Doctor of Philosophy (PhD)</option>
-                </select>
-            </div>
+<div id="experienceForm" class="mt-4 d-none form-step">
 
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Field of Study*</label>
-                <select class="form-select" id="field_study" name="field_study" required>
-                    <option value="">Select one</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Business">Business</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Education">Education</option>
-                    <option value="Health Sciences">Health Sciences</option>
-                </select>
-            </div>
+    <h4 class="fw-bold mb-3">Educational Background</h4>
 
-            <div class="mb-3">
-                <label for="field_study" class="form-label">University Name*</label>
-                    <input class="form-select" id="university_name" name="university_name" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Address*</label>
-                    <input class="form-select" id="university_address" name="university_address" required>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Year Complete*</label>
-                    <input class="form-select" id="year_complete" name="year_complete" required>
-                </select>
-            </div>
-
-        <br>
-        <h4 class="fw-bold mb-3">Work Experience</h4>
-
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Position*</label>
-                    <input class="form-select" id="work_position" name="work_position" required>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Employer*</label>
-                <input class="form-select" id="work_employer" name="work_employer" required>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Location*</label>
-                <input class="form-select" id="work_location" name="work_location" required>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="field_study" class="form-label">Duration*</label>
-                    <input class="form-select" id="work_duration" name="work_duration" required>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="experience_years" class="form-label">Years of Relevant Experience*</label>
-                <select class="form-select" id="experience_years" name="experience_years" required>
-                    <option value="">Select one</option>
-                    <option value="0–1">0–1</option>
-                    <option value="2–3">2–3</option>
-                    <option value="4–5">4–5</option>
-                    <option value="6+">6+</option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label for="key_skills" class="form-label">Key Skill & Expertise*</label>
-
-                <!-- Autocomplete suggestion box -->
-                <input list="skillsList" class="form-control" id="key_skills" name="key_skills" placeholder="Type or select a skill" required>
-
-                <datalist id="skillsList">
-                    <option value="Team Leadership">
-                    <option value="Project Management">
-                    <option value="Communication">
-                    <option value="Software Development">
-                    <option value="Graphic Design">
-                    <option value="Data Analysis">
-                    <option value="Customer Service">
-                </datalist>
-            </div>
-
-            <div class="d-flex justify-content-between mt-auto ">
-                <button type="button" id="btnBackToPersonal" class="btn btn-secondary">Previous</button>
-                <button type="button" id="btnToDocuments" class="btn btn-primary">Proceed</button>
-            </div>
+    <div class="mb-3 floating-input">
+        <select class="form-select" id="education" name="education" required>
+            <option value="" disabled selected></option>
+            <option value="High School">High School</option>
+            <option value="Associate Degree">Associate Degree</option>
+            <option value="Bachelor's Degree">Bachelor's Degree</option>
+            <option value="Master's Degree">Master's Degree</option>
+            <option value="Master's Degree">Master of Science (MSc)</option>
+            <option value="Master's Degree">Master of Arts (MA)</option>
+            <option value="Doctorate">Doctor of Philosophy (PhD)</option>
+        </select>
+        <label for="education">Highest Educational Attainment<span class="required-asterisk"> *</span></label>
     </div>
+
+    <div class="mb-3 floating-input">
+        <select class="form-select" id="field_study" name="field_study" required>
+            <option value="" disabled selected></option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Business">Business</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Education">Education</option>
+            <option value="Health Sciences">Health Sciences</option>
+        </select>
+        <label for="field_study">Field of Study<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="university_name" name="university_name" placeholder=" " required>
+        <label for="university_name">University Name<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="university_address" name="university_address" placeholder=" " required>
+        <label for="university_address">Address<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="year_complete" name="year_complete" placeholder=" " required>
+        <label for="year_complete">Year Complete<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <h4 class="fw-bold mb-3 mt-4">Work Experience</h4>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="work_position" name="work_position" placeholder=" " required>
+        <label for="work_position">Position<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="work_employer" name="work_employer" placeholder=" " required>
+        <label for="work_employer">Employer<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="work_location" name="work_location" placeholder=" " required>
+        <label for="work_location">Location<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <input type="text" class="form-select" id="work_duration" name="work_duration" placeholder=" " required>
+        <label for="work_duration">Duration<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-3 floating-input">
+        <select class="form-select" id="experience_years" name="experience_years" required>
+            <option value="" disabled selected></option>
+            <option value="0–1">0–1</option>
+            <option value="2–3">2–3</option>
+            <option value="4–5">4–5</option>
+            <option value="6+">6+</option>
+        </select>
+        <label for="experience_years">Years of Relevant Experience<span class="required-asterisk"> *</span></label>
+    </div>
+
+    <div class="mb-4 floating-input">
+        <input list="skillsList" class="form-control" id="key_skills"
+               name="key_skills" placeholder=" " required>
+        <label for="key_skills">Key Skill & Expertise<span class="required-asterisk"> *</span></label>
+
+        <datalist id="skillsList">
+            <option value="Team Leadership">
+            <option value="Project Management">
+            <option value="Communication">
+            <option value="Software Development">
+            <option value="Graphic Design">
+            <option value="Data Analysis">
+            <option value="Customer Service">
+        </datalist>
+    </div>
+
+    <div class="d-flex justify-content-between mt-auto">
+        <button type="button" id="btnBackToPersonal" class="btn btn-secondary">Previous</button>
+        <button type="button" id="btnToDocuments" class="btn btn-primary">Proceed</button>
+    </div>
+
+</div>
+
 
     <!--Documents Form-->
  <div id="documentsForm" class="mt-4 d-none form-step">
@@ -223,7 +222,7 @@
 
     <!-- Resume/CV -->
     <div class="mb-4">
-        <label class="form-label fw-semibold">Resume/CV*</label>
+        <label class="form-label fw-semibold">Resume/CV <span class="required-asterisk"> *</span></label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
             <div class="upload-main-text">Click to upload your resume</div>
@@ -235,7 +234,7 @@
 
     <!-- Cover Letter -->
     <div class="mb-4">
-        <label class="form-label fw-semibold">Cover Letter*</label>
+        <label class="form-label fw-semibold">Cover Letter <span class="required-asterisk"> *</span></label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
             <div class="upload-main-text">Click to upload your cover letter</div>
@@ -247,7 +246,7 @@
 
     <!-- Personal Data Sheet -->
     <div class="mb-4">
-        <label class="form-label fw-semibold">Personal Data Sheet*</label>
+        <label class="form-label fw-semibold">Personal Data Sheet <span class="required-asterisk"> *</span></label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
             <div class="upload-main-text">Click to upload your Personal Data Sheet</div>
@@ -259,7 +258,7 @@
 
     <!-- Transcript Of Records -->
     <div class="mb-4">
-        <label class="form-label fw-semibold">Transcript Of Records*</label>
+        <label class="form-label fw-semibold">Transcript Of Records <span class="required-asterisk"> *</span></label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
             <div class="upload-main-text">Click to upload your Transcript Of Records</div>
@@ -274,7 +273,7 @@
         <label class="form-label fw-semibold">Diploma, Master's (if available), Doctorate (if available)</label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
-            <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate</div>
+            <div class="upload-main-text">Click to upload your Diploma, Master's, Doctorate </div>
             <div class="upload-sub-text">PDF, DOC, DOCX (up to 5MB)</div>
             <input type="file" id="diploma" name="documents[4][file]" accept=".pdf,.doc,.docx" required>
             <input type="hidden" name="documents[4][type]" value="Diploma">
@@ -307,7 +306,7 @@
 
     <!-- Certifications -->
     <div class="mb-4">
-        <label class="form-label fw-semibold">Certifications & Supporting Document*</label>
+        <label class="form-label fw-semibold">Certifications & Supporting Document <span class="required-asterisk"> *</span></label>
         <label class="upload-area">
             <i class="bi bi-file-earmark-arrow-up upload-icon"></i>
             <div class="upload-main-text">Click to upload your documents</div>

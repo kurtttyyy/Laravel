@@ -3,7 +3,7 @@
 
 
 <!-- ================= PERSONAL DETAILS ================= -->
-<div x-show="tab==='record'" x-transition class="p-6">
+<div x-show="tab==='record'" x-transition class="w-full p-6">
 
   <!-- Main Container -->
   <div class="max-w-7xl mx-auto space-y-6">

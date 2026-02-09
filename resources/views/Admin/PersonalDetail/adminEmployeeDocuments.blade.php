@@ -1,5 +1,5 @@
 <!-- Documents -->
-<div x-show="tab === 'documents'" x-transition class="p-6 space-y-6">
+<div x-show="tab === 'documents'" x-transition class="w-full p-6 space-y-6">
 
   <!-- Upload Box (Static) -->
   <div class="border-2 border-dashed border-indigo-200 bg-indigo-50 rounded-xl p-8 text-center">

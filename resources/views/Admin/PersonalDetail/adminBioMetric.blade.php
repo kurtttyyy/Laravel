@@ -1,5 +1,5 @@
 
-<div x-show="tab === 'biometric'" x-transition class="p-6 space-y-6">
+<div x-show="tab === 'biometric'" x-transition class="w-full p-6 space-y-6">
     <div class="p-8 space-y-6">
       <div x-data="{ openForm: false }">
 

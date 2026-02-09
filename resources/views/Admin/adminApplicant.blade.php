@@ -741,7 +741,10 @@
           <span class="px-3 py-1 text-xs rounded-full" style="${badgeStyle}">${app.application_status}</span>
         </td>
         <td class="text-yellow-400">
-          ${[...Array(5)].map((_, i) => i < app.starRatings ? '&#9733;' : '&#9733;').join('')}
+          ${[...Array(5)].map((_, i) => i < (app.starRatings || 0)
+            ? '<span class="text-yellow-400">&#9733;</span>'
+            : '<span class="text-gray-300">&#9733;</span>'
+          ).join('')}
         </td>
         <td class="text-gray-400 space-x-3">
           <i class="fa-regular fa-eye cursor-pointer hover:text-indigo-600" onclick="openApplicantModal(${app.id})"></i>

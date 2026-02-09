@@ -154,7 +154,7 @@
                         {{ $app->application_status }}
                     </span>
                 </td>
-                <td class="text-yellow-400">
+                <td>
                     @for ($i = 0; $i < 5; $i++)
                         @if ($i < $app->starRatings)
                             <span class="text-yellow-400">&#9733;</span>

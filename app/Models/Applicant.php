@@ -48,6 +48,7 @@ class Applicant extends Model
 
     protected $casts = [
         'date_hired' => 'date',
+        'starRatings' => 'integer',
     ];
 
     protected $appends = [

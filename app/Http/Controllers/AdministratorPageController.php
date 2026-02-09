@@ -23,7 +23,12 @@ class AdministratorPageController extends Controller
         $employee = User::with(
             'applicant',
             'applicant.documents:id,applicant_id,filename,filepath,type,mime_type,size,created_at',
-            'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
+            'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate',
+            'employee',
+            'education',
+            'government',
+            'salary',
+            'license',
             )->where('role','Employee')->get();
 
         Log::info($employee);

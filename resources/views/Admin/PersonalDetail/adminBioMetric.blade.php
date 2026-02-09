@@ -69,20 +69,20 @@
 
     <!-- LEFT BOX -->
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Last Name:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">First Name:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Middle Name:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">ID Number:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Account No.:</div>
+      <div class="row" x-text="selectedEmployee?.last_name">Last Name:</div>
+      <div class="row" x-text="selectedEmployee?.first_name">First Name:</div>
+      <div class="row" x-text="selectedEmployee?.middle_name">Middle Name:</div>
+      <div class="row" x-text="selectedEmployee?.employee.employee_id">ID Number:</div>
+      <div class="row" x-text="selectedEmployee?.employee.account_number">Account No.:</div>
     </div>
 
     <!-- RIGHT BOX -->
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Sex:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Civil Status:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Contact No.:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Date of Birth:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Address:</div>
+      <div class="row" x-text="selectedEmployee?.employee.gender">Sex:</div>
+      <div class="row" x-text="selectedEmployee?.employee.civil_status">Civil Status:</div>
+      <div class="row" x-text="selectedEmployee?.employee.contact_number">Contact No.:</div>
+      <div class="row" x-text="selectedEmployee?.employee.birthday">Date of Birth:</div>
+      <div class="row" x-text="selectedEmployee?.employee.address">Address:</div>
     </div>
   </div>
 
@@ -90,37 +90,37 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Employment Date:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Position:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Department:</div>
+      <div class="row" x-text="selectedEmployee?.employee.employment_date">Employment Date:</div>
+      <div class="row" x-text="selectedEmployee?.employee.position">Position:</div>
+      <div class="row" x-text="selectedEmployee?.employee.department">Department:</div>
       <div class="row">
         Classification:
         <label class="ml-4">
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.applicant?.position.employment === 'Full-Time'">
+                :checked="selectedEmployee?.employee.classification === 'Full-Time'">
             Full-time
         </label>
 
         <label class="ml-3">
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.applicant?.position.employment === 'Part-Time'">
+                :checked="selectedEmployee?.employee.classification === 'Part-Time'">
             Part-time
         </label>
 
         <label class="ml-3">
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.applicant?.position.employment === 'NT'">
+                :checked="selectedEmployee?.employee.classification === 'NT'">
             NT
         </label>
     </div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">SSS:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">TIN:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">PhilHealth:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Pag-IBIG MID:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Pag-IBIG RTN:</div>
+      <div class="row" x-text="selectedEmployee?.government.SSS">SSS:</div>
+      <div class="row" x-text="selectedEmployee?.government.TIN">TIN:</div>
+      <div class="row" x-text="selectedEmployee?.government.PhilHealth">PhilHealth:</div>
+      <div class="row" x-text="selectedEmployee?.government.MID">Pag-IBIG MID:</div>
+      <div class="row" x-text="selectedEmployee?.government.RTN">Pag-IBIG RTN:</div>
     </div>
   </div>
 
@@ -128,33 +128,33 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">License:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Registration No.:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Registration Date:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Valid Until:</div>
+      <div class="row" x-text="selectedEmployee?.license.license">License:</div>
+      <div class="row" x-text="selectedEmployee?.license.registration_number">Registration No.:</div>
+      <div class="row" x-text="selectedEmployee?.license.registration_date">Registration Date:</div>
+      <div class="row" x-text="selectedEmployee?.license.valid_until">Valid Until:</div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Bachelor’s Degree:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Master’s Degree:</div>
-      <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Doctorate Degree:</div>
+      <div class="row" x-text="selectedEmployee?.education.bachelor">Bachelor’s Degree:</div>
+      <div class="row" x-text="selectedEmployee?.education.masater">Master’s Degree:</div>
+      <div class="row" x-text="selectedEmployee?.education.doctorate">Doctorate Degree:</div>
     </div>
   </div>
 
   <!-- SALARY BOX -->
   <div class="border border-gray-500 w-1/2 mt-4" style="width: 502px;">
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Basic Salary:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Rate per Hour:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">COLA:</div>
+    <div class="row" x-text="selectedEmployee?.salary.salary">Basic Salary:</div>
+    <div class="row" x-text="selectedEmployee?.salary.rate_per_hour">Rate per Hour:</div>
+    <div class="row" x-text="selectedEmployee?.salary.cola">COLA:</div>
   </div>
   <br>
 <div class="border-t border-dashed border-gray-500 my-3"></div>
 
   <br>
     <div class="row font-semibold bg-gray-100">Employee Details</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Full Name:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">ID Number:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Department:</div>
+    <div class="row" x-text="selectedEmployee?.first_name + ' ' + selectedEmployee?.middle_name + ' ' + selectedEmployee?.last_name">Full Name:</div>
+    <div class="row" x-text="selectedEmployee?.employee.employee_id">ID Number:</div>
+    <div class="row" x-text="selectedEmployee?.employee.department">Department:</div>
     <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Person Contact in case of Emergency:</div>
     <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Address:</div>
     <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Cellphone Number:</div>
@@ -180,26 +180,28 @@
   >
 
     <h2 class="text-lg font-semibold mb-4">Edit Employee Profile</h2>
-
+    <form action="{{ route('admin.updateBio')}}" method="POST">
+        @csrf
+        <input type="hidden" name="user_id" :value="selectedEmployee?.id">
     <!-- PERSONAL INFO -->
     <div class="grid grid-cols-2 gap-4">
-      <input class="border px-2 py-1" placeholder="Last Name">
-      <input class="border px-2 py-1" placeholder="First Name">
-      <input class="border px-2 py-1" placeholder="Middle Name">
-      <input class="border px-2 py-1" placeholder="ID Number">
-      <input class="border px-2 py-1" placeholder="Account No.">
-      <select class="border px-2 py-1">
-        <option>Sex</option>
-        <option>Male</option>
-        <option>Female</option>
+      <input class="border px-2 py-1" name="last" placeholder="Last Name">
+      <input class="border px-2 py-1" name="first" placeholder="First Name">
+      <input class="border px-2 py-1" name="middle" placeholder="Middle Name">
+      <input class="border px-2 py-1" name="employee_id" placeholder="ID Number">
+      <input class="border px-2 py-1" name="account_number" placeholder="Account No.">
+      <select name="gender" class="border px-2 py-1">
+        <option value= "">Sex</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
       </select>
-      <input class="border px-2 py-1" placeholder="Civil Status">
-      <input class="border px-2 py-1" placeholder="Contact No.">
+      <input class="border px-2 py-1" name="civil_status" placeholder="Civil Status">
+      <input class="border px-2 py-1" name="contact_number" placeholder="Contact No.">
       <div>
       <label class="block text-xs text-gray-600">Date of Birth</label>
-        <input type="date" class="w-full border px-2 py-1">
+        <input type="date" name="birthday" class="w-full border px-2 py-1">
       </div>
-      <input class="border px-2 py-1" placeholder="Address">
+      <input class="border px-2 py-1" name="address" placeholder="Address">
     </div>
 
     <!-- EMPLOYMENT -->
@@ -207,41 +209,41 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
       <label class="block text-xs text-gray-600">Employment Date</label>
-        <input type="date" class="w-full border px-2 py-1">
+        <input type="date" name="employment_date" class="w-full border px-2 py-1">
       </div>
-      <input class="border px-2 py-1" placeholder="Position">
-      <input class="border px-2 py-1" placeholder="Department">
+      <input class="border px-2 py-1" name = "position" placeholder="Position">
+      <input class="border px-2 py-1" name = "department" placeholder="Department">
 
-      <select class="border px-2 py-1">
-        <option>Classification</option>
-        <option>Full-time</option>
-        <option>Part-time</option>
-        <option>NT</option>
+      <select name = "classification" class="border px-2 py-1">
+        <option value ="">Classification</option>
+        <option value ="Full-Time">Full-time</option>
+        <option value ="Part-Time">Part-time</option>
+        <option value ="NT">NT</option>
       </select>
     </div>
 
     <!-- GOVERNMENT IDS -->
     <h3 class="font-semibold mt-6">Government IDs</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input class="border px-2 py-1" placeholder="SSS">
-      <input class="border px-2 py-1" placeholder="TIN">
-      <input class="border px-2 py-1" placeholder="PhilHealth">
-      <input class="border px-2 py-1" placeholder="Pag-IBIG MID">
-      <input class="border px-2 py-1" placeholder="Pag-IBIG RTN">
+      <input name = "SSS" class="border px-2 py-1" placeholder="SSS">
+      <input name = "TIN" class="border px-2 py-1" placeholder="TIN">
+      <input name = "PhilHealth" class="border px-2 py-1" placeholder="PhilHealth">
+      <input name = "MID" class="border px-2 py-1" placeholder="Pag-IBIG MID">
+      <input name = "RTN" class="border px-2 py-1" placeholder="Pag-IBIG RTN">
     </div>
 
     <!-- LICENSE -->
     <h3 class="font-semibold mt-6">License</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input class="border px-2 py-1" placeholder="License">
-      <input class="border px-2 py-1" placeholder="Registration No.">
+      <input name = "license" class="border px-2 py-1" placeholder="License">
+      <input name = "registration_number" class="border px-2 py-1" placeholder="Registration No.">
       <div>
         <label class="block text-xs text-gray-600">Registration Date</label>
-        <input type="date" class="w-full border px-2 py-1">
+        <input name = "registration_date" type="date" class="w-full border px-2 py-1">
       </div>
       <div>
         <label class="block text-xs text-gray-600">Valid Until</label>
-        <input type="date" class="w-full border px-2 py-1">
+        <input name = "valid_until" type="date" class="w-full border px-2 py-1">
       </div>
 
     </div>
@@ -249,23 +251,42 @@
     <!-- EDUCATION -->
     <h3 class="font-semibold mt-6">Education</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input class="border px-2 py-1" placeholder="Bachelor’s Degree">
-      <input class="border px-2 py-1" placeholder="Master’s Degree">
-      <input class="border px-2 py-1" placeholder="Doctorate Degree">
+      <input name = "bachelor" class="border px-2 py-1" placeholder="Bachelor’s Degree">
+      <input name = "master" class="border px-2 py-1" placeholder="Master’s Degree">
+      <input name = "doctorate" class="border px-2 py-1" placeholder="Doctorate Degree">
     </div>
 
     <!-- SALARY -->
     <h3 class="font-semibold mt-6">Salary</h3>
     <div class="grid grid-cols-3 gap-4">
-      <input class="border px-2 py-1" placeholder="Basic Salary">
-      <input class="border px-2 py-1" placeholder="Rate per Hour">
-      <input class="border px-2 py-1" placeholder="COLA">
+      <input name = "salary" class="border px-2 py-1" placeholder="Basic Salary">
+      <input name = "rate_per_hour" class="border px-2 py-1" placeholder="Rate per Hour">
+      <input name = "cola" class="border px-2 py-1" placeholder="COLA">
     </div>
 
+    <!-- ACTIONS -->
+    <div class="flex justify-end gap-2 mt-6">
+      <button
+        @click="openForm = false"
+        class="px-4 py-1 border rounded">
+        Cancel
+      </button>
+
+      <button type="submit"
+        class="px-4 py-1 bg-green-600 text-white rounded">
+        Save
+      </button>
+    </div>
+
+    </form>
+
+  </div>
+</div>
+
+
+
+<div class="space-y-3" style="visibility: hidden;">
     <h3 class="font-semibold mt-6">Employee Details</h3>
-
-<div class="space-y-3">
-
   <div>
     <label class="block text-xs text-gray-600">Full Name</label>
     <input
@@ -317,28 +338,6 @@
   </div>
 
 </div>
-
-
-    <!-- ACTIONS -->
-    <div class="flex justify-end gap-2 mt-6">
-      <button
-        @click="openForm = false"
-        class="px-4 py-1 border rounded">
-        Cancel
-      </button>
-
-      <button
-        class="px-4 py-1 bg-green-600 text-white rounded">
-        Save
-      </button>
-    </div>
-
-
-
-  </div>
-</div>
-
-
 
 <style>
   .row {

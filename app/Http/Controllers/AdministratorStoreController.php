@@ -219,6 +219,7 @@ class AdministratorStoreController extends Controller
     }
 
     public function update_bio(Request $request){
+        Log::info($request);
         $attrs = $request->validate([
             //User Model
             'user_id' => 'required|exists:users,id',

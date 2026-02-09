@@ -7,10 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class RegisterLoginController extends Controller
 {
     public function register_store(Request $request){
+        Log::info($request);
         $attrs = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',

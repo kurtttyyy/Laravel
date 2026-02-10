@@ -104,7 +104,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 002.25-2.25v-1.372a1.125 1.125 0 00-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293a12.035 12.035 0 01-5.292-5.292l1.293-.97a1.125 1.125 0 00.417-1.173L6.963 4.102A1.125 1.125 0 005.872 3.25H4.5A2.25 2.25 0 002.25 5.5v1.25z"/>
       </svg>
       <div>
-        <span class="block uppercase text-gray-400 font-semibold">Phone No.</span>
+        <span class="block text-xs uppercase text-gray-400 font-semibold">Phone No.</span>
         <span x-text="selectedEmployee?.applicant?.phone_number ?? '—'"></span>
       </div>
     </div>

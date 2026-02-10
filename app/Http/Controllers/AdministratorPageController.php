@@ -16,7 +16,13 @@ class AdministratorPageController extends Controller
     public function display_home(){
         $employee = User::where('role', 'Employee')
                         ->where('status','!=','Not Approved')->get();
-        return view('admin.adminHome', compact('employee'));
+        $accept = User::with([
+            'employee',
+            'applicant',
+            'applicant.position:id,department',
+        ])->where('role', 'Employee')
+                        ->where('status','Approved')->get();
+        return view('admin.adminHome', compact('employee','accept'));
     }
 
     public function display_employee(){
@@ -203,6 +209,6 @@ class AdministratorPageController extends Controller
     public function display_create_position(){
         return view('admin.adminCreatePosition');
     }
-    
+
 }
 

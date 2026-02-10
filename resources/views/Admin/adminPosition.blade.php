@@ -115,7 +115,7 @@
                     <ul class="text-slate-600 text-sm mt-4">
                         @foreach (array_slice($lines, 0, 3) as $line)
                             <li>
-                                {{ 
+                                {{
                                     Str::limit(
                                         ltrim($line, "•- "),
                                         150,
@@ -137,7 +137,7 @@
 
         <div class="flex justify-between items-center mt-6">
             <span class="text-xs text-slate-500">
-                <i class="fa fa-users mr-1"></i> {{ $countApplication }} Applicants • Posted {{ $open->created_at->format('m/d/y') }}
+                <i class="fa fa-users mr-1"></i> {{ $open->applicants_count }} Applicants • Posted {{ $open->created_at->format('m/d/y') }}
             </span>
 
             <div class="flex gap-2">

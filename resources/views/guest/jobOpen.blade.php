@@ -183,13 +183,19 @@
         });
     }
 
-    function populateOtherJobs(currentId) {
-        const container = document.getElementById('otherJobs');
-        container.innerHTML = '';
+    function populateOtherJobs(currentJob) {
+    const container = document.getElementById('otherJobs');
+    container.innerHTML = '';
 
-        allJobs.filter(j => j.id !== currentId).forEach(job => {
+    allJobs
+        .filter(j =>
+            j.id !== currentJob.id &&
+            j.department === currentJob.department
+        )
+        .forEach(job => {
             const div = document.createElement('div');
-            div.className = 'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
+            div.className =
+                'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
 
             div.innerHTML = `
                 <div>
@@ -197,16 +203,17 @@
                     <small class="text-muted">${job.department}</small>
                 </div>
                 <a href="javascript:void(0)"
-                class="text-success open-job"
-                style="text-decoration: none;"
-                data-job='${JSON.stringify(job)}'>
-                View →
+                   class="text-success open-job"
+                   style="text-decoration: none;"
+                   data-job='${JSON.stringify(job)}'>
+                    View →
                 </a>
             `;
 
             container.appendChild(div);
         });
-    }
+}
+
 
 
     function openSidebar(job) {
@@ -224,7 +231,7 @@
         document.getElementById('applyJobBtn').href =
             `/application/non_teaching/procedure/${job.id}`;
 
-        populateOtherJobs(job.id);
+        populateOtherJobs(job);
 
         sidebar.classList.add('show');
         overlay.style.display = 'block';

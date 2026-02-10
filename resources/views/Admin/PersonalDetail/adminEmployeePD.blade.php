@@ -63,16 +63,6 @@
 </div>
 
 
-    <div class="flex gap-3">
-      <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M4 4v16M4 4h16v4H4v12" />
-      </svg>
-      <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Nationality</span>
-        <span x-text="selectedEmployee?.applicant?.nationality ?? '—'"></span>
-      </div>
-    </div>
 
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -85,6 +75,37 @@
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Marital Status</span>
         <span x-text="selectedEmployee?.applicant?.marital_status ?? '—'"></span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <svg class="w-5 h-5 text-gray-400 mt-1"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5H4.5A2.25 2.25 0 002.25 6.75m19.5 0l-9.75 6.75L2.25 6.75" />
+      </svg>
+
+      <div>
+        <span class="block text-xs uppercase text-gray-400 font-semibold">
+          Email Address
+        </span>
+      <span class="text-xs text-gray-600"
+            x-text="selectedEmployee?.applicant?.email ?? '—'">
+      </span>
+      </div>
+    </div>
+
+
+        <div class="flex gap-3">
+      <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 002.25-2.25v-1.372a1.125 1.125 0 00-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293a12.035 12.035 0 01-5.292-5.292l1.293-.97a1.125 1.125 0 00.417-1.173L6.963 4.102A1.125 1.125 0 005.872 3.25H4.5A2.25 2.25 0 002.25 5.5v1.25z"/>
+      </svg>
+      <div>
+        <span class="block text-xs uppercase text-gray-400 font-semibold">Phone No.</span>
+        <span x-text="selectedEmployee?.applicant?.phone_number ?? '—'"></span>
       </div>
     </div>
   </div>
@@ -315,16 +336,6 @@
       </div>
     </div>
 
-    <div class="flex gap-3">
-      <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-      <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Routing Number</span>
-        <span x-text="selectedEmployee?.bank?.routing_number ?? '—'"></span>
-      </div>
-    </div>
   </div>
 
 </div>

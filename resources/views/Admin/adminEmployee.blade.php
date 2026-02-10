@@ -124,7 +124,7 @@
                 <div class="mt-4 space-y-1 text-gray-500 text-sm">
                     <div class="flex items-center gap-2">
                         <i class="fa-regular fa-id-badge"></i>
-                        EMP-2500024-24
+                        {{ $emp->employee->employee_id}}
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-sitemap"></i>

@@ -278,7 +278,7 @@
       </svg>
       <div>
         <span class="block uppercase text-gray-400 font-semibold">PAG IBIG MID:</span>
-        <span x-text="selectedEmployee?.government.RTN ?? '—'"></span>
+        <span x-text="selectedEmployee?.government.MID ?? '—'"></span>
       </div>
     </div>
 

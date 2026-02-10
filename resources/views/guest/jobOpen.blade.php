@@ -82,6 +82,16 @@
             <i class="bi bi-geo-alt-fill me-1"></i>
             <span id="sidebarLocationText"></span>
         </p>
+
+        <p>
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            <span id="sidebarStartText"></span>
+        </p>
+
+        <p>
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            <span id="sidebarExpireText"></span>
+        </p>
     </div>
 
     <div class="sidebar-body">
@@ -184,12 +194,18 @@
     }
 
     function populateOtherJobs(currentJob) {
-        const container = document.getElementById('otherJobs');
-        container.innerHTML = '';
+    const container = document.getElementById('otherJobs');
+    container.innerHTML = '';
 
-        allJobs.filter(j => j.id !== currentJob.id && j.department === currentJob.department).forEach(job => {
+    allJobs
+        .filter(j =>
+            j.id !== currentJob.id &&
+            j.department === currentJob.department
+        )
+        .forEach(job => {
             const div = document.createElement('div');
-            div.className = 'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
+            div.className =
+                'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
 
             div.innerHTML = `
                 <div>
@@ -197,16 +213,23 @@
                     <small class="text-muted">${job.department}</small>
                 </div>
                 <a href="javascript:void(0)"
-                class="text-success open-job"
-                style="text-decoration: none;"
-                data-job='${JSON.stringify(job)}'>
-                View →
+                   class="text-success open-job"
+                   style="text-decoration: none;"
+                   data-job='${JSON.stringify(job)}'>
+                    View →
                 </a>
             `;
 
             container.appendChild(div);
         });
-    }
+}
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // options for formatting
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+}
 
 
     function openSidebar(job) {
@@ -214,6 +237,8 @@
         document.getElementById('sidebarCollege').textContent = job.department;
         document.getElementById('sidebarType').textContent = job.employment;
         document.getElementById('sidebarLocationText').textContent = job.location;
+        document.getElementById('sidebarStartText').textContent = formatDate(job.one);
+        document.getElementById('sidebarExpireText').textContent = formatDate(job.two);
 
         populateSkills(job.skills);
         populateList('sidebarDescription', job.job_description);

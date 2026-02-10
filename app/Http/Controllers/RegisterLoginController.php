@@ -70,6 +70,7 @@ class RegisterLoginController extends Controller
         if (Auth::attempt([
             'email'    => $attrs['email'],
             'password' => $attrs['password'],
+            'status'   => 'Approved',
         ])) {
 
             $request->session()->regenerate();

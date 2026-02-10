@@ -100,44 +100,23 @@
             </thead>
             <tbody class="divide-y">
               <tr>
+                @foreach($accept as $acc)
                 <td class="py-3 flex items-center gap-3">
                   <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">JD</div>
                   <div>
-                    <p class="font-medium">John Doe</p>
-                    <p class="text-xs text-slate-500">john.doe@company.com</p>
+                    <p class="font-medium">{{$acc->first_name}} {{$acc->middle_name}} {{$acc->last_name}}</p>
+                    <p class="text-xs text-slate-500">{{$acc->email}}</p>
                   </div>
                 </td>
-                <td>Engineering</td>
-                <td><span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded">Active</span></td>
-                <td>Jan 15, 2024</td>
+                @if(empty($acc->employee->department))
+                    <td>{{$acc->applicant->position->department}}</td>
+                @else
+                    <td>{{$acc->employee->department}}</td>
+                @endif
+                    <td><span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded">Active</span></td>
+                    <td>{{$acc->created_at_formatted}}</td>
+                @endforeach
               </tr>
-
-              <tr>
-                <td class="py-3 flex items-center gap-3">
-                  <div class="w-9 h-9 bg-pink-500 rounded-full text-white flex items-center justify-center">SW</div>
-                  <div>
-                    <p class="font-medium">Sarah Wilson</p>
-                    <p class="text-xs text-slate-500">sarah.w@company.com</p>
-                  </div>
-                </td>
-                <td>Marketing</td>
-                <td><span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded">Active</span></td>
-                <td>Jan 12, 2024</td>
-              </tr>
-
-              <tr>
-                <td class="py-3 flex items-center gap-3">
-                  <div class="w-9 h-9 bg-orange-500 rounded-full text-white flex items-center justify-center">MC</div>
-                  <div>
-                    <p class="font-medium">Mike Chen</p>
-                    <p class="text-xs text-slate-500">mike.chen@company.com</p>
-                  </div>
-                </td>
-                <td>Finance</td>
-                <td><span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">On Leave</span></td>
-                <td>Jan 10, 2024</td>
-              </tr>
-
             </tbody>
           </table>
 

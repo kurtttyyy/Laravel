@@ -183,11 +183,11 @@
         });
     }
 
-    function populateOtherJobs(currentId) {
+    function populateOtherJobs(currentJob) {
         const container = document.getElementById('otherJobs');
         container.innerHTML = '';
 
-        allJobs.filter(j => j.id !== currentId).forEach(job => {
+        allJobs.filter(j => j.id !== currentJob.id && j.department === currentJob.department).forEach(job => {
             const div = document.createElement('div');
             div.className = 'border rounded p-2 mb-2 d-flex justify-content-between align-items-center cursor-pointer';
 
@@ -224,7 +224,7 @@
         document.getElementById('applyJobBtn').href =
             `/application/non_teaching/procedure/${job.id}`;
 
-        populateOtherJobs(job.id);
+        populateOtherJobs(job);
 
         sidebar.classList.add('show');
         overlay.style.display = 'block';

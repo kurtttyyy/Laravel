@@ -23,7 +23,7 @@
           d="M4.5 20.25a7.5 7.5 0 0115 0" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Full Name</span>
+        <span class="block uppercase text-gray-400 font-semibold" style="font-size: 10px;">Full Name</span>
         <span x-text="selectedEmployee?.applicant?.first_name + ' ' + selectedEmployee?.applicant?.last_name"></span>
       </div>
     </div>
@@ -34,7 +34,7 @@
           d="M8 7V3m8 4V3m-11 8h14m-15 9.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V7.5A2.25 2.25 0 0018.75 5.25H5.25A2.25 2.25 0 003 7.5v11.25z" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Date of Birth</span>
+        <span class="block uppercase text-gray-400 font-semibold">Date of Birth</span>
         <span x-text="selectedEmployee?.employee.formatted_birthday ?? '—'"></span>
       </div>
     </div>
@@ -57,7 +57,7 @@
   </svg>
 
   <div>
-    <span class="block text-xs uppercase text-gray-400 font-semibold">Gender</span>
+    <span class="block uppercase text-gray-400 font-semibold">Gender</span>
     <span x-text="selectedEmployee?.employee.sex ?? '—'"></span>
   </div>
 </div>
@@ -73,7 +73,7 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7.5 7.5 0 00-7.5 6.75"/>
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Marital Status</span>
+        <span class="block uppercase text-gray-400 font-semibold">Marital Status</span>
         <span x-text="selectedEmployee?.employee.civil_status ?? '—'"></span>
       </div>
     </div>
@@ -89,10 +89,10 @@
       </svg>
 
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">
+        <span class="block uppercase text-gray-400 font-semibold">
           Email Address
         </span>
-      <span class="text-xs text-gray-600"
+      <span class= text-gray-600"
             x-text="selectedEmployee?.applicant?.email ?? '—'">
       </span>
       </div>
@@ -104,7 +104,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5a2.25 2.25 0 002.25-2.25v-1.372a1.125 1.125 0 00-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293a12.035 12.035 0 01-5.292-5.292l1.293-.97a1.125 1.125 0 00.417-1.173L6.963 4.102A1.125 1.125 0 005.872 3.25H4.5A2.25 2.25 0 002.25 5.5v1.25z"/>
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Phone No.</span>
+        <span class="block uppercase text-gray-400 font-semibold">Phone No.</span>
         <span x-text="selectedEmployee?.applicant?.phone_number ?? '—'"></span>
       </div>
     </div>
@@ -126,7 +126,7 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V12h6v9" />
     </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Street Address</span>
+        <span class="block uppercase text-gray-400 font-semibold">Street Address</span>
         <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
@@ -137,7 +137,7 @@
     <circle cx="12" cy="9" r="2.5" />
     </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Province</span>
+        <span class="block uppercase text-gray-400 font-semibold">Province</span>
         <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
@@ -148,7 +148,7 @@
     <circle cx="12" cy="9" r="2.5" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Municipality</span>
+        <span class="block uppercase text-gray-400 font-semibold">Municipality</span>
         <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
@@ -188,7 +188,7 @@
   </svg>
 
   <div>
-    <span class="block text-xs uppercase text-gray-400 font-semibold">
+    <span class="block uppercase text-gray-400 font-semibold">
       Contact Name
     </span>
     <span x-text="selectedEmployee?.emergency_contact?.name ?? '—'"></span>
@@ -203,7 +203,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 14a7.5 7.5 0 00-7.5 6.75" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Relationship</span>
+        <span class="block uppercase text-gray-400 font-semibold">Relationship</span>
         <span x-text="selectedEmployee?.emergency_contact?.relationship ?? '—'"></span>
       </div>
     </div>
@@ -224,7 +224,7 @@
   </svg>
 
   <div>
-    <span class="block text-xs uppercase text-gray-400 font-semibold">Phone Number</span>
+    <span class="block uppercase text-gray-400 font-semibold">Phone Number</span>
     <span x-text="selectedEmployee?.emergency_contact?.phone ?? '—'"></span>
   </div>
 </div>
@@ -263,7 +263,7 @@
   </svg>
 
   <div>
-    <span class="block text-xs uppercase text-gray-400 font-semibold">
+    <span class="block uppercase text-gray-400 font-semibold">
       PNB
     </span>
     <span x-text="selectedEmployee?.employee.account_number ?? '—'"></span>
@@ -277,7 +277,7 @@
           d="M4 6h16M4 12h16M4 18h16" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">PAG IBIG</span>
+        <span class="block uppercase text-gray-400 font-semibold">PAG IBIG MID:</span>
         <span x-text="selectedEmployee?.government.RTN ?? '—'"></span>
       </div>
     </div>
@@ -288,7 +288,18 @@
           d="M4 6h16M4 12h16M4 18h16" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">SSS</span>
+        <span class="block uppercase text-gray-400 font-semibold">PAG IBIG RTN:</span>
+        <span x-text="selectedEmployee?.government.RTN ?? '—'"></span>
+      </div>
+    </div>
+
+        <div class="flex gap-3">
+      <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <div>
+        <span class="block uppercase text-gray-400 font-semibold">SSS</span>
         <span x-text="selectedEmployee?.government.SSS ?? '—'"></span>
       </div>
     </div>
@@ -299,7 +310,7 @@
           d="M4 6h16M4 12h16M4 18h16" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">PhilHealth</span>
+        <span class="block uppercase text-gray-400 font-semibold">PhilHealth</span>
         <span x-text="selectedEmployee?.government.PhilHealth ?? '—'"></span>
       </div>
     </div>
@@ -309,7 +320,7 @@
           d="M4 6h16M4 12h16M4 18h16" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">TIN</span>
+        <span class="block uppercase text-gray-400 font-semibold">TIN</span>
         <span x-text="selectedEmployee?.government.TIN ?? '—'"></span>
       </div>
     </div>
@@ -321,7 +332,7 @@
           d="M7 7h10v10H7z" />
       </svg>
       <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Account Number</span>
+        <span class="block uppercase text-gray-400 font-semibold">Account Number</span>
         <span x-text="selectedEmployee?.employee.employee_id ?? '—'"></span>
       </div>
     </div>

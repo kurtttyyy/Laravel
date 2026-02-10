@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeePageController extends Controller
 {
     public function display_home(){
-        return view('employee.employeeHome');
+        $user = Auth::user();
+        return view('employee.employeeHome', compact('user'));
     }
 
     public function display_leave(){
@@ -15,7 +18,17 @@ class EmployeePageController extends Controller
     }
 
     public function display_profile(){
-        return view('employee.employeeProfile');
+        $user = Auth::user();
+        $employee = User::with([
+            'employee',
+            'applicant',
+            'education',
+            'license',
+            'salary',
+            'government',
+        ])->where('id', $user->id)->first();
+
+        return view('employee.employeeProfile', compact('employee'));
     }
 
     public function display_payslip(){

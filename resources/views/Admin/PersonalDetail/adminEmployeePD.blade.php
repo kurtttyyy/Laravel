@@ -153,16 +153,6 @@
       </div>
     </div>
 
-    <div class="flex gap-3">
-      <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a7 7 0 017 7c0 4.418-7 13-7 13S5 13.418 5 9a7 7 0 017-7z" />
-    <circle cx="12" cy="9" r="2.5" />
-      </svg>
-      <div>
-        <span class="block text-xs uppercase text-gray-400 font-semibold">Postal Code</span>
-        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
-      </div>
-    </div>
   </div>
 
   <!-- Emergency Contact -->

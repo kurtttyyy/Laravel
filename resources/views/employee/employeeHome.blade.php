@@ -6,6 +6,23 @@
     <title>Employee Dashboard - Northeastern College</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            transition: margin-left 0.3s ease;
+        }
+        
+        main {
+            transition: margin-left 0.3s ease;
+        }
+        
+        aside:not(:hover) ~ main {
+            margin-left: 4rem; /* w-16 when collapsed */
+        }
+        
+        aside:hover ~ main {
+            margin-left: 14rem; /* w-56 when expanded */
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 
@@ -14,12 +31,12 @@
     @include('components.employeeSideBar')
 
     <!-- Main Content -->
-    <main class="flex-1 ml-56">
+    <main class="flex-1 ml-16 transition-all duration-300">
         <!-- Top Header -->
     @include('components.employeeHeader.dashboardHeader', ['name' => 'Kurt', 'notifications' => 5])
 
 
-<div class="p-8 space-y-8">
+<div class="p-4 md:p-8 space-y-8 pt-20">
     <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="relative bg-white rounded-2xl p-6 border border-gray-200">
@@ -88,7 +105,7 @@
 </div>
 
 
-<div class="p-8 space-y-6 bg-white rounded-2xl border border-gray-200">
+<div class="p-4 md:p-8 space-y-6 bg-white rounded-2xl border border-gray-200 mx-4 md:mx-0">
     <!-- Quick Actions Container -->
     <div>
         <h3 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
@@ -128,9 +145,9 @@
 
 
     <!-- Attendance + Upcoming Events Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 md:px-0">
         <!-- This Week's Attendance -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="bg-white rounded-2xl border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold text-gray-900">This Week's Attendance</h3>
                 <span class="text-sm text-gray-500 font-medium">Jan 20 – Jan 26</span>
@@ -187,7 +204,7 @@
 
 
 <!-- Upcoming Events -->
-<div class="bg-white border border-gray-200 rounded-2xl p-6">
+<div class="bg-white border border-gray-200 rounded-2xl p-4 md:p-6">
     <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-bold text-gray-900">Upcoming Events</h3>
         <span class="text-sm text-gray-500 font-medium">Jan 20 – Jan 26</span>
@@ -237,6 +254,24 @@
 
     </main>
 </div>
+
+<script>
+    // Handle sidebar state changes and adjust layout
+    const sidebar = document.querySelector('aside');
+    const main = document.querySelector('main');
+    
+    if (sidebar && main) {
+        sidebar.addEventListener('mouseenter', function() {
+            main.classList.remove('ml-16');
+            main.classList.add('ml-56');
+        });
+        
+        sidebar.addEventListener('mouseleave', function() {
+            main.classList.remove('ml-56');
+            main.classList.add('ml-16');
+        });
+    }
+</script>
 
 </body>
 </html>

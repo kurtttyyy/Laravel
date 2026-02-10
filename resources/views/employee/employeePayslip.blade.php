@@ -13,6 +13,19 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            transition: margin-left 0.3s ease;
+        }
+        
+        main {
+            transition: margin-left 0.3s ease;
+        }
+        
+        aside:not(:hover) ~ main {
+            margin-left: 4rem;
+        }
+        
+        aside:hover ~ main {
+            margin-left: 14rem;
         }
     </style>
 </head>
@@ -23,9 +36,9 @@
  @include('components.employeeSidebar')
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 ml-56">
+    <main class="flex-1 ml-16 transition-all duration-300">
     @include('components.employeeHeader.payslipHeader')
-<div class="p-8 space-y-8">
+<div class="p-4 md:p-8 space-y-8 pt-20">
 
 
         <div class="bg-gradient-to-b from-green-900 to-green-500 rounded-2xl p-8 text-white shadow-lg">
@@ -82,5 +95,23 @@
     </main>
 
 </div>
+
+<script>
+    const sidebar = document.querySelector('aside');
+    const main = document.querySelector('main');
+    
+    if (sidebar && main) {
+        sidebar.addEventListener('mouseenter', function() {
+            main.classList.remove('ml-16');
+            main.classList.add('ml-56');
+        });
+        
+        sidebar.addEventListener('mouseleave', function() {
+            main.classList.remove('ml-56');
+            main.classList.add('ml-16');
+        });
+    }
+</script>
+
 </body>
 </html>

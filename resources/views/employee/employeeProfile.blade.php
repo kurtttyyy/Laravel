@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            transition: margin-left 0.3s ease;
+        }
+        
+        main {
+            transition: margin-left 0.3s ease;
+        }
+        
+        aside:not(:hover) ~ main {
+            margin-left: 4rem;
+        }
+        
+        aside:hover ~ main {
+            margin-left: 14rem;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
 
@@ -14,13 +31,13 @@
     @include('components.employeeSideBar')
 
     <!-- Main Content -->
-    <main class="flex-1 ml-56">
+    <main class="flex-1 ml-16 transition-all duration-300">
 
     @include('components.employeeHeader.myProfileHeader')
 
 
         <!-- Content -->
-        <div class="p-8 space-y-8">
+        <div class="p-4 md:p-8 space-y-8 pt-20">
 
             <!-- Profile Card -->
             <div class="bg-white rounded-xl shadow p-6">
@@ -96,6 +113,23 @@
         </div>
     </main>
 </div>
+
+<script>
+    const sidebar = document.querySelector('aside');
+    const main = document.querySelector('main');
+    
+    if (sidebar && main) {
+        sidebar.addEventListener('mouseenter', function() {
+            main.classList.remove('ml-16');
+            main.classList.add('ml-56');
+        });
+        
+        sidebar.addEventListener('mouseleave', function() {
+            main.classList.remove('ml-56');
+            main.classList.add('ml-16');
+        });
+    }
+</script>
 
 </body>
 </html>

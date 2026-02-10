@@ -146,9 +146,9 @@
                             Active
                         </span>
 
-                        <span class="px-2 py-1 text-indigo-700 bg-indigo-100 rounded-full text-xs font-medium">
+                        <!--<span class="px-2 py-1 text-indigo-700 bg-indigo-100 rounded-full text-xs font-medium">
                             Rehire
-                        </span>
+                        </span>-->
                     </div>
                     <button
                         @click="openProfile = true; selectedEmployee = @js($emp);"

@@ -1,4 +1,4 @@
-<header class="bg-white border-b border-gray-200 sticky top-0 z-40 px-8 py-6">
+<header class="bg-white border-b border-gray-200 sticky top-0 z-40 px-4 md:px-8 py-4 md:py-6 backdrop-blur-sm">
   <div class="flex items-center justify-between gap-6">
 
     <!-- Title -->

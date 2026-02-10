@@ -12,7 +12,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; transition: margin-left 0.3s ease; }
+        main { transition: margin-left 0.3s ease; }
+        aside ~ main { margin-left: 16rem; }
   </style>
 </head>
 
@@ -23,11 +25,10 @@
         <div class="flex min-h-screen">
 
         <!-- Sidebar -->
-        @include('components.adminSideBar')
+            @include('components.adminSideBar')
 
         <!-- Main Content -->
-        <main class="flex-1">
-
+  <main class="flex-1 ml-16 transition-all duration-300">
             <!-- Dashboard Content -->
             <div class="p-8 space-y-6">
 
@@ -283,4 +284,19 @@
     </form>
 
 </body>
+
+<script>
+  const sidebar = document.querySelector('aside');
+  const main = document.querySelector('main');
+  if (sidebar && main) {
+    sidebar.addEventListener('mouseenter', function() {
+      main.classList.remove('ml-16');
+      main.classList.add('ml-64');
+    });
+    sidebar.addEventListener('mouseleave', function() {
+      main.classList.remove('ml-64');
+      main.classList.add('ml-16');
+    });
+  }
+</script>
 </html>

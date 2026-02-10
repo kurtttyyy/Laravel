@@ -12,7 +12,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; transition: margin-left 0.3s ease; }
+    main { transition: margin-left 0.3s ease; }
+    aside ~ main { margin-left: 16rem; }
   </style>
 </head>
 <body class="bg-slate-100">
@@ -24,7 +26,7 @@
 
 
   <!-- Main Content -->
-  <main class="flex-1">
+  <main class="flex-1 ml-16 transition-all duration-300">
 
     <!-- Header -->
      @include('components.adminHeader.attendanceHeader')

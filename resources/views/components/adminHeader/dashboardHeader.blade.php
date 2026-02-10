@@ -1,4 +1,4 @@
-    <header class="bg-white px-8 py-5 flex justify-between items-center border-b">
+    <header class="bg-white border-b sticky top-0 z-40 px-4 md:px-8 py-4 md:py-5 flex justify-between items-center backdrop-blur-sm">
       <div>
         <h1 class="text-3xl font-bold text-gray-900">HR Dashboard</h1>
         <p class="text-sm text-slate-500">Welcome back! Here's what's happening today.</p>

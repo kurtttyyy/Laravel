@@ -173,7 +173,7 @@
       class="fixed inset-0 bg-black/50 flex items-center justify-center z-40"
       style="display:none"
     >
-      <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-y-auto overflow-hidden">
+      <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-y-auto overflow-hidden">
 
         <div class="bg-gradient-to-r from-purple-500 to-indigo-500 p-6 text-white relative">
           <button @click="openProfile=false" class="absolute top-4 right-4 text-2xl">&times;</button>

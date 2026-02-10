@@ -28,7 +28,7 @@
                     <span class="badge bg-light text-dark">{{ $job->created_at->diffForHumans() }}</span>
                     <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
-                    data-job='@json($job)'>
+                    data-job-id="{{ $job->id }}">
                         View Details →
                     </a>
                 </div>
@@ -53,7 +53,7 @@
                     <span class="badge bg-light text-dark">{{ $others->created_at->diffForHumans() }}</span>
                     <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
-                    data-job='@json($others)'>
+                    data-job-id="{{ $others->id }}">
                         View Details →
                     </a>
                 </div>
@@ -215,7 +215,7 @@
                 <a href="javascript:void(0)"
                    class="text-success open-job"
                    style="text-decoration: none;"
-                   data-job='${JSON.stringify(job)}'>
+                   data-job-id="${job.id}">
                     View →
                 </a>
             `;
@@ -257,13 +257,21 @@ function formatDate(dateString) {
 
     document.querySelectorAll('.view-details').forEach(btn => {
         btn.addEventListener('click', () => {
-            openSidebar(JSON.parse(btn.dataset.job));
+            const jobId = parseInt(btn.dataset.jobId);
+            const job = allJobs.find(j => j.id === jobId);
+            if (job) {
+                openSidebar(job);
+            }
         });
     });
 
     document.addEventListener('click', e => {
         if (e.target.classList.contains('open-job')) {
-            openSidebar(JSON.parse(e.target.dataset.job));
+            const jobId = parseInt(e.target.dataset.jobId);
+            const job = allJobs.find(j => j.id === jobId);
+            if (job) {
+                openSidebar(job);
+            }
         }
     });
 

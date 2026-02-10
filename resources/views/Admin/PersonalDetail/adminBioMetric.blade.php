@@ -31,7 +31,7 @@
 
   <!-- Download Icon -->
   <div class="relative group">
-    <button onclick="window.print()"
+    <button onclick="downloadProfilePDF()"
       class="p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
       <!-- Download Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
@@ -57,35 +57,83 @@
 
 
 <div id="profile-form">
+
   <!-- HEADER -->
   <div class="text-center mb-6 leading-tight">
     <p class="font-semibold uppercase">Northeastern College</p>
-    <p >Santiago City, Philippines</p>
-    <p >Telephone No.: (078) 305-3226</p>
+    <p>Santiago City, Philippines</p>
+    <p>Telephone No.: (078) 305-3226</p>
 
     <p class="mt-4 font-semibold uppercase">Office of the Human Resource</p>
     <p class="font-semibold uppercase">Employees Profile Form</p>
   </div>
+
+  <!-- ROW STYLES -->
+  <style>
+    .row {
+      padding: 4px 8px;
+      border-bottom: 1px solid #d1d5db;
+      font-size: 0.875rem;
+    }
+    .label {
+      font-weight: 500;
+      display: inline;
+    }
+    .value {
+      display: inline;
+      margin-left: 4px;
+    }
+  </style>
 
   <!-- TOP SECTION -->
   <div class="grid grid-cols-2 gap-4">
 
     <!-- LEFT BOX -->
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.last_name">Last Name:</div>
-      <div class="row" x-text="selectedEmployee?.first_name">First Name:</div>
-      <div class="row" x-text="selectedEmployee?.middle_name">Middle Name:</div>
-      <div class="row" x-text="selectedEmployee?.employee.employee_id">ID Number:</div>
-      <div class="row" x-text="selectedEmployee?.employee.account_number">Account No.:</div>
+      <div class="row">
+        <span class="label">Last Name:</span>
+        <span class="value" x-text="selectedEmployee?.last_name ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">First Name:</span>
+        <span class="value" x-text="selectedEmployee?.first_name ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Middle Name:</span>
+        <span class="value" x-text="selectedEmployee?.middle_name ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">ID Number:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.employee_id ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Account No.:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.account_number ?? '-'"></span>
+      </div>
     </div>
 
     <!-- RIGHT BOX -->
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.employee.sex">Sex:</div>
-      <div class="row" x-text="selectedEmployee?.employee.civil_status">Civil Status:</div>
-      <div class="row" x-text="selectedEmployee?.employee.contact_number">Contact No.:</div>
-      <div class="row" x-text="selectedEmployee?.employee.formatted_birthday">Date of Birth:</div>
-      <div class="row" x-text="selectedEmployee?.employee.address">Address:</div>
+      <div class="row">
+        <span class="label">Sex:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.sex ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Civil Status:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.civil_status ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Contact No.:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.contact_number ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Date of Birth:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.formatted_birthday ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Address:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.address ?? '-'"></span>
+      </div>
     </div>
   </div>
 
@@ -93,37 +141,58 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.employee.employement_date">Employment Date:</div>
-      <div class="row" x-text="selectedEmployee?.employee.position">Position:</div>
-      <div class="row" x-text="selectedEmployee?.employee.department">Department:</div>
       <div class="row">
-        Classification:
-        <label class="ml-4">
+        <span class="label">Employment Date:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.employement_date ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Position:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.position ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Department:</span>
+        <span class="value" x-text="selectedEmployee?.employee?.department ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Classification:</span>
+        <span class="value">
+          <label class="mr-2">
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.employee.classification === 'Full-Time'">
-            Full-time
-        </label>
-
-        <label class="ml-3">
+              :checked="selectedEmployee?.employee?.classification === 'Full-Time'"> Full-time
+          </label>
+          <label class="mr-2">
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.employee.classification === 'Part-Time'">
-            Part-time
-        </label>
-
-        <label class="ml-3">
+              :checked="selectedEmployee?.employee?.classification === 'Part-Time'"> Part-time
+          </label>
+          <label>
             <input type="checkbox" disabled
-                :checked="selectedEmployee?.employee.classification === 'NT'">
-            NT
-        </label>
-    </div>
+              :checked="selectedEmployee?.employee?.classification === 'NT'"> NT
+          </label>
+        </span>
+      </div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.government.SSS">SSS:</div>
-      <div class="row" x-text="selectedEmployee?.government.TIN">TIN:</div>
-      <div class="row" x-text="selectedEmployee?.government.PhilHealth">PhilHealth:</div>
-      <div class="row" x-text="selectedEmployee?.government.MID">Pag-IBIG MID:</div>
-      <div class="row" x-text="selectedEmployee?.government.RTN">Pag-IBIG RTN:</div>
+      <div class="row">
+        <span class="label">SSS:</span>
+        <span class="value" x-text="selectedEmployee?.government?.SSS ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">TIN:</span>
+        <span class="value" x-text="selectedEmployee?.government?.TIN ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">PhilHealth:</span>
+        <span class="value" x-text="selectedEmployee?.government?.PhilHealth ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Pag-IBIG MID:</span>
+        <span class="value" x-text="selectedEmployee?.government?.MID ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Pag-IBIG RTN:</span>
+        <span class="value" x-text="selectedEmployee?.government?.RTN ?? '-'"></span>
+      </div>
     </div>
   </div>
 
@@ -131,44 +200,100 @@
   <div class="grid grid-cols-2 gap-4 mt-4">
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.license.license">License:</div>
-      <div class="row" x-text="selectedEmployee?.license.registration_number">Registration No.:</div>
-      <div class="row" x-text="selectedEmployee?.license.registration_date">Registration Date:</div>
-      <div class="row" x-text="selectedEmployee?.license.valid_until">Valid Until:</div>
+      <div class="row">
+        <span class="label">License:</span>
+        <span class="value" x-text="selectedEmployee?.license?.license ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Registration No.:</span>
+        <span class="value" x-text="selectedEmployee?.license?.registration_number ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Registration Date:</span>
+        <span class="value" x-text="selectedEmployee?.license?.registration_date ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Valid Until:</span>
+        <span class="value" x-text="selectedEmployee?.license?.valid_until ?? '-'"></span>
+      </div>
     </div>
 
     <div class="border border-gray-500">
-      <div class="row" x-text="selectedEmployee?.education.bachelor">Bachelor’s Degree:</div>
-      <div class="row" x-text="selectedEmployee?.education.master">Master’s Degree:</div>
-      <div class="row" x-text="selectedEmployee?.education.doctorate">Doctorate Degree:</div>
+      <div class="row">
+        <span class="label">Bachelor’s Degree:</span>
+        <span class="value" x-text="selectedEmployee?.education?.bachelor ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Master’s Degree:</span>
+        <span class="value" x-text="selectedEmployee?.education?.master ?? '-'"></span>
+      </div>
+      <div class="row">
+        <span class="label">Doctorate Degree:</span>
+        <span class="value" x-text="selectedEmployee?.education?.doctorate ?? '-'"></span>
+      </div>
     </div>
   </div>
 
-  <!-- SALARY BOX -->
-  <div class="border border-gray-500 w-1/2 mt-4" style="width: 380px;">
-    <div class="row" x-text="selectedEmployee?.salary.salary">Basic Salary:</div>
-    <div class="row" x-text="selectedEmployee?.salary.rate_per_hour">Rate per Hour:</div>
-    <div class="row" x-text="selectedEmployee?.salary.cola">COLA:</div>
+  <!-- SALARY -->
+  <div class="border border-gray-500 mt-4" style="width:378px;">
+    <div class="row">
+      <span class="label">Basic Salary:</span>
+      <span class="value" x-text="selectedEmployee?.salary?.salary ?? '-'"></span>
+    </div>
+    <div class="row">
+      <span class="label">Rate per Hour:</span>
+      <span class="value" x-text="selectedEmployee?.salary?.rate_per_hour ?? '-'"></span>
+    </div>
+    <div class="row">
+      <span class="label">COLA:</span>
+      <span class="value" x-text="selectedEmployee?.salary?.cola ?? '-'"></span>
+    </div>
   </div>
-  <br>
-<div class="border-t border-dashed border-gray-500 my-3"></div>
 
-  <br>
-    <div class="row font-semibold bg-gray-100">Employee Details</div>
-    <div class="row" x-text="selectedEmployee?.first_name + ' ' + selectedEmployee?.middle_name + ' ' + selectedEmployee?.last_name">Full Name:</div>
-    <div class="row" x-text="selectedEmployee?.employee.employee_id">ID Number:</div>
-    <div class="row" x-text="selectedEmployee?.employee.department">Department:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Person Contact in case of Emergency:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Address:</div>
-    <div class="row" x-text="selectedEmployee?.applicant?.position.title ?? '-'">Cellphone Number:</div>
+  <div class="border-t border-dashed border-gray-500 my-4"></div>
 
+  <!-- EMPLOYEE DETAILS -->
+  <div class="row font-semibold bg-gray-100">Employee Details</div>
 
+  <div class="row">
+    <span class="label">Full Name:</span>
+    <span class="value"
+      x-text="`${selectedEmployee?.first_name ?? ''} ${selectedEmployee?.middle_name ?? ''} ${selectedEmployee?.last_name ?? ''}`">
+    </span>
+  </div>
+
+  <div class="row">
+    <span class="label">ID Number:</span>
+    <span class="value" x-text="selectedEmployee?.employee?.employee_id ?? '-'"></span>
+  </div>
+
+  <div class="row">
+    <span class="label">Department:</span>
+    <span class="value" x-text="selectedEmployee?.employee?.department ?? '-'"></span>
+  </div>
+
+  <div class="row">
+    <span class="label">Person to Contact in Emergency:</span>
+    <span class="value" x-text="selectedEmployee?.applicant?.position?.title ?? '-'"></span>
+  </div>
+
+  <div class="row">
+    <span class="label">Address:</span>
+    <span class="value" x-text="selectedEmployee?.employee?.address ?? '-'"></span>
+  </div>
+
+  <div class="row">
+    <span class="label">Cellphone Number:</span>
+    <span class="value" x-text="selectedEmployee?.employee?.contact_number ?? '-'"></span>
+  </div>
 
   <!-- FOOTER -->
   <div class="mt-6 text-xs text-gray-600">
     NC HR Form No. 16a – Employees Profile Rev. 01
   </div>
+
 </div>
+
 </div>
 
 <!-- MODAL -->
@@ -315,8 +440,35 @@
       top: 0;
       width: 100%;
     }
+
+      .row {
+        @apply flex justify-between px-2 py-1 border-b border-gray-300 text-sm;
+      }
+      .label {
+        @apply font-medium;
+      }
+      .value {
+        @apply text-right;
+      }
   }
 </style>
+
+<!-- HTML2PDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+function downloadProfilePDF() {
+  const element = document.getElementById('profile-form');
+  const opt = {
+    margin: 10,
+    filename: 'Employee_Profile_' + new Date().getTime() + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+</script>
 
 
 

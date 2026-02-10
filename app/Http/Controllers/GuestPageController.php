@@ -38,9 +38,7 @@ class GuestPageController extends Controller
         $job = OpenPosition::find($id);
         $other = OpenPosition::where('id', '!=', $job->id)
                                 ->get();
-        $jobOpen = OpenPosition::where('department', $job->department)
-                                ->where('id', '!=', $job->id)
-                                ->get();
+        $jobOpen = OpenPosition::all();
 
         return view('guest.jobOpen', compact('jobOpen','job','other'));
     }

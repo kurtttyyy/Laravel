@@ -100,16 +100,16 @@
         </div>
 
         <h6 class="section-title">Job Description</h6>
-        <ul id="sidebarDescription"></ul>
+        <ul id="sidebarDescription" class="list-unstyled ps-0"></ul>
 
         <h6 class="section-title">Responsibilities</h6>
-        <ul id="sidebarResponsibilities"></ul>
+        <ul id="sidebarResponsibilities" class="list-unstyled ps-0"></ul>
 
         <h6 class="section-title">Qualifications</h6>
-        <ul id="sidebarQualifications"></ul>
+        <ul id="sidebarQualifications" class="list-unstyled ps-0"></ul>
 
         <h6 class="section-title">Benefits</h6>
-        <ul id="sidebarBenefits"></ul>
+        <ul id="sidebarBenefits" class="list-unstyled ps-0"></ul>
 
         <div class="text-center mt-3 hover-card">
             <a href="#" id="applyJobBtn" class="btn btn-success w-100">
@@ -135,9 +135,37 @@
         el.innerHTML = '';
         if (!data) return;
 
-        (Array.isArray(data) ? data : [data]).forEach(item => {
+        // If responsibilities come as a single string with bullets/newlines, split into lines
+        let items = Array.isArray(data) ? data : [data];
+
+        // special handling for longer text fields: split on bullet markers or newlines
+        if (/(responsib|description|qualif|benefit)/.test(id.toLowerCase())) {
+            if (!Array.isArray(data)) {
+                let text = String(data || '');
+                // convert <br> to newline for consistent splitting
+                text = text.replace(/<br\s*\/?/gi, '\n');
+
+                // If the text contains explicit bullet markers, split on newlines and strip markers
+                if (/\u2022|\u2023|\u25E6|^\s*[-–—\*\+]/m.test(text)) {
+                    const parts = text.split(/\n+/).map(p => p.replace(/^\s*[\u2022\u2023\u25E6\-–—\*\+]\s*/, '').trim());
+                    items = parts.filter(Boolean);
+                } else {
+                    // fallback: split on newlines only
+                    const parts = text.split(/\n+/).map(p => p.trim());
+                    items = parts.filter(Boolean);
+                }
+            }
+        }
+
+        items.forEach(item => {
             const li = document.createElement('li');
-            li.textContent = item;
+            li.className = 'mb-2';
+            // allow HTML strings if passed, otherwise use text
+            if (typeof item === 'string' && /<[^>]+>/.test(item)) {
+                li.innerHTML = item;
+            } else {
+                li.textContent = item;
+            }
             el.appendChild(li);
         });
     }

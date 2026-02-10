@@ -15,7 +15,7 @@ class AdministratorPageController extends Controller
 
     public function display_home(){
         $employee = User::where('role', 'Employee')
-                        ->where('status','!=','Not Approved')->get();
+                        ->where('status', 'Pending')->get();
         $accept = User::with([
             'employee',
             'applicant',

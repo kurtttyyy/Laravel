@@ -84,7 +84,7 @@
       <div class="row" x-text="selectedEmployee?.employee.sex">Sex:</div>
       <div class="row" x-text="selectedEmployee?.employee.civil_status">Civil Status:</div>
       <div class="row" x-text="selectedEmployee?.employee.contact_number">Contact No.:</div>
-      <div class="row" x-text="selectedEmployee?.employee.birthday">Date of Birth:</div>
+      <div class="row" x-text="selectedEmployee?.employee.formatted_birthday">Date of Birth:</div>
       <div class="row" x-text="selectedEmployee?.employee.address">Address:</div>
     </div>
   </div>

@@ -6,7 +6,7 @@
 <div class="max-w-5xl mx-auto bg-white px-5 py-8 border border-gray-400 text-[13px] text-black">
 
 <!-- EDIT & DOWNLOAD BUTTONS -->
-<div class="flex justify-between items-center mb-4 space-x-2">
+<div id="action-buttons" class="flex justify-between items-center mb-4 space-x-2">
 
   <!-- Edit Icon -->
   <div class="relative group">
@@ -31,13 +31,16 @@
 
   <!-- Download Icon -->
   <div class="relative group">
-    <button @click="downloadProfile()" class="p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+    <button onclick="window.print()"
+      class="p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
       <!-- Download Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
       </svg>
     </button>
+
 
     <!-- Bubble Chat Tooltip -->
     <div
@@ -53,7 +56,7 @@
 </div>
 
 
-
+<div id="profile-form">
   <!-- HEADER -->
   <div class="text-center mb-6 leading-tight">
     <p class="font-semibold uppercase">Northeastern College</p>
@@ -142,7 +145,7 @@
   </div>
 
   <!-- SALARY BOX -->
-  <div class="border border-gray-500 w-1/2 mt-4" style="width: 502px;">
+  <div class="border border-gray-500 w-1/2 mt-4" style="width: 455px;">
     <div class="row" x-text="selectedEmployee?.salary.salary">Basic Salary:</div>
     <div class="row" x-text="selectedEmployee?.salary.rate_per_hour">Rate per Hour:</div>
     <div class="row" x-text="selectedEmployee?.salary.cola">COLA:</div>
@@ -165,6 +168,7 @@
   <div class="mt-6 text-xs text-gray-600">
     NC HR Form No. 16a – Employees Profile Rev. 01
   </div>
+</div>
 </div>
 
 <!-- MODAL -->
@@ -293,9 +297,30 @@
   .row:last-child {
     border-bottom: none;
   }
+
+  /* PRINT ONLY THE FORM */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    #profile-form,
+    #profile-form * {
+      visibility: visible;
+    }
+
+    #profile-form {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  }
 </style>
+
 
 
     </div>
     </div>
 </div>
+

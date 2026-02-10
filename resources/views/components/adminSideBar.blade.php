@@ -1,10 +1,10 @@
-<aside class="group fixed left-0 top-0 h-screen bg-slate-900 text-slate-200 flex flex-col w-16 hover:w-64 transition-all duration-300 overflow-hidden z-50" x-data>
+<aside class="group fixed left-0 top-0 h-screen bg-slate-900 text-slate-200 flex flex-col w-20 hover:w-64 transition-all duration-300 overflow-hidden z-50" x-data>
   <div class="px-4 py-4 flex items-center gap-3 border-b border-slate-800">
     <div class="flex items-center justify-center">
       <!-- Small square icon visible when collapsed -->
       <img src="{{ asset('images/logo.webp') }}" alt="HR Logo" class="w-8 h-8 object-contain block group-hover:hidden">
       <!-- Full logo visible when sidebar expanded -->
-      <img src="{{ asset('images/logo.webp') }}" alt="HR Logo Full" class="hidden group-hover:block h-8">
+      <img src="{{ asset('images/logo.webp') }}" alt="HR Logo Full" class="hidden group-hover:block h-16">
     </div>
     <span class="text-lg font-semibold inline-block whitespace-nowrap max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ml-2">HR PORTAL</span>
   </div>

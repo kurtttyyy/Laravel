@@ -145,7 +145,7 @@
   </div>
 
   <!-- SALARY BOX -->
-  <div class="border border-gray-500 w-1/2 mt-4" style="width: 455px;">
+  <div class="border border-gray-500 w-1/2 mt-4" style="width: 380px;">
     <div class="row" x-text="selectedEmployee?.salary.salary">Basic Salary:</div>
     <div class="row" x-text="selectedEmployee?.salary.rate_per_hour">Rate per Hour:</div>
     <div class="row" x-text="selectedEmployee?.salary.cola">COLA:</div>

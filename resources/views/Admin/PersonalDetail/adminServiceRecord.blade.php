@@ -124,9 +124,6 @@
         <div class="bg-white rounded-xl p-6 shadow">
           <h2 class="font-semibold mb-4">Quick Actions</h2>
           <div class="space-y-3">
-            <button class="w-full border rounded-lg py-2 hover:bg-gray-50">
-              Export PDF
-            </button>
 
             <button
               @click="emailOpen = true"

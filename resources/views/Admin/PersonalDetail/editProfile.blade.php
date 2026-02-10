@@ -44,7 +44,6 @@
               <input class="border rounded-md px-3 py-2" value="Senior Software Engineer">
               <input class="border rounded-md px-3 py-2" value="Engineering">
               <input class="border rounded-md px-3 py-2" value="EMP-2024-1234">
-              <input class="border rounded-md px-3 py-2" value="Sarah Williams">
             </div>
           </section>
 
@@ -55,7 +54,6 @@
             <div class="grid grid-cols-2 gap-4">
               <input class="border rounded-md px-3 py-2" value="San Francisco">
               <input class="border rounded-md px-3 py-2" value="California">
-              <input class="border rounded-md px-3 py-2" value="94102">
               <input class="border rounded-md px-3 py-2" value="United States">
             </div>
           </section>
@@ -74,9 +72,15 @@
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">🏦 Bank Details</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="Chase Bank">
-              <input class="border rounded-md px-3 py-2" value="••••1234">
-              <input class="border rounded-md px-3 py-2" value="021000021">
+              <input class="border rounded-md px-3 py-2" value="PNB">
+              <input class="border rounded-md px-3 py-2" value="PNB ACCOUNT NUMBER">
+              <input class="border rounded-md px-3 py-2" value="PAG IBIG MID">
+              <input class="border rounded-md px-3 py-2" value="PAG IBIG RTN">
+              <input class="border rounded-md px-3 py-2" value="SSS">
+              <input class="border rounded-md px-3 py-2" value="PHILHEALTH">
+              <input class="border rounded-md px-3 py-2" value="TIN">
+
+
             </div>
           </section>
 

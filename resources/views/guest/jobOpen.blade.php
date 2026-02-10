@@ -21,11 +21,11 @@
                         {{ $job->employment }}
                     </span>
                 </div>
-
+                <p class="mb-1">{{ $job->job_description }}</p>
                 <p class="mb-1">{{ $job->location }}</p>
 
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="badge bg-light text-dark">3d ago</span>
+                    <span class="badge bg-light text-dark">{{ $job->created_at->diffForHumans() }}</span>
                     <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
                     data-job='@json($job)'>
@@ -46,11 +46,11 @@
                         {{ $others->employment }}
                     </span>
                 </div>
-
+                <p class="mb-1">{{ $others->job_description }}</p>
                 <p class="mb-1">{{ $others->location }}</p>
 
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="badge bg-light text-dark">3d ago</span>
+                    <span class="badge bg-light text-dark">{{ $others->created_at->diffForHumans() }}</span>
                     <a href="javascript:void(0)"
                     class="fw-semibold text-success text-decoration-none view-details"
                     data-job='@json($others)'>

@@ -105,7 +105,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Phone No.</span>
-        <span x-text="selectedEmployee?.applicant?.phone_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.applicant?.phone ?? '—'"></span>
       </div>
     </div>
   </div>

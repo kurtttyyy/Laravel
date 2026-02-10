@@ -30,4 +30,9 @@ class OpenPosition extends Model
         'two',
         'passionate',
     ];
+
+    public function applicants()
+    {
+        return $this->hasMany(Applicant::class, 'open_position_id','id');
+    }
 }

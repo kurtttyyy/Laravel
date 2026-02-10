@@ -82,6 +82,16 @@
             <i class="bi bi-geo-alt-fill me-1"></i>
             <span id="sidebarLocationText"></span>
         </p>
+
+        <p>
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            <span id="sidebarStartText"></span>
+        </p>
+
+        <p>
+            <i class="bi bi-geo-alt-fill me-1"></i>
+            <span id="sidebarExpireText"></span>
+        </p>
     </div>
 
     <div class="sidebar-body">
@@ -213,7 +223,13 @@
             container.appendChild(div);
         });
 }
-
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // options for formatting
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+}
 
 
     function openSidebar(job) {
@@ -221,6 +237,8 @@
         document.getElementById('sidebarCollege').textContent = job.department;
         document.getElementById('sidebarType').textContent = job.employment;
         document.getElementById('sidebarLocationText').textContent = job.location;
+        document.getElementById('sidebarStartText').textContent = formatDate(job.one);
+        document.getElementById('sidebarExpireText').textContent = formatDate(job.two);
 
         populateSkills(job.skills);
         populateList('sidebarDescription', job.job_description);

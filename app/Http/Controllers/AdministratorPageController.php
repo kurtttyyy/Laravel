@@ -163,11 +163,11 @@ class AdministratorPageController extends Controller
     }
 
     public function display_position(){
-        $openPosition = OpenPosition::all();
-        $titles = OpenPosition::pluck('id');
-        $countApplication = Applicant::whereIn('open_position_id', $titles)->count();
+        $openPosition = OpenPosition::withCount('applicants')->get();
+        $openPositions = OpenPosition::all();
+        $countApplication = Applicant::groupBy('open_position_id')->count();
         $logs = GuestLog::count();
-        $positionCounts = $openPosition->count();
+        $positionCounts = $openPositions->count();
         $applicantCounts = Applicant::count();
         return view('admin.adminPosition', compact('openPosition',
         'logs', 'positionCounts', 'applicantCounts','countApplication'));

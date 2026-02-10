@@ -35,7 +35,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Date of Birth</span>
-        <span x-text="selectedEmployee?.applicant?.date_of_birth ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.formatted_birthday ?? '—'"></span>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
 
   <div>
     <span class="block text-xs uppercase text-gray-400 font-semibold">Gender</span>
-    <span x-text="selectedEmployee?.applicant?.gender ?? '—'"></span>
+    <span x-text="selectedEmployee?.employee.sex ?? '—'"></span>
   </div>
 </div>
 
@@ -84,7 +84,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Marital Status</span>
-        <span x-text="selectedEmployee?.applicant?.marital_status ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.civil_status ?? '—'"></span>
       </div>
     </div>
   </div>
@@ -94,7 +94,7 @@
     <div class="flex items-center gap-2 text-indigo-600 font-semibold text-lg">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a7 7 0 017 7c0 4.418-7 13-7 13S5 13.418 5 9a7 7 0 017-7z" />
-    <circle cx="12" cy="9" r="2.5" /> 
+    <circle cx="12" cy="9" r="2.5" />
       </svg>
       Address
     </div>
@@ -102,44 +102,44 @@
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9v9a3 3 0 01-3 3H6a3 3 0 01-3-3v-9z" />
-    <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V12h6v9" /> 
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V12h6v9" />
     </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Street Address</span>
-        <span x-text="selectedEmployee?.applicant?.address?.street ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
 
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a7 7 0 017 7c0 4.418-7 13-7 13S5 13.418 5 9a7 7 0 017-7z" />
-    <circle cx="12" cy="9" r="2.5" />      
+    <circle cx="12" cy="9" r="2.5" />
     </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Province</span>
-        <span x-text="selectedEmployee?.applicant?.address?.province ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
 
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a7 7 0 017 7c0 4.418-7 13-7 13S5 13.418 5 9a7 7 0 017-7z" />
-    <circle cx="12" cy="9" r="2.5" /> 
+    <circle cx="12" cy="9" r="2.5" />
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Municipality</span>
-        <span x-text="selectedEmployee?.applicant?.address?.municipality ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
 
     <div class="flex gap-3">
       <svg class="w-5 h-5 text-gray-400 mt-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a7 7 0 017 7c0 4.418-7 13-7 13S5 13.418 5 9a7 7 0 017-7z" />
-    <circle cx="12" cy="9" r="2.5" /> 
+    <circle cx="12" cy="9" r="2.5" />
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Postal Code</span>
-        <span x-text="selectedEmployee?.applicant?.address?.postal_code ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
       </div>
     </div>
   </div>
@@ -255,9 +255,9 @@
     <span class="block text-xs uppercase text-gray-400 font-semibold">
       PNB
     </span>
-    <span x-text="selectedEmployee?.bank?.name ?? '—'"></span>
+    <span x-text="selectedEmployee?.employee.account_number ?? '—'"></span>
   </div>
-  
+
 </div>
 
     <div class="flex gap-3">
@@ -267,7 +267,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">PAG IBIG</span>
-        <span x-text="selectedEmployee?.bank?.routing_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.government.RTN ?? '—'"></span>
       </div>
     </div>
 
@@ -278,7 +278,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">SSS</span>
-        <span x-text="selectedEmployee?.bank?.routing_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.government.SSS ?? '—'"></span>
       </div>
     </div>
 
@@ -289,7 +289,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">PhilHealth</span>
-        <span x-text="selectedEmployee?.bank?.routing_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.government.PhilHealth ?? '—'"></span>
       </div>
     </div>
         <div class="flex gap-3">
@@ -299,7 +299,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">TIN</span>
-        <span x-text="selectedEmployee?.bank?.routing_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.government.TIN ?? '—'"></span>
       </div>
     </div>
 
@@ -311,7 +311,7 @@
       </svg>
       <div>
         <span class="block text-xs uppercase text-gray-400 font-semibold">Account Number</span>
-        <span x-text="selectedEmployee?.bank?.account_number ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee.employee_id ?? '—'"></span>
       </div>
     </div>
 

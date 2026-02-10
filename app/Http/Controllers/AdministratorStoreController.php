@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\ApplicantDocument;
 use App\Models\Education;
 use App\Models\Employee;
 use App\Models\Government;
@@ -107,6 +108,41 @@ class AdministratorStoreController extends Controller
         ]);
 
         return redirect()->back()->with('success','Success Rating Store');
+    }
+
+    public function store_document(Request $request){
+        Log::info($request);
+        $attrs = $request->validate([
+            'applicant_id' => 'required|exists:applicants,id',
+            'documents' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        ]);
+
+        $file = $request->file('documents');
+
+        if (!$file || !$file->isValid()) {
+            return back()->withErrors(['documents' => 'Invalid file upload.']);
+        }
+
+        $originalName = $file->getClientOriginalName();
+        $mimeType     = $file->getMimeType();
+        $size         = $file->getSize();
+
+        $fileName = time() . '_' . $originalName;
+
+        // Store file
+        $filePath = $file->storeAs('uploads', $fileName, 'public');
+
+        ApplicantDocument::create([
+            'applicant_id' => $attrs['applicant_id'],
+            'type'         => 'New File',
+            'filename'     => $originalName,
+            'filepath'     => $filePath, // already "uploads/filename"
+            'mime_type'    => $mimeType,
+            'size'         => $size,
+        ]);
+
+        return back()->with('success', 'Document uploaded successfully.');
+
     }
 
     //UPDATE

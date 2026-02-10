@@ -1,22 +1,24 @@
 <!-- Documents -->
 <div x-show="tab === 'documents'" x-transition class="w-full p-6 space-y-6">
 
-  <!-- Upload Box (Static) -->
-  <div class="border-2 border-dashed border-indigo-200 bg-indigo-50 rounded-xl p-8 text-center">
-    <div class="text-3xl mb-2">☁️</div>
-    <h3 class="font-semibold text-gray-800">Upload New Document</h3>
-    <p class="text-sm text-gray-500 mb-4">
-      Drag and drop files here or click to browse
-    </p>
-
-    <button
-      type="button"
-      class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
-    >
-      Choose File
-    </button>
-  </div>
-
+    <form action="{{ route('admin.addDocument') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" name="applicant_id" :value="selectedEmployee?.applicant.id">
+        <!-- Upload Box (Static) -->
+        <div class="border-2 border-dashed border-indigo-200 bg-indigo-50 rounded-xl p-8 text-center">
+            <div class="text-3xl mb-2">☁️</div>
+            <h3 class="font-semibold text-gray-800">Upload New Document</h3>
+            <p class="text-sm text-gray-500 mb-4">
+            Drag and drop files here or click to browse
+            </p>
+            <input type="file" name="documents" accept=".pdf,.doc,.docx" required
+                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
+            >
+        </div>
+        <div>
+            <button type="submit">Save</button>
+        </div>
+    </form>
   <!-- All Documents -->
   <div x-show="selectedEmployee?.applicant?.documents?.length" class="space-y-3">
     <h3 class="font-semibold text-gray-800">All Documents</h3>

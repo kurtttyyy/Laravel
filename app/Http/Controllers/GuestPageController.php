@@ -36,7 +36,8 @@ class GuestPageController extends Controller
 
     public function display_job($id){
         $job = OpenPosition::find($id);
-        $other = OpenPosition::all();
+        $other = OpenPosition::where('id', '!=', $job->id)
+                                ->get();
         $jobOpen = OpenPosition::where('department', $job->department)
                                 ->where('id', '!=', $job->id)
                                 ->get();

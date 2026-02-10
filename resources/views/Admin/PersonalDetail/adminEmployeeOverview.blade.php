@@ -133,7 +133,9 @@
         <span class="block font-semibold text-xs uppercase text-gray-400">
           Employee ID
         </span>
-        <span class="text-gray-700">EMP-2024-1234</span>
+        <span class="text-gray-700"
+            x-text="selectedEmployee?.employee.employee_id ?? '—'"
+        ></span>
       </div>
     </div>
 

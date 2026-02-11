@@ -10,56 +10,102 @@
 <main class="container my-5 animated-card2 delay-5">
     <h2 class="fw-bold mb-4">Job Vacancies</h2>
 
-    <div class="card shadow-sm mb-4 hover-card ">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h4 class="mb-1">{{ $job->title }}</h4>
-                        <h5 class="text-secondary mb-1">{{ $job->department }}</h5>
-                    </div>
-                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
-                        {{ $job->employment }}
-                    </span>
-                </div>
-                <p class="mb-1">{{ $job->job_description }}</p>
-                <p class="mb-1">{{ $job->location }}</p>
+<div class="card shadow-sm mb-4 hover-card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="mb-1">{{ $job->title }}</h4>
+                <h5 class="text-secondary mb-1">{{ $job->department }}</h5>
+            </div>
+            <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+                {{ $job->employment }}
+            </span>
+        </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="badge bg-light text-dark">{{ $job->created_at->diffForHumans() }}</span>
-                    <a href="javascript:void(0)"
-                    class="fw-semibold text-success text-decoration-none view-details"
-                    data-job-id="{{ $job->id }}">
-                        View Details →
-                    </a>
+        @php
+            $lines = preg_split("/\r\n|\n|\r/", $job->job_description);
+        @endphp
+
+        <ul class="list-unstyled ps-0 mb-2">
+            @foreach (array_slice($lines, 0, 3) as $line)
+                <li class="mb-1">
+                    {{
+                        Str::limit(
+                            ltrim($line, "•- "),
+                            282,
+                            '...'
+                        )
+                    }}
+                </li>
+            @endforeach
+        </ul>
+
+        <p class="mb-1 text-muted">
+            <i class="bi bi-geo-alt me-1"></i>{{ $job->location }}
+        </p>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="badge bg-light text-dark">
+                {{ $job->created_at->diffForHumans() }}
+            </span>
+            <a href="javascript:void(0)"
+               class="fw-semibold text-success text-decoration-none view-details"
+               data-job-id="{{ $job->id }}">
+                View Details →
+            </a>
+        </div>
+    </div>
+</div>
+
+@foreach ($other as $others)
+    <div class="card shadow-sm mb-4 hover-card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h4 class="mb-1">{{ $others->title }}</h4>
+                    <h5 class="text-secondary mb-1">{{ $others->department }}</h5>
                 </div>
+                <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+                    {{ $others->employment }}
+                </span>
+            </div>
+
+            @php
+                $lines = preg_split("/\r\n|\n|\r/", $others->job_description);
+            @endphp
+
+            <ul class="list-unstyled ps-0 mb-2">
+                @foreach (array_slice($lines, 0, 3) as $line)
+                    <li class="mb-1">
+                        {{
+                            Str::limit(
+                                ltrim($line, "•- "),
+                                250,
+                                '...'
+                            )
+                        }}
+                    </li>
+                @endforeach
+            </ul>
+
+            <p class="mb-1 text-muted">
+                <i class="bi bi-geo-alt me-1"></i>{{ $others->location }}
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="badge bg-light text-dark">
+                    {{ $others->created_at->diffForHumans() }}
+                </span>
+                <a href="javascript:void(0)"
+                   class="fw-semibold text-success text-decoration-none view-details"
+                   data-job-id="{{ $others->id }}">
+                    View Details →
+                </a>
             </div>
         </div>
-    @foreach($other as $others)
-        <div class="card shadow-sm mb-4 hover-card ">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h4 class="mb-1">{{ $others->title }}</h4>
-                        <h5 class="text-secondary mb-1">{{ $others->department }}</h5>
-                    </div>
-                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
-                        {{ $others->employment }}
-                    </span>
-                </div>
-                <p class="mb-1">{{ $others->job_description }}</p>
-                <p class="mb-1">{{ $others->location }}</p>
+    </div>
+@endforeach
 
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="badge bg-light text-dark">{{ $others->created_at->diffForHumans() }}</span>
-                    <a href="javascript:void(0)"
-                    class="fw-semibold text-success text-decoration-none view-details"
-                    data-job-id="{{ $others->id }}">
-                        View Details →
-                    </a>
-                </div>
-            </div>
-        </div>
-    @endforeach
 </main>
 
 {{-- Overlay --}}

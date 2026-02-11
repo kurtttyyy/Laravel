@@ -1,7 +1,7 @@
 
 <div x-show="tab === 'biometric'" x-transition class="w-full p-6 space-y-6">
     <div class="p-8 space-y-6">
-      <div x-data="{ openForm: false }">
+      <div>
 
 <div class="max-w-5xl mx-auto bg-white px-5 py-8 border border-gray-400 text-[13px] text-black">
 
@@ -10,7 +10,7 @@
 
   <!-- Edit Icon -->
   <div class="relative group">
-    <button @click="openForm = true" class="p-2 bg-green-600 text-white rounded hover:bg-green-700">
+    <button @click="openEditProfile = true; modalTarget = 'biometric'" class="p-2 bg-green-600 text-white rounded hover:bg-green-700">
       <!-- Pencil/Edit Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -299,12 +299,12 @@
 <!-- MODAL -->
 <!-- FULL FORM MODAL -->
 <div
-  x-show="openForm"
+  x-show="openEditProfile && modalTarget === 'biometric'"
   x-transition
   class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
-  <div
-    @click.outside="openForm = false"
+    <div
+    @click.outside="openEditProfile = false; modalTarget = ''"
     class="bg-white w-full max-w-5xl rounded shadow-lg p-6 text-sm overflow-y-auto max-h-[90vh]"
   >
 
@@ -314,23 +314,23 @@
         <input type="hidden" name="user_id" :value="selectedEmployee?.id">
     <!-- PERSONAL INFO -->
     <div class="grid grid-cols-2 gap-4">
-      <input class="border px-2 py-1" name="last" placeholder="Last Name">
-      <input class="border px-2 py-1" name="first" placeholder="First Name">
-      <input class="border px-2 py-1" name="middle" placeholder="Middle Name">
-      <input class="border px-2 py-1" name="employee_id" placeholder="ID Number">
-      <input class="border px-2 py-1" name="account_number" placeholder="Account No.">
-      <select name="gender" class="border px-2 py-1">
+      <input class="border px-2 py-1" name="last" placeholder="Last Name" x-model="selectedEmployee.last_name">
+      <input class="border px-2 py-1" name="first" placeholder="First Name" x-model="selectedEmployee.first_name">
+      <input class="border px-2 py-1" name="middle" placeholder="Middle Name" x-model="selectedEmployee.middle_name">
+      <input class="border px-2 py-1" name="employee_id" placeholder="ID Number" x-model="selectedEmployee.employee.employee_id">
+      <input class="border px-2 py-1" name="account_number" placeholder="Account No." x-model="selectedEmployee.employee.account_number">
+      <select name="gender" class="border px-2 py-1" x-model="selectedEmployee.employee.sex">
         <option value= "">Sex</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
       </select>
-      <input class="border px-2 py-1" name="civil_status" placeholder="Civil Status">
-      <input class="border px-2 py-1" name="contact_number" placeholder="Contact No.">
+      <input class="border px-2 py-1" name="civil_status" placeholder="Civil Status" x-model="selectedEmployee.employee.civil_status">
+      <input class="border px-2 py-1" name="contact_number" placeholder="Contact No." x-model="selectedEmployee.employee.contact_number">
       <div>
       <label class="block text-xs text-gray-600">Date of Birth</label>
-        <input type="date" name="birthday" class="w-full border px-2 py-1">
+        <input type="date" name="birthday" class="w-full border px-2 py-1" :value="selectedEmployee?.employee?.birthday ? selectedEmployee.employee.birthday.split('T')[0] : ''">
       </div>
-      <input class="border px-2 py-1" name="address" placeholder="Address">
+      <input class="border px-2 py-1" name="address" placeholder="Address" x-model="selectedEmployee.employee.address">
     </div>
 
     <!-- EMPLOYMENT -->
@@ -338,12 +338,12 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
       <label class="block text-xs text-gray-600">Employment Date</label>
-        <input type="date" name="employment_date" class="w-full border px-2 py-1">
+        <input type="date" name="employment_date" class="w-full border px-2 py-1" :value="selectedEmployee?.employee?.employement_date ?? ''">
       </div>
-      <input class="border px-2 py-1" name = "position" placeholder="Position">
-      <input class="border px-2 py-1" name = "department" placeholder="Department">
+      <input class="border px-2 py-1" name = "position" placeholder="Position" x-model="selectedEmployee.employee.position">
+      <input class="border px-2 py-1" name = "department" placeholder="Department" x-model="selectedEmployee.employee.department">
 
-      <select name = "classification" class="border px-2 py-1">
+      <select name = "classification" class="border px-2 py-1" x-model="selectedEmployee.employee.classification">
         <option value ="">Classification</option>
         <option value ="Full-Time">Full-time</option>
         <option value ="Part-Time">Part-time</option>
@@ -354,25 +354,25 @@
     <!-- GOVERNMENT IDS -->
     <h3 class="font-semibold mt-6">Government IDs</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input name = "SSS" class="border px-2 py-1" placeholder="SSS">
-      <input name = "TIN" class="border px-2 py-1" placeholder="TIN">
-      <input name = "PhilHealth" class="border px-2 py-1" placeholder="PhilHealth">
-      <input name = "MID" class="border px-2 py-1" placeholder="Pag-IBIG MID">
-      <input name = "RTN" class="border px-2 py-1" placeholder="Pag-IBIG RTN">
+      <input name = "SSS" class="border px-2 py-1" placeholder="SSS" x-model="selectedEmployee.government.SSS">
+      <input name = "TIN" class="border px-2 py-1" placeholder="TIN" x-model="selectedEmployee.government.TIN">
+      <input name = "PhilHealth" class="border px-2 py-1" placeholder="PhilHealth" x-model="selectedEmployee.government.PhilHealth">
+      <input name = "MID" class="border px-2 py-1" placeholder="Pag-IBIG MID" x-model="selectedEmployee.government.MID">
+      <input name = "RTN" class="border px-2 py-1" placeholder="Pag-IBIG RTN" x-model="selectedEmployee.government.RTN">
     </div>
 
     <!-- LICENSE -->
     <h3 class="font-semibold mt-6">License</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input name = "license" class="border px-2 py-1" placeholder="License">
-      <input name = "registration_number" class="border px-2 py-1" placeholder="Registration No.">
+      <input name = "license" class="border px-2 py-1" placeholder="License" x-model="selectedEmployee.license.license">
+      <input name = "registration_number" class="border px-2 py-1" placeholder="Registration No." x-model="selectedEmployee.license.registration_number">
       <div>
         <label class="block text-xs text-gray-600">Registration Date</label>
-        <input name = "registration_date" type="date" class="w-full border px-2 py-1">
+        <input name = "registration_date" type="date" class="w-full border px-2 py-1" :value="selectedEmployee?.license?.registration_date ? selectedEmployee.license.registration_date.split('T')[0] : ''">
       </div>
       <div>
         <label class="block text-xs text-gray-600">Valid Until</label>
-        <input name = "valid_until" type="date" class="w-full border px-2 py-1">
+        <input name = "valid_until" type="date" class="w-full border px-2 py-1" :value="selectedEmployee?.license?.valid_until ? selectedEmployee.license.valid_until.split('T')[0] : ''">
       </div>
 
     </div>
@@ -380,23 +380,23 @@
     <!-- EDUCATION -->
     <h3 class="font-semibold mt-6">Education</h3>
     <div class="grid grid-cols-2 gap-4">
-      <input name = "bachelor" class="border px-2 py-1" placeholder="Bachelor’s Degree">
-      <input name = "master" class="border px-2 py-1" placeholder="Master’s Degree">
-      <input name = "doctorate" class="border px-2 py-1" placeholder="Doctorate Degree">
+      <input name = "bachelor" class="border px-2 py-1" placeholder="Bachelor’s Degree" x-model="selectedEmployee.education.bachelor">
+      <input name = "master" class="border px-2 py-1" placeholder="Master’s Degree" x-model="selectedEmployee.education.master">
+      <input name = "doctorate" class="border px-2 py-1" placeholder="Doctorate Degree" x-model="selectedEmployee.education.doctorate">
     </div>
 
     <!-- SALARY -->
     <h3 class="font-semibold mt-6">Salary</h3>
     <div class="grid grid-cols-3 gap-4">
-      <input name = "salary" class="border px-2 py-1" placeholder="Basic Salary">
-      <input name = "rate_per_hour" class="border px-2 py-1" placeholder="Rate per Hour">
-      <input name = "cola" class="border px-2 py-1" placeholder="COLA">
+      <input name = "salary" class="border px-2 py-1" placeholder="Basic Salary" x-model="selectedEmployee.salary.salary">
+      <input name = "rate_per_hour" class="border px-2 py-1" placeholder="Rate per Hour" x-model="selectedEmployee.salary.rate_per_hour">
+      <input name = "cola" class="border px-2 py-1" placeholder="COLA" x-model="selectedEmployee.salary.cola">
     </div>
 
     <!-- ACTIONS -->
     <div class="flex justify-end gap-2 mt-6">
       <button type="button"
-        @click="openForm = false"
+        @click="openEditProfile = false; modalTarget = ''"
         class="px-4 py-1 border rounded">
         Cancel
       </button>

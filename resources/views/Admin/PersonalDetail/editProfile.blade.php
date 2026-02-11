@@ -1,8 +1,8 @@
     <!-- ================= EDIT PROFILE MODAL (EXACT DESIGN) ================= -->
     <div
-      x-show="openEditProfile"
+      x-show="openEditProfile && modalTarget === 'general'"
       x-transition
-      @click.self="openEditProfile=false"
+      @click.self="openEditProfile=false; modalTarget = ''"
       class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
       style="display:none"
     >
@@ -11,7 +11,7 @@
         <!-- Header -->
         <div class="flex justify-between px-6 py-4 border-b">
           <h2 class="font-semibold text-gray-800">Edit Employee Profile</h2>
-          <button @click="openEditProfile=false" class="text-xl text-gray-400">&times;</button>
+          <button @click="openEditProfile=false; modalTarget = ''" class="text-xl text-gray-400">&times;</button>
         </div>
 
         <!-- Content -->
@@ -88,7 +88,7 @@
 
         <!-- Footer -->
         <div class="border-t px-6 py-4 flex justify-end gap-3">
-          <button @click="openEditProfile=false" class="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>
+          <button @click="openEditProfile=false; modalTarget = ''" class="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>
           <button class="px-6 py-2 bg-blue-500 text-white rounded-md">Save Changes</button>
         </div>
 

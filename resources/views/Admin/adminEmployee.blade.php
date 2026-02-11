@@ -35,6 +35,7 @@
       x-data="{
         openProfile:false,
         openEditProfile:false,
+        modalTarget: '',
         tab:'overview',
         department:'All',
         selectedEmployee: null,
@@ -222,7 +223,7 @@
           <button class="flex-1 bg-indigo-600 text-white py-2 rounded-lg">Send Message</button>
           <button class="flex-1 bg-slate-100 py-2 rounded-lg">Schedule Meeting</button>
           <button
-            @click="openEditProfile = true"
+            @click="openEditProfile = true; modalTarget = 'general'"
             class="flex-1 bg-slate-100 py-2 rounded-lg hover:bg-slate-200">
             Edit Profile
           </button>

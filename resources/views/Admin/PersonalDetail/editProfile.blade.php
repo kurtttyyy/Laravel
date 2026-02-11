@@ -23,6 +23,7 @@
             <div class="grid grid-cols-2 gap-4">
               <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.first_name">
               <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.last_name">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.middle_name">
               <input class="border rounded-md px-3 py-2" :value="selectedEmployee?.employee?.birthday ? selectedEmployee.employee.birthday.split('T')[0] : ''">
               <select name="gender" class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.sex">
                 <option value= "">Sex</option>
@@ -55,9 +56,21 @@
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">📍 Address</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
-              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
-              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
+              <input
+                class="border rounded-md px-3 py-2"
+                placeholder="Barangay"
+                :value="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[0] ?? ''; })()"
+              >
+              <input
+                class="border rounded-md px-3 py-2"
+                placeholder="Municipality"
+                :value="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[1] ?? ''; })()"
+              >
+              <input
+                class="border rounded-md px-3 py-2"
+                placeholder="Province"
+                :value="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[2] ?? ''; })()"
+              >
             </div>
           </section>
 
@@ -65,9 +78,9 @@
           <section>
             <h3 class="text-red-500 font-semibold mb-4 flex items-center gap-2">🚨 Emergency Contact</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="Jane Doe">
-              <input class="border rounded-md px-3 py-2" value="Spouse">
-              <input class="border rounded-md px-3 py-2" value="+1 (555) 987-6543">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.emergency_contact_name">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.emergency_contact_relationship">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.emergency_contact_number">
             </div>
           </section>
 

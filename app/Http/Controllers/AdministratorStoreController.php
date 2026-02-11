@@ -218,7 +218,7 @@ class AdministratorStoreController extends Controller
             'applicantId' => 'required',
             'interview_type' => 'required',
             'date' => 'required|date',
-            'time' => 'required|date_format:H:i:s',
+            'time' => 'required|date_format:H:i,H:i:s',
             'duration' => 'required',
             'interviewers' => 'required',
             'email_link' => 'required',
@@ -276,6 +276,9 @@ class AdministratorStoreController extends Controller
             'position' => 'required',
             'department' => 'required',
             'classification' => 'required',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_relationship' => 'nullable|string|max:255',
+            'emergency_contact_number' => 'nullable|string|max:255',
 
             //Government Model
             'SSS' => 'required',
@@ -328,6 +331,9 @@ class AdministratorStoreController extends Controller
                 'department' => $attrs['department'],
                 'position' => $attrs['position'],
                 'classification' => $attrs['classification'],
+                'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
+                'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
+                'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
             ]
         );
 

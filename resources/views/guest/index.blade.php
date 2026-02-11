@@ -82,9 +82,9 @@
             Explore career opportunities and take the first step towards your dream job
         </p>
 
-        <form class="d-flex justify-content-center mb-4 animated-card2 delay-5" role="search">
+        <form id="jobSearchForm" class="d-flex justify-content-center mb-4 animated-card2 delay-5" role="search">
             <div class="input-group search-input" style="max-width:720px;">
-                <input type="search" class="form-control"
+                <input id="jobSearchInput" type="search" class="form-control"
                        placeholder="Search job titles, keywords..."
                        aria-label="Search">
                 <button class="btn btn-hero" type="submit">Search</button>
@@ -99,16 +99,16 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Department</label>
-                        <select class="form-select">
+                        <select id="departmentFilter" class="form-select">
                             <option value="">All Departments</option>
                             @foreach($open_position->pluck('department')->unique() as $departments)
-                                <option value="{{ $department }}">{{ $departments }}</option>
+                                <option value="{{ $departments }}">{{ $departments }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Employment Type</label>
-                        <select class="form-select">
+                        <select id="employmentFilter" class="form-select">
                             <option value="">All Types</option>
                             @foreach($open_position->pluck('employment')->unique() as $employments)
                                 <option value="{{ $employments }}">{{ $employments }}</option>
@@ -117,7 +117,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small mb-1">Location</label>
-                        <select class="form-select">
+                        <select id="locationFilter" class="form-select">
                             <option value="">All Location</option>
                             @foreach($open_position->pluck('location')->unique() as $locations)
                                 <option value="{{ $locations }}">{{ $locations }}</option>
@@ -162,9 +162,15 @@
 <div class="container mt-5">
     <h2 class="fw-bold text-start">Job Vacancies</h2>
 
-    <div class="row">
+    <div id="jobList" class="row">
         @foreach ($open_position as $position)
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6 job-item"
+                data-title="{{ Str::lower($position->title) }}"
+                data-department="{{ Str::lower($position->department) }}"
+                data-employment="{{ Str::lower($position->employment) }}"
+                data-location="{{ Str::lower($position->location) }}"
+                data-description="{{ Str::lower($position->job_description) }}"
+            >
                 <div class="card p-3 rounded shadow-sm mb-4 animated-card delay-5 hover-card border-1">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="fw-bold mb-1">{{ $position->title }}</h5>
@@ -213,8 +219,71 @@
             </div>
         @endforeach
     </div>
+
+    <div id="noResultsMessage" class="alert alert-warning mt-3 d-none" role="alert">
+        No jobs matched your filters.
+    </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const jobSearchForm = document.getElementById('jobSearchForm');
+        const searchInput = document.getElementById('jobSearchInput');
+        const departmentFilter = document.getElementById('departmentFilter');
+        const employmentFilter = document.getElementById('employmentFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const jobItems = Array.from(document.querySelectorAll('.job-item'));
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        function normalize(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        function applyFilters() {
+            const searchTerm = normalize(searchInput?.value);
+            const selectedDepartment = normalize(departmentFilter?.value);
+            const selectedEmployment = normalize(employmentFilter?.value);
+            const selectedLocation = normalize(locationFilter?.value);
+
+            let visibleCount = 0;
+
+            jobItems.forEach((item) => {
+                const title = normalize(item.dataset.title);
+                const department = normalize(item.dataset.department);
+                const employment = normalize(item.dataset.employment);
+                const location = normalize(item.dataset.location);
+                const description = normalize(item.dataset.description);
+
+                const matchesSearch = !searchTerm ||
+                    title.includes(searchTerm) ||
+                    description.includes(searchTerm) ||
+                    department.includes(searchTerm) ||
+                    location.includes(searchTerm);
+
+                const matchesDepartment = !selectedDepartment || department === selectedDepartment;
+                const matchesEmployment = !selectedEmployment || employment === selectedEmployment;
+                const matchesLocation = !selectedLocation || location === selectedLocation;
+
+                const isVisible = matchesSearch && matchesDepartment && matchesEmployment && matchesLocation;
+
+                item.classList.toggle('d-none', !isVisible);
+                if (isVisible) visibleCount++;
+            });
+
+            noResultsMessage.classList.toggle('d-none', visibleCount > 0);
+        }
+
+        jobSearchForm?.addEventListener('submit', function (event) {
+            event.preventDefault();
+            applyFilters();
+        });
+
+        searchInput?.addEventListener('input', applyFilters);
+        departmentFilter?.addEventListener('change', applyFilters);
+        employmentFilter?.addEventListener('change', applyFilters);
+        locationFilter?.addEventListener('change', applyFilters);
+    });
+</script>
 
 
 

@@ -274,7 +274,7 @@
 
   <div class="row">
     <span class="label">Person to Contact in Emergency:</span>
-    <span class="value" x-text="selectedEmployee?.applicant?.position?.title ?? selectedEmployee?.employee?.position ?? '-'"></span>
+    <span class="value" x-text="selectedEmployee?.employee?.emergency_contact_name ?? '-'"></span>
   </div>
 
   <div class="row">
@@ -284,7 +284,7 @@
 
   <div class="row">
     <span class="label">Cellphone Number:</span>
-    <span class="value" x-text="selectedEmployee?.employee?.contact_number ?? '-'"></span>
+    <span class="value" x-text="selectedEmployee?.employee?.emergency_contact_number ?? '-'"></span>
   </div>
 
   <!-- FOOTER -->
@@ -391,6 +391,13 @@
       <input name = "salary" class="border px-2 py-1" placeholder="Basic Salary" x-model="selectedEmployee.salary.salary">
       <input name = "rate_per_hour" class="border px-2 py-1" placeholder="Rate per Hour" x-model="selectedEmployee.salary.rate_per_hour">
       <input name = "cola" class="border px-2 py-1" placeholder="COLA" x-model="selectedEmployee.salary.cola">
+    </div>
+
+    <h3 class="font-semibold mt-6">Emergency Contact Person</h3>
+    <div class="grid grid-cols-3 gap-4">
+      <input name="emergency_contact_name" class="border px-2 py-1" placeholder="Name" x-model="selectedEmployee.employee.emergency_contact_name">
+      <input name="emergency_contact_number" class="border px-2 py-1" placeholder="Contact Number" x-model="selectedEmployee.employee.emergency_contact_number">
+      <input name="emergency_contact_relationship" class="border px-2 py-1" placeholder="Relationship" x-model="selectedEmployee.employee.emergency_contact_relationship">
     </div>
 
     <!-- ACTIONS -->

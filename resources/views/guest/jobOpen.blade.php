@@ -10,7 +10,25 @@
 <main class="container my-5 animated-card2 delay-5">
     <h2 class="fw-bold mb-4">Job Vacancies</h2>
 
-<div class="card shadow-sm mb-4 hover-card">
+    <form id="jobOpenSearchForm" class="mb-4" role="search">
+        <div class="input-group" style="max-width: 720px;">
+            <input
+                id="jobOpenSearchInput"
+                type="search"
+                class="form-control"
+                placeholder="Search job titles, departments, locations..."
+                aria-label="Search jobs"
+            >
+            <button class="btn btn-success" type="submit">Search</button>
+        </div>
+    </form>
+
+<div class="job-open-item card shadow-sm mb-4 hover-card"
+    data-title="{{ Str::lower($job->title) }}"
+    data-department="{{ Str::lower($job->department) }}"
+    data-location="{{ Str::lower($job->location) }}"
+    data-description="{{ Str::lower($job->job_description) }}"
+>
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
@@ -58,7 +76,12 @@
 </div>
 
 @foreach ($other as $others)
-    <div class="card shadow-sm mb-4 hover-card">
+    <div class="job-open-item card shadow-sm mb-4 hover-card"
+        data-title="{{ Str::lower($others->title) }}"
+        data-department="{{ Str::lower($others->department) }}"
+        data-location="{{ Str::lower($others->location) }}"
+        data-description="{{ Str::lower($others->job_description) }}"
+    >
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
@@ -105,6 +128,10 @@
         </div>
     </div>
 @endforeach
+
+<div id="jobOpenNoResults" class="alert alert-warning d-none">
+    No jobs matched your search.
+</div>
 
 </main>
 
@@ -185,6 +212,30 @@
 
     const sidebar = document.getElementById('jobSidebar');
     const overlay = document.getElementById('overlay');
+    const searchForm = document.getElementById('jobOpenSearchForm');
+    const searchInput = document.getElementById('jobOpenSearchInput');
+    const jobCards = Array.from(document.querySelectorAll('.job-open-item'));
+    const noResults = document.getElementById('jobOpenNoResults');
+
+    function filterJobCards() {
+        const searchTerm = (searchInput?.value || '').toLowerCase().trim();
+        let visibleCount = 0;
+
+        jobCards.forEach((card) => {
+            const searchableText = [
+                card.dataset.title || '',
+                card.dataset.department || '',
+                card.dataset.location || '',
+                card.dataset.description || '',
+            ].join(' ');
+
+            const isVisible = !searchTerm || searchableText.includes(searchTerm);
+            card.classList.toggle('d-none', !isVisible);
+            if (isVisible) visibleCount++;
+        });
+
+        noResults.classList.toggle('d-none', visibleCount > 0);
+    }
 
     function populateList(id, data) {
         const el = document.getElementById(id);
@@ -330,6 +381,13 @@ function formatDate(dateString) {
         sidebar.classList.remove('show');
         overlay.style.display = 'none';
     };
+
+    searchForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        filterJobCards();
+    });
+
+    searchInput?.addEventListener('input', filterJobCards);
 </script>
 
 @endsection

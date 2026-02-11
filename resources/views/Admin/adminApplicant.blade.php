@@ -429,6 +429,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
           <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
           name="duration">
+            <option value="5 minutes">5 minutes</option>
             <option value="30 minutes">30 minutes</option>
             <option value="45 minutes">45 minutes</option>
             <option value="60 minutes">60 minutes</option>

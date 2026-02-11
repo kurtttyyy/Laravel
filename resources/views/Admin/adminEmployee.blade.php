@@ -38,6 +38,32 @@
         modalTarget: '',
         tab:'overview',
         department:'All',
+        statusFilter:'All',
+        search:'',
+        employeeIndex: [],
+        normalize(value) {
+          return (value ?? '').toString().trim().toLowerCase();
+        },
+        matchesDepartment(empDepartment) {
+          if (this.department === 'All') return true;
+          return this.normalize(empDepartment) === this.normalize(this.department);
+        },
+        matchesSearch(empName) {
+          const query = this.normalize(this.search);
+          if (!query) return true;
+          return this.normalize(empName).includes(query);
+        },
+        matchesStatus(empStatus) {
+          if (this.statusFilter === 'All') return true;
+          return this.normalize(empStatus) === this.normalize(this.statusFilter);
+        },
+        hasVisibleEmployees() {
+          return this.employeeIndex.some(emp =>
+            this.matchesDepartment(emp.department) &&
+            this.matchesSearch(emp.name) &&
+            this.matchesStatus(emp.status)
+          );
+        },
         selectedEmployee: {
           applicant: { documents: [], position: {} },
           employee: {},
@@ -75,10 +101,25 @@
             console.error('Unable to load employee documents.', error);
           }
         },
-      }">
+      }"
+      x-init="employeeIndex = @js(
+        $employee->map(fn($emp) => [
+          'name' => trim(($emp->first_name ?? '').' '.($emp->middle_name ?? '').' '.($emp->last_name ?? '')),
+          'department' => data_get($emp, 'applicant.position.department') ?? data_get($emp, 'employee.department') ?? '',
+          'status' => $emp->account_status ?? '',
+        ])->values()
+      )"
+>
 
     <!-- Header -->
-    @include('components.adminHeader.employeeHeader')
+    @php
+      $departmentOptions = $employee
+        ->map(fn($emp) => data_get($emp, 'applicant.position.department') ?? data_get($emp, 'employee.department'))
+        ->filter()
+        ->unique()
+        ->values();
+    @endphp
+    @include('components.adminHeader.employeeHeader', ['departmentOptions' => $departmentOptions])
 
     <!-- ================= DASHBOARD CONTENT ================= -->
 <div class="p-4 md:p-8 space-y-6 pt-20">
@@ -104,40 +145,10 @@
             Inactive
         </div>
 
-          <div class="flex items-center gap-2 text-sm text-gray-600">
-          <i class="fa-solid fa-filter text-gray-400"></i>
-          Filter by Department
-        </div>
-
-        <select
-          x-model="department"
-          class="border border-gray-300 rounded-lg px-3 py-2 text-sm
-                focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-        >
-          <option value="All">All Departments</option>
-          <option value="Engineering">Engineering</option>
-          <option value="Human Resource">Human Resource</option>
-          <option value="Finance">Finance</option>
-          <option value="IT Support">IT Support</option>
-          <option value="Marketing">Marketing</option>
-        </select>
-
     </div>
     <!-- FILTER BAR -->
 
 
-
-
-
-
-    <!-- Add Employee Button -->
-    <button
-        class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white
-               rounded-lg shadow hover:bg-indigo-700 transition"
-    >
-        <i class="fa fa-user-plus"></i>
-        Add Employee
-    </button>
 
 </div>
 
@@ -149,7 +160,12 @@
 
         @foreach ($employee as $emp)
         <!-- Employee Card -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden w-72">
+        <div
+            class="bg-white rounded-xl shadow-md overflow-hidden w-72"
+            x-show="matchesDepartment(@js(data_get($emp, 'applicant.position.department') ?? data_get($emp, 'employee.department') ?? '')) &&
+                    matchesSearch(@js(trim(($emp->first_name ?? '').' '.($emp->middle_name ?? '').' '.($emp->last_name ?? ''))) ) &&
+                    matchesStatus(@js($emp->account_status ?? ''))"
+        >
             <div class="h-24 bg-gradient-to-r from-purple-500 to-indigo-500 flex justify-center items-center">
                 <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24">
                     {{$emp->initials}}
@@ -180,7 +196,7 @@
                 <div class="flex justify-between items-center">
                     <div class="flex items-center -space-x-">
                         <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium z-10">
-                            Active
+                            {{ $emp->account_status ?? 'Active' }}
                         </span>
 
                         <!--<span class="px-2 py-1 text-indigo-700 bg-indigo-100 rounded-full text-xs font-medium">
@@ -196,6 +212,14 @@
             </div>
         </div>
         @endforeach
+    </div>
+
+    <div
+      x-show="!hasVisibleEmployees()"
+      class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-3"
+      style="display:none;"
+    >
+      No employee found for your filter/search.
     </div>
 
 

@@ -22,5 +22,28 @@ class Employee extends Model
         'department',
         'position',
         'classification',
+        'emergency_contact_name',
+        'emergency_contact_relationship',
+        'emergency_contact_number',
     ];
+
+    protected $casts = [
+        'employement_date' => 'date',
+        'birthday' => 'date',
+    ];
+
+    protected $appends = [
+        'formatted_employement_date',
+        'formatted_birthday',
+    ];
+
+    public function getFormattedEmployementDateAttribute()
+    {
+        return $this->employement_date ? $this->employement_date->format('F j, Y') : null;
+    }
+
+    public function getFormattedBirthdayAttribute()
+    {
+        return $this->birthday ? $this->birthday->format('F j, Y') : null;
+    }
 }

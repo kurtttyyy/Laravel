@@ -125,7 +125,13 @@ class AdministratorPageController extends Controller
     }
 
     public function display_interview(){
-        $interview = Interviewer::with('applicant')->get();
+        $visibleUntil = now()->subMinutes(5)->format('Y-m-d H:i:s');
+
+        $interview = Interviewer::with('applicant')
+            ->whereRaw("TIMESTAMP(`date`, `time`) >= ?", [$visibleUntil])
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get();
 
         $count_daily = Interviewer::whereDate('date', today())
                                     ->whereTime('time', '<', now())
@@ -160,7 +166,7 @@ class AdministratorPageController extends Controller
             'applicant_id' => $app->applicant_id,
             'interview_type' => $app->interview_type,
             'date' => $app->date->format('Y-m-d'),
-            'time' => $app->time,
+            'time' => \Carbon\Carbon::parse($app->time)->format('H:i'),
             'duration' => $app->duration,
             'interviewers' => $app->interviewers,
             'email_link' => $app->email_link,

@@ -157,7 +157,7 @@
         </span>
         <span
           class="text-gray-700"
-          x-text="selectedEmployee?.applicant?.formatted_date_hired ?? '—'"
+          x-text="selectedEmployee?.applicant?.formatted_date_hired || selectedEmployee?.employee?.formatted_employement_date || selectedEmployee?.employee?.employement_date || '—'"
         ></span>
       </div>
     </div>

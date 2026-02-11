@@ -97,7 +97,10 @@
             <p class="text-sm text-slate-400 mb-4">TODAY – {{ now()->format('F j, Y') }}</p>
 
             <!-- CARD 1 -->
-            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between">
+            <div
+                class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between interview-card"
+                data-scheduled-at="{{ \Carbon\Carbon::parse($inter->date->format('Y-m-d').' '.$inter->time)->toIso8601String() }}"
+            >
                 <div class="flex gap-6">
                     <div class="text-indigo-600 font-bold text-xl">
                         {{ \Carbon\Carbon::parse($inter->time)->format('h:i') }}
@@ -197,6 +200,7 @@
                     <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
                     name="duration"
                     id="duration">
+                        <option value="5 minutes">5 minutes</option>
                         <option value="30 minutes">30 minutes</option>
                         <option value="45 minutes">45 minutes</option>
                         <option value="60 minutes">60 minutes</option>
@@ -287,6 +291,27 @@
 </script>
 
 <script>
+  function hideExpiredInterviews() {
+    const graceMs = 5 * 60 * 1000;
+    const nowMs = Date.now();
+    const cards = document.querySelectorAll('.interview-card');
+
+    cards.forEach((card) => {
+      const scheduledAt = card.dataset.scheduledAt;
+      if (!scheduledAt) return;
+
+      const scheduledMs = new Date(scheduledAt).getTime();
+      if (Number.isNaN(scheduledMs)) return;
+
+      if (nowMs > (scheduledMs + graceMs)) {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  hideExpiredInterviews();
+  setInterval(hideExpiredInterviews, 30000);
+
   const sidebar = document.querySelector('aside');
   const main = document.querySelector('main');
   if (sidebar && main) {

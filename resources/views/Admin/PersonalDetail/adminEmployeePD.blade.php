@@ -24,7 +24,7 @@
       </svg>
       <div>
         <span class="block uppercase text-gray-400 font-semibold" style="font-size: 10px;">Full Name</span>
-        <span x-text="selectedEmployee?.applicant?.first_name + ' ' + selectedEmployee?.applicant?.last_name"></span>
+        <span x-text="`${selectedEmployee?.first_name ?? ''} ${selectedEmployee?.middle_name ?? ''} ${selectedEmployee?.last_name ?? ''}`.trim()"></span>
       </div>
     </div>
 
@@ -126,8 +126,8 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M9 21V12h6v9" />
     </svg>
       <div>
-        <span class="block uppercase text-gray-400 font-semibold">Street Address</span>
-        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
+        <span class="block uppercase text-gray-400 font-semibold">Barangay</span>
+        <span x-text="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[0] ?? '—'; })()"></span>
       </div>
     </div>
 
@@ -137,8 +137,8 @@
     <circle cx="12" cy="9" r="2.5" />
     </svg>
       <div>
-        <span class="block uppercase text-gray-400 font-semibold">Province</span>
-        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
+        <span class="block uppercase text-gray-400 font-semibold">Municipality</span>
+        <span x-text="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[1] ?? '—'; })()"></span>
       </div>
     </div>
 
@@ -148,8 +148,8 @@
     <circle cx="12" cy="9" r="2.5" />
       </svg>
       <div>
-        <span class="block uppercase text-gray-400 font-semibold">Municipality</span>
-        <span x-text="selectedEmployee?.employee.address ?? '—'"></span>
+        <span class="block uppercase text-gray-400 font-semibold">Province</span>
+        <span x-text="(() => { const parts = (selectedEmployee?.employee?.address ?? '').split(',').map(p => p.trim()).filter(Boolean); return parts[2] ?? '—'; })()"></span>
       </div>
     </div>
 
@@ -191,7 +191,7 @@
     <span class="block uppercase text-gray-400 font-semibold">
       Contact Name
     </span>
-    <span x-text="selectedEmployee?.emergency_contact?.name ?? '—'"></span>
+    <span x-text="selectedEmployee?.employee?.emergency_contact_name ?? '—'"></span>
   </div>
 </div>
 
@@ -204,7 +204,7 @@
       </svg>
       <div>
         <span class="block uppercase text-gray-400 font-semibold">Relationship</span>
-        <span x-text="selectedEmployee?.emergency_contact?.relationship ?? '—'"></span>
+        <span x-text="selectedEmployee?.employee?.emergency_contact_relationship ?? '—'"></span>
       </div>
     </div>
 
@@ -225,7 +225,7 @@
 
   <div>
     <span class="block uppercase text-gray-400 font-semibold">Phone Number</span>
-    <span x-text="selectedEmployee?.emergency_contact?.phone ?? '—'"></span>
+    <span x-text="selectedEmployee?.employee?.emergency_contact_number ?? '—'"></span>
   </div>
 </div>
 

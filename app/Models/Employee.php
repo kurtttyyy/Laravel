@@ -23,21 +23,4 @@ class Employee extends Model
         'position',
         'classification',
     ];
-
-    protected $casts = [
-        'birthday' => 'date',
-    ];
-
-    protected $appends = [
-        'formatted_birthday',
-    ];
-
-    public function getFormattedBirthdayAttribute()
-    {
-        return $this->birthday
-            ? $this->birthday->format('F j, Y')
-            : '';
-    }
-
-
 }

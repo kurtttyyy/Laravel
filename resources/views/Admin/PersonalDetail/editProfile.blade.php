@@ -21,10 +21,14 @@
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">👤 Personal Information</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="John">
-              <input class="border rounded-md px-3 py-2" value="Doe">
-              <input class="border rounded-md px-3 py-2" value="03/15/1990">
-              <select class="border rounded-md px-3 py-2"><option>Male</option></select>
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.first_name">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.last_name">
+              <input class="border rounded-md px-3 py-2" :value="selectedEmployee?.employee?.birthday ? selectedEmployee.employee.birthday.split('T')[0] : ''">
+              <select name="gender" class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.sex">
+                <option value= "">Sex</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
             </div>
           </section>
 
@@ -32,8 +36,8 @@
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">📧 Contact Information</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="john.doe@company.com">
-              <input class="border rounded-md px-3 py-2" value="+1 (555) 123-4567">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.email" >
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.contact_number">
             </div>
           </section>
 
@@ -41,20 +45,19 @@
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">💼 Employment Details</h3>
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="Senior Software Engineer">
-              <input class="border rounded-md px-3 py-2" value="Engineering">
-              <input class="border rounded-md px-3 py-2" value="EMP-2024-1234">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.position">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.department">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.employee_id">
             </div>
           </section>
 
           <!-- Address -->
           <section>
             <h3 class="text-indigo-600 font-semibold mb-4 flex items-center gap-2">📍 Address</h3>
-            <input class="border rounded-md px-3 py-2 w-full mb-4" value="123 Market Street, Apt 4B">
             <div class="grid grid-cols-2 gap-4">
-              <input class="border rounded-md px-3 py-2" value="San Francisco">
-              <input class="border rounded-md px-3 py-2" value="California">
-              <input class="border rounded-md px-3 py-2" value="United States">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
+              <input class="border rounded-md px-3 py-2" x-model="selectedEmployee.employee.address">
             </div>
           </section>
 

@@ -20,6 +20,7 @@ Route::controller(GuestPageController::class)->group(function () {
     Route::get('/application/teaching/procedure', 'display_teaching')->name('guest.applicationTeachingSteps');
     Route::get('/', 'display_index')->name('guest.index');
     Route::get('/index', 'display_index')->name('guest.index');
+    Route::get('/job/available', 'job_open_landing')->name('guest.jobOpenLanding');
     Route::get('/job/available/{id}', 'display_job')->name('guest.jobOpen');
 });
 

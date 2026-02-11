@@ -13,7 +13,7 @@
             <a href="{{ route('guest.index') }}" class="btn btn-outline-light border-0 nav-home-link">Home</a>
 
             <!-- Buttons -->
-            <a href="{{ route('guest.jobOpen',  ['id' => 1]) }}" class=" btn btn-outline-light border-0 nav-home-link">Job Applicant</a>
+            <a href="{{ route('guest.jobOpenLanding') }}" class=" btn btn-outline-light border-0 nav-home-link">Job Applicant</a>
 
             <!-- Application Status button triggers modal -->
             <button id="applicationStatusBtn"
@@ -79,5 +79,3 @@
 
 
 </script>
-
-

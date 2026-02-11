@@ -36,6 +36,18 @@ class ApplicantController extends Controller
             'experience_years' => 'required',
         ]);
 
+        // Keep applicant identity in session so vacancy pages can hide jobs already applied to.
+        session(['applicant_email' => $attrs['email']]);
+
+        $alreadyApplied = Applicant::where('email', $attrs['email'])
+            ->where('open_position_id', $attrs['position'])
+            ->exists();
+
+        if ($alreadyApplied) {
+            return redirect()->route('guest.index')
+                ->with('error', 'You already applied for this position.');
+        }
+
         $applicant_store = Applicant::create([
             'first_name' => $attrs['first_name'],
             'last_name' => $attrs['last_name'],
@@ -86,13 +98,15 @@ class ApplicantController extends Controller
             }
         });
 
-        return redirect()->back()->with('success', 'Submitted successfully');
+        return redirect()->route('guest.index')->with('success', 'Submitted successfully');
     }
 
     public function display_application(Request $request){
         $attrs = $request->validate([
             'email' => 'required|email',
         ]);
+
+        session(['applicant_email' => $attrs['email']]);
 
         if (!Applicant::where('email', $attrs['email'])->exists()) {
             return redirect('/');

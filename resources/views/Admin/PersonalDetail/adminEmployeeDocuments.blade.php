@@ -4,7 +4,7 @@
 <form action="{{ route('admin.addDocument') }}" method="POST" enctype="multipart/form-data">
     @csrf
 
-    <input type="hidden" name="applicant_id" :value="selectedEmployee?.applicant.id">
+    <input type="hidden" name="applicant_id" :value="selectedEmployee?.applicant?.id">
 
     <!-- File Name -->
     <div class="mb-4">
@@ -48,15 +48,12 @@
 </form>
 
 <!-- All Documents -->
-<div
-    x-show="selectedEmployee?.applicant?.documents?.length"
-    class="bg-gray-50 rounded-2xl p-4 shadow-inner"
->
+<div class="bg-gray-50 rounded-2xl p-4 shadow-inner">
     <h3 class="font-semibold text-gray-800 mb-3">All Documents</h3>
 
     <!-- Scroll Container -->
     <div class="space-y-3 max-h-80 overflow-y-auto pr-2">
-        <template x-for="doc in selectedEmployee.applicant.documents" :key="doc.id">
+        <template x-for="doc in (selectedEmployee?.applicant?.documents ?? [])" :key="doc.id">
             <!-- Document Item -->
             <div class="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
                 <div class="flex items-center space-x-4">
@@ -67,14 +64,19 @@
                         <p class="font-medium text-gray-800" x-text="doc.type"></p>
                         <p
                             class="text-xs text-gray-500"
-                            x-text="doc.filename + ' â€¢ ' + doc.size + ' â€¢ ' + doc.formatted_created_at"
+                            x-text="doc.filename + ' • ' + (doc.formatted_size ?? doc.size) + ' • ' + (doc.formatted_created_at ?? '')"
                         ></p>
                     </div>
                 </div>
 
                 <div class="flex items-center space-x-3">
                     <!-- Eye icon -->
-                    <button class="text-gray-500 hover:text-indigo-600">
+                    <a
+                        class="text-gray-500 hover:text-indigo-600"
+                        :href="`/storage/${doc.filepath}`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -82,10 +84,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                    </button>
+                    </a>
 
                     <!-- Download icon -->
-                    <button class="text-gray-500 hover:text-indigo-600">
+                    <a
+                        class="text-gray-500 hover:text-indigo-600"
+                        :href="`/storage/${doc.filepath}`"
+                        :download="doc.filename"
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -93,11 +99,18 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
                         </svg>
-                    </button>
+                    </a>
                 </div>
             </div>
         </template>
+        <p
+            x-show="!selectedEmployee?.applicant?.documents?.length"
+            class="text-sm text-gray-500"
+        >
+            No documents uploaded.
+        </p>
     </div>
 </div>
 
 </div>
+

@@ -10,6 +10,8 @@ class Education extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'education';
+
     protected $fillable = [
         'user_id',
         'bachelor',

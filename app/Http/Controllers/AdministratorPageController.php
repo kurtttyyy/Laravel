@@ -26,16 +26,27 @@ class AdministratorPageController extends Controller
     }
 
     public function display_employee(){
-        $employee = User::with(
+        $employee = User::with([
             'applicant',
-            'applicant.documents:id,applicant_id,filename,filepath,type,mime_type,size,created_at',
+            'applicant.documents' => function ($query) {
+                $query->select([
+                    'id',
+                    'applicant_id',
+                    'filename',
+                    'filepath',
+                    'type',
+                    'mime_type',
+                    'size',
+                    'created_at',
+                ])->orderByDesc('created_at');
+            },
             'applicant.position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate',
             'employee',
             'education',
             'government',
             'salary',
             'license',
-            )->where('role','Employee')->get();
+            ])->where('role','Employee')->get();
 
         Log::info($employee);
         return view('admin.adminEmployee', compact('employee'));
@@ -185,6 +196,29 @@ class AdministratorPageController extends Controller
         return view('admin.adminEmployeeOverview');
     }
 
+    public function employee_documents($id){
+        $employee = User::with([
+            'applicant.documents' => function ($query) {
+                $query->select([
+                    'id',
+                    'applicant_id',
+                    'filename',
+                    'filepath',
+                    'type',
+                    'mime_type',
+                    'size',
+                    'created_at',
+                ])->orderByDesc('created_at');
+            },
+        ])->where('role', 'Employee')->findOrFail($id);
+
+        $documents = $employee->applicant?->documents?->values() ?? collect();
+
+        return response()->json([
+            'documents' => $documents,
+        ]);
+    }
+
     //Personal Detail
     public function display_documents(){
         return view('admin.PersonalDetail.adminEmployeeDocuments');
@@ -211,4 +245,3 @@ class AdministratorPageController extends Controller
     }
 
 }
-

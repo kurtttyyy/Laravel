@@ -114,6 +114,7 @@ class AdministratorStoreController extends Controller
         Log::info($request);
         $attrs = $request->validate([
             'applicant_id' => 'required|exists:applicants,id',
+            'document_name' => 'required|string|max:255',
             'documents' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
@@ -134,7 +135,7 @@ class AdministratorStoreController extends Controller
 
         ApplicantDocument::create([
             'applicant_id' => $attrs['applicant_id'],
-            'type'         => 'New File',
+            'type'         => $attrs['document_name'],
             'filename'     => $originalName,
             'filepath'     => $filePath, // already "uploads/filename"
             'mime_type'    => $mimeType,

@@ -189,7 +189,7 @@
         </span>
         <span
           class="text-gray-700"
-          x-text="selectedEmployee?.applicant?.position?.title ?? '—'"
+          x-text="selectedEmployee?.applicant?.position?.title ?? selectedEmployee?.employee?.position ?? '—'"
         ></span>
       </div>
     </div>

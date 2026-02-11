@@ -33,7 +33,7 @@ class RegisterLoginController extends Controller
         $hire = 'hired';
 
         $find = Applicant::where('email', $attrs['email'])
-                            ->where('application_status', $hire)
+                            ->whereRaw('LOWER(application_status) = ?', [$hire])
                             ->exists();
 
         if(!$find){
@@ -52,7 +52,7 @@ class RegisterLoginController extends Controller
         ]);
 
         Applicant::where('email', $user->email)
-                    ->where('application_status', $hire)
+                    ->whereRaw('LOWER(application_status) = ?', [$hire])
                     ->update([
                         'user_id' => $user->id,
                     ]);

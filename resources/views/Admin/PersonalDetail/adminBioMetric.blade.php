@@ -274,7 +274,7 @@
 
   <div class="row">
     <span class="label">Person to Contact in Emergency:</span>
-    <span class="value" x-text="selectedEmployee?.applicant?.position?.title ?? '-'"></span>
+    <span class="value" x-text="selectedEmployee?.applicant?.position?.title ?? selectedEmployee?.employee?.position ?? '-'"></span>
   </div>
 
   <div class="row">

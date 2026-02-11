@@ -25,6 +25,7 @@ class ApplicantDocument extends Model
 
     protected $appends = [
         'formatted_created_at',
+        'formatted_size',
     ];
 
     public function getFormattedCreatedAtAttribute()
@@ -32,6 +33,21 @@ class ApplicantDocument extends Model
         return $this->created_at
             ? $this->created_at->format('F j, Y')
             : '';
+    }
+
+    public function getFormattedSizeAttribute()
+    {
+        if (!is_numeric($this->size) || $this->size < 0) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $size = (float) $this->size;
+        $power = $size > 0 ? (int) floor(log($size, 1024)) : 0;
+        $power = min($power, count($units) - 1);
+
+        $value = $size / (1024 ** $power);
+        return number_format($value, $power === 0 ? 0 : 1) . ' ' . $units[$power];
     }
 
     public function applicants(){

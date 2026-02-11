@@ -38,7 +38,43 @@
         modalTarget: '',
         tab:'overview',
         department:'All',
-        selectedEmployee: null,
+        selectedEmployee: {
+          applicant: { documents: [], position: {} },
+          employee: {},
+          education: {},
+          government: {},
+          license: {},
+          salary: {},
+        },
+        async setEmployee(emp) {
+          this.selectedEmployee = {
+            ...emp,
+            applicant: { documents: [], position: {}, ...(emp?.applicant ?? {}) },
+            employee: emp?.employee ?? {},
+            education: emp?.education ?? {},
+            government: emp?.government ?? {},
+            license: emp?.license ?? {},
+            salary: emp?.salary ?? {},
+          };
+
+          await this.loadDocuments(emp?.id);
+        },
+        async loadDocuments(userId) {
+          if (!userId || !this.selectedEmployee?.applicant?.id) return;
+
+          try {
+            const response = await fetch(`/system/employee/${userId}/documents`, {
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            if (!response.ok) return;
+
+            const payload = await response.json();
+            this.selectedEmployee.applicant.documents = payload.documents ?? [];
+          } catch (error) {
+            console.error('Unable to load employee documents.', error);
+          }
+        },
       }">
 
     <!-- Header -->
@@ -122,7 +158,7 @@
 
             <div class="p-4 mt-7">
                 <h3 class="font-bold text-gray-800 text-lg text-center">{{$emp->first_name ?? ''}} {{$emp->last_name ?? ''}}</h3>
-                <p class="text-gray-500 text-sm text-center">{{$emp->applicant->position->title ?? ''}}</p>
+                <p class="text-gray-500 text-sm text-center">{{$emp->applicant->position->title ?? $emp->employee->position ?? ''}}</p>
 
                 <div class="mt-4 space-y-1 text-gray-500 text-sm">
                     <div class="flex items-center gap-2">
@@ -131,7 +167,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-sitemap"></i>
-                        {{$emp->applicant->position->department }}
+                        {{$emp->applicant->position->department ?? $emp->employee->department ?? ''}}
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-calendar"></i>
@@ -152,7 +188,7 @@
                         </span>-->
                     </div>
                     <button
-                        @click="openProfile = true; selectedEmployee = @js($emp);"
+                        @click="openProfile = true; setEmployee(@js($emp));"
                         class="text-blue-500 text-sm font-medium hover:underline">
                         View Profile
                     </button>
@@ -189,8 +225,8 @@
               x-text="selectedEmployee?.applicant?.first_name + ' ' + selectedEmployee?.applicant?.last_name"
               ></h2>
               <p class="text-sm">
-                <span x-text="selectedEmployee?.applicant?.position?.title"></span><br>
-                <span x-text="selectedEmployee?.applicant?.position?.department"></span>
+                <span x-text="selectedEmployee?.applicant?.position?.title ?? selectedEmployee?.employee?.position ?? '-'"></span><br>
+                <span x-text="selectedEmployee?.applicant?.position?.department ?? selectedEmployee?.employee?.department ?? '-'"></span>
               </p>
             </div>
             <span class="ml-auto bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full">

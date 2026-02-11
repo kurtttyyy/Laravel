@@ -79,7 +79,7 @@
 </div>
         @foreach($interview as $inter)
         <!-- INTERVIEW LIST -->
-        <div class="bg-white rounded-xl border p-6">
+        <div class="bg-white rounded-xl border p-6 interview-wrapper">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="font-semibold text-lg">Interview Schedule</h2>
 
@@ -99,7 +99,9 @@
             <!-- CARD 1 -->
             <div
                 class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between interview-card"
-                data-scheduled-at="{{ \Carbon\Carbon::parse($inter->date->format('Y-m-d').' '.$inter->time)->toIso8601String() }}"
+                data-scheduled-date="{{ $inter->date->format('Y-m-d') }}"
+                data-scheduled-time="{{ \Carbon\Carbon::parse($inter->time)->format('H:i:s') }}"
+                data-duration-minutes="{{ (int) filter_var($inter->duration, FILTER_SANITIZE_NUMBER_INT) }}"
             >
                 <div class="flex gap-6">
                     <div class="text-indigo-600 font-bold text-xl">
@@ -113,6 +115,8 @@
                         <p class="text-sm text-slate-400 mt-1">
                             ⏱ {{$inter->duration}} · 👥 {{$inter->interviewers}}
                         </p>
+
+                        <p class="text-xs text-indigo-600 mt-1" data-role="time-remaining"></p>
 
                         <div class="mt-3 flex gap-3">
                             <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm"
@@ -130,13 +134,18 @@
                     </div>
                 </div>
 
-                <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm h-fit">
-                    @if($inter->date->isToday())
-                        Today
-                    @else
-                        Upcoming
-                    @endif
-                </span>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="hidden next-interview-label bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs">
+                        Next Interview
+                    </span>
+                    <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm h-fit">
+                        @if($inter->date->isToday())
+                            Today
+                        @else
+                            Upcoming
+                        @endif
+                    </span>
+                </div>
             </div>
 
         </div>
@@ -291,26 +300,74 @@
 </script>
 
 <script>
-  function hideExpiredInterviews() {
-    const graceMs = 5 * 60 * 1000;
-    const nowMs = Date.now();
-    const cards = document.querySelectorAll('.interview-card');
+  function formatRemainingTime(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-    cards.forEach((card) => {
-      const scheduledAt = card.dataset.scheduledAt;
-      if (!scheduledAt) return;
-
-      const scheduledMs = new Date(scheduledAt).getTime();
-      if (Number.isNaN(scheduledMs)) return;
-
-      if (nowMs > (scheduledMs + graceMs)) {
-        card.classList.add('hidden');
-      }
-    });
+    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
   }
 
-  hideExpiredInterviews();
-  setInterval(hideExpiredInterviews, 30000);
+  function updateInterviewCards() {
+    const nowMs = Date.now();
+    const cards = Array.from(document.querySelectorAll('.interview-card'));
+    let nextCard = null;
+    let nextStartMs = Number.POSITIVE_INFINITY;
+
+    cards.forEach((card) => {
+      const scheduledDate = card.dataset.scheduledDate;
+      const scheduledTime = card.dataset.scheduledTime;
+      const durationMinutes = parseInt(card.dataset.durationMinutes || '0', 10);
+      const remainingEl = card.querySelector('[data-role="time-remaining"]');
+      const nextLabel = card.querySelector('.next-interview-label');
+
+      if (nextLabel) nextLabel.classList.add('hidden');
+      if (!scheduledDate || !scheduledTime) return;
+
+      // Build local datetime from stored schedule values to avoid timezone offset issues.
+      const scheduledMs = new Date(`${scheduledDate}T${scheduledTime}`).getTime();
+      if (Number.isNaN(scheduledMs)) return;
+      if (Number.isNaN(durationMinutes)) return;
+
+      const endMs = scheduledMs + (durationMinutes * 60 * 1000);
+
+      if (nowMs >= endMs) {
+        card.classList.add('hidden');
+        if (remainingEl) remainingEl.textContent = '';
+      } else {
+        card.classList.remove('hidden');
+
+        if (nowMs < scheduledMs) {
+          if (remainingEl) {
+            remainingEl.textContent = `Starts in ${formatRemainingTime(scheduledMs - nowMs)}`;
+          }
+
+          if (scheduledMs < nextStartMs) {
+            nextStartMs = scheduledMs;
+            nextCard = card;
+          }
+        } else if (remainingEl) {
+          remainingEl.textContent = 'In progress';
+        }
+      }
+
+      const wrapper = card.closest('.interview-wrapper');
+      if (wrapper) {
+        wrapper.classList.toggle('hidden', card.classList.contains('hidden'));
+      }
+    });
+
+    if (nextCard) {
+      const nextLabel = nextCard.querySelector('.next-interview-label');
+      if (nextLabel) nextLabel.classList.remove('hidden');
+    }
+  }
+
+  updateInterviewCards();
+  setInterval(updateInterviewCards, 1000);
 
   const sidebar = document.querySelector('aside');
   const main = document.querySelector('main');

@@ -125,17 +125,30 @@ class AdministratorPageController extends Controller
     }
 
     public function display_interview(){
-        $visibleUntil = now()->subMinutes(5)->format('Y-m-d H:i:s');
-
-        $interview = Interviewer::with('applicant')
-            ->whereRaw("TIMESTAMP(`date`, `time`) >= ?", [$visibleUntil])
+        $allInterviews = Interviewer::with('applicant')
             ->orderBy('date')
             ->orderBy('time')
             ->get();
 
-        $count_daily = Interviewer::whereDate('date', today())
-                                    ->whereTime('time', '<', now())
-                                    ->count();
+        $interview = $allInterviews
+            ->filter(function ($item) {
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return now()->lte($end);
+            })
+            ->values();
+
+        $count_daily = $allInterviews
+            ->filter(function ($item) {
+                if (!$item->date->isToday()) {
+                    return false;
+                }
+
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return now()->gte($end);
+            })
+            ->count();
         $count_month = Interviewer::whereMonth('date', now()->month)
                                     ->whereYear('date', now()->year)
                                     ->whereDate('date', '<', today())
@@ -148,6 +161,19 @@ class AdministratorPageController extends Controller
                                     ->count();
         return view('admin.adminInterview', compact('interview','count_daily','count_month',
                                                     'count_year','count_upcoming'));
+    }
+
+    private function durationToMinutes(?string $duration): int
+    {
+        if (!$duration) {
+            return 0;
+        }
+
+        if (preg_match('/(\d+)/', $duration, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return 0;
     }
 
     public function display_interview_ID($id){

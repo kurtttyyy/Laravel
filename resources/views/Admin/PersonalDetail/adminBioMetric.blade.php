@@ -235,7 +235,7 @@
   </div>
 
   <!-- SALARY -->
-  <div class="border border-gray-500 mt-4" style="width:378px;">
+  <div class="border border-gray-500 mt-4" style="width:356px;">
     <div class="row">
       <span class="label">Basic Salary:</span>
       <span class="value" x-text="selectedEmployee?.salary?.salary ?? '-'"></span>

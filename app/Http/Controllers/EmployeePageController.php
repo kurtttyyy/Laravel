@@ -19,7 +19,7 @@ class EmployeePageController extends Controller
 
     public function display_profile(){
         $user = Auth::user();
-        $employee = User::with([
+        $emp = User::with([
             'employee',
             'applicant',
             'education',
@@ -28,7 +28,7 @@ class EmployeePageController extends Controller
             'government',
         ])->where('id', $user->id)->first();
 
-        return view('employee.employeeProfile', compact('employee'));
+        return view('employee.employeeProfile', compact('emp'));
     }
 
     public function display_payslip(){

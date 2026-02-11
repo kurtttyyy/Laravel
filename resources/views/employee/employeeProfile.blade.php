@@ -34,8 +34,6 @@
     <main class="flex-1 ml-16 transition-all duration-300">
 
     @include('components.employeeHeader.myProfileHeader')
-
-        @foreach($employee as $emp)
             <!-- Content -->
             <div class="p-4 md:p-8 space-y-8 pt-20">
 
@@ -89,7 +87,7 @@
                         <p class="font-medium mb-3">{{ $emp->employee->contact_number }}</p>
 
                         <p class="text-xs text-gray-500">ADDRESS</p>
-                        <p class="font-medium">{{ $empp->employee->address}}</p>
+                        <p class="font-medium">{{ $emp->employee->address}}</p>
                     </div>
 
                     <!-- Employment Info -->
@@ -111,7 +109,7 @@
                 </div>
 
             </div>
-        @endforeach
+
     </main>
 </div>
 

@@ -78,6 +78,7 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/store/ratings', 'store_star_ratings')->name('admin.adminStarStore');
     Route::post('system/store/interview', 'store_interview')->name('admin.storeNewInterview');
     Route::post('system/employee/document', 'store_document')->name('admin.addDocument');
+    Route::post('system/attendance/upload', 'store_attendance_excel')->name('admin.uploadAttendanceExcel');
 
     //UPDATE
     Route::post('system/edit/position/{id}', 'update_position')->name('admin.updatePosition');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AttendanceUpload;
 use App\Models\Applicant;
 use App\Models\ApplicantDocument;
 use App\Models\Education;
@@ -144,6 +145,32 @@ class AdministratorStoreController extends Controller
 
         return back()->with('success', 'Document uploaded successfully.');
 
+    }
+
+    public function store_attendance_excel(Request $request){
+        $attrs = $request->validate([
+            'excel_file' => 'required|file|mimes:xls,xlsx|max:10240',
+        ]);
+
+        $file = $request->file('excel_file');
+
+        if (!$file || !$file->isValid()) {
+            return back()->withErrors(['excel_file' => 'Invalid file upload.']);
+        }
+
+        $originalName = $file->getClientOriginalName();
+        $fileName = time().'_'.$originalName;
+        $filePath = $file->storeAs('attendance_excels', $fileName, 'public');
+
+        AttendanceUpload::create([
+            'original_name' => $originalName,
+            'file_path' => $filePath,
+            'file_size' => $file->getSize(),
+            'status' => 'Uploaded',
+            'uploaded_at' => now(),
+        ]);
+
+        return back()->with('success', 'Excel file uploaded successfully.');
     }
 
     //UPDATE

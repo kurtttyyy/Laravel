@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AttendanceUpload;
 use App\Models\Applicant;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
@@ -73,8 +74,18 @@ class AdministratorPageController extends Controller
         return view('admin.adminEmployee', compact('employee'));
     }
 
-    public function display_attendance(){
-        return view('admin.adminAttendance');
+    public function display_attendance(Request $request){
+        $fromDate = $request->query('from_date');
+
+        $attendanceFiles = AttendanceUpload::query()
+            ->when($fromDate, function ($query) use ($fromDate) {
+                $query->whereDate('uploaded_at', '>=', $fromDate);
+            })
+            ->orderByDesc('uploaded_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('admin.adminAttendance', compact('attendanceFiles', 'fromDate'));
     }
 
     public function display_leave(){

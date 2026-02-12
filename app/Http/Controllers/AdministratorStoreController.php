@@ -151,7 +151,7 @@ class AdministratorStoreController extends Controller
         Log::info($request);
         $attrs = $request->validate([
             'title' => 'required',
-            //'department' => 'required',
+            'department' => 'required',
             'employment' => 'required',
             'collage_name' => 'required',
             //'mode' => 'required',
@@ -174,7 +174,7 @@ class AdministratorStoreController extends Controller
 
         $open->update([
             'title' => $attrs['title'],
-            //'department' => $attrs['department'],
+            'department' => $attrs['department'],
             'employment' => $attrs['employment'],
             //'work_mode' => $attrs['mode'],
             'collage_name' => $attrs['collage_name'],
@@ -253,6 +253,86 @@ class AdministratorStoreController extends Controller
         ]);
 
         return redirect()->back()->with('success','Employee can now login');
+    }
+
+    public function update_general_profile(Request $request){
+        $attrs = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'first' => 'required|string|max:255',
+            'middle' => 'nullable|string|max:255',
+            'last' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255|unique:users,email,'.$request->input('user_id'),
+            'employee_id' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'gender' => 'nullable|string|max:50',
+            'contact_number' => 'nullable|string|max:255',
+            'birthday' => 'nullable|date',
+            'position' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'barangay' => 'nullable|string|max:255',
+            'municipality' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:255',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_relationship' => 'nullable|string|max:255',
+            'emergency_contact_number' => 'nullable|string|max:255',
+            'SSS' => 'nullable|string|max:255',
+            'TIN' => 'nullable|string|max:255',
+            'PhilHealth' => 'nullable|string|max:255',
+            'MID' => 'nullable|string|max:255',
+            'RTN' => 'nullable|string|max:255',
+        ]);
+
+        $user = User::findOrFail($attrs['user_id']);
+
+        $userPayload = [
+            'first_name' => $attrs['first'],
+            'middle_name' => $attrs['middle'] ?? null,
+            'last_name' => $attrs['last'],
+        ];
+
+        if (!empty($attrs['email'])) {
+            $userPayload['email'] = $attrs['email'];
+        }
+
+        $user->update($userPayload);
+
+        $addressParts = array_filter([
+            $attrs['barangay'] ?? null,
+            $attrs['municipality'] ?? null,
+            $attrs['province'] ?? null,
+        ], function ($value) {
+            return filled($value);
+        });
+
+        Employee::updateOrCreate(
+            ['user_id' => $attrs['user_id']],
+            [
+                'employee_id' => $attrs['employee_id'] ?? null,
+                'account_number' => $attrs['account_number'] ?? null,
+                'sex' => $attrs['gender'] ?? null,
+                'contact_number' => $attrs['contact_number'] ?? null,
+                'birthday' => $attrs['birthday'] ?? null,
+                'position' => $attrs['position'] ?? null,
+                'department' => $attrs['department'] ?? null,
+                'address' => count($addressParts) ? implode(', ', $addressParts) : null,
+                'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
+                'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
+                'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
+            ]
+        );
+
+        Government::updateOrCreate(
+            ['user_id' => $attrs['user_id']],
+            [
+                'SSS' => $attrs['SSS'] ?? null,
+                'TIN' => $attrs['TIN'] ?? null,
+                'PhilHealth' => $attrs['PhilHealth'] ?? null,
+                'MID' => $attrs['MID'] ?? null,
+                'RTN' => $attrs['RTN'] ?? null,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Profile updated successfully');
     }
 
     public function update_bio(Request $request){

@@ -19,9 +19,6 @@
 </head>
 
 <body class="bg-slate-100">
-    <!-- Form -->
-    <form class="space-y-6" action="{{ route('admin.updatePosition', $open->id) }}" method = "POST">
-        @csrf
         <div class="flex min-h-screen">
 
         <!-- Sidebar -->
@@ -34,6 +31,8 @@
 
 
         <!-- Card -->
+        <form class="space-y-6" action="{{ route('admin.updatePosition', $open->id) }}" method="POST">
+            @csrf
         <div class="bg-white rounded-xl shadow-sm p-8 max-w-6xl mx-auto">
 
             <!-- Header -->
@@ -85,6 +84,16 @@
                         class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-indigo-500">
                 </div>
 
+                <!-- Department -->
+                <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">
+                    Department
+                </label>
+                <input type="text" name="department"
+                        value="{{ old('department', $open->department) }}"
+                        class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:ring-2 focus:ring-indigo-500">
+                </div>
+
                 <!-- Employment Type -->
                 <div>
                 <label class="block text-sm font-medium text-slate-600 mb-1">
@@ -130,15 +139,15 @@
                         focus:ring-2 focus:ring-indigo-500">
                     <option value="">Select experience level</option>
                     <option value="Senior Level"
-                        {{ old('experience_level', $open->experience_level) == 'Senior' ? 'selected' : '' }}>
+                        {{ old('experience_level', $open->experience_level) == 'Senior Level' ? 'selected' : '' }}>
                         Senior Level
                     </option>
                     <option value="Mid Level"
-                        {{ old('experience_level', $open->experience_level) == 'Mid' ? 'selected' : '' }}>
+                        {{ old('experience_level', $open->experience_level) == 'Mid Level' ? 'selected' : '' }}>
                         Mid Level
                     </option>
                     <option value="Junior Level"
-                        {{ old('experience_level', $open->experience_level) == 'Junior' ? 'selected' : '' }}>
+                        {{ old('experience_level', $open->experience_level) == 'Junior Level' ? 'selected' : '' }}>
                         Junior Level
                     </option>
                 </select>
@@ -277,11 +286,11 @@
 
 
         </div>
+        </form>
 
             </div>
         </main>
         </div>
-    </form>
 
 </body>
 

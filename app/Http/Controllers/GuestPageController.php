@@ -8,6 +8,7 @@ use App\Models\OpenPosition;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class GuestPageController extends Controller
 {
@@ -28,12 +29,7 @@ class GuestPageController extends Controller
 
     public function display_index(){
         $applicantEmail = session('applicant_email');
-        $appliedPositionIds = collect();
-
-        if ($applicantEmail) {
-            $appliedPositionIds = Applicant::where('email', $applicantEmail)
-                ->pluck('open_position_id');
-        }
+        $appliedPositionIds = $this->getBlockedPositionIds($applicantEmail);
 
         $open_position = OpenPosition::when($appliedPositionIds->isNotEmpty(), function ($query) use ($appliedPositionIds) {
             $query->whereNotIn('id', $appliedPositionIds);
@@ -47,12 +43,7 @@ class GuestPageController extends Controller
 
     public function job_open_landing(){
         $applicantEmail = session('applicant_email');
-        $appliedPositionIds = collect();
-
-        if ($applicantEmail) {
-            $appliedPositionIds = Applicant::where('email', $applicantEmail)
-                ->pluck('open_position_id');
-        }
+        $appliedPositionIds = $this->getBlockedPositionIds($applicantEmail);
 
         $firstAvailableJob = OpenPosition::when($appliedPositionIds->isNotEmpty(), function ($query) use ($appliedPositionIds) {
             $query->whereNotIn('id', $appliedPositionIds);
@@ -70,16 +61,30 @@ class GuestPageController extends Controller
         $job = OpenPosition::findOrFail($id);
 
         $applicantEmail = session('applicant_email');
-        $appliedPositionIds = collect();
+        $appliedPositionIds = $this->getBlockedPositionIds($applicantEmail);
 
         if ($applicantEmail) {
-            $appliedPositionIds = Applicant::where('email', $applicantEmail)
-                ->pluck('open_position_id');
-        }
+            $latestApplication = Applicant::where('email', $applicantEmail)
+                ->where('open_position_id', $job->id)
+                ->latest('id')
+                ->first();
 
-        if ($appliedPositionIds->contains($job->id)) {
-            return redirect()->route('guest.index')
-                ->with('error', 'You already applied for that position.');
+            if ($latestApplication) {
+                $status = Str::lower(trim((string) $latestApplication->application_status));
+
+                if ($status === 'rejected') {
+                    $baseDate = $latestApplication->updated_at ?? $latestApplication->created_at;
+                    $nextEligibleDate = $baseDate->copy()->addMonths(3);
+
+                    if (now()->lt($nextEligibleDate)) {
+                        return redirect()->route('guest.index')
+                            ->with('popup_error', 'Your last application was rejected. You can apply again on '.$nextEligibleDate->format('F j, Y').'.');
+                    }
+                } else {
+                    return redirect()->route('guest.index')
+                        ->with('popup_error', 'You already applied for that position.');
+                }
+            }
         }
 
         $other = OpenPosition::where('id', '!=', $job->id)
@@ -93,5 +98,28 @@ class GuestPageController extends Controller
         })->get();
 
         return view('guest.jobOpen', compact('jobOpen','job','other'));
+    }
+
+    private function getBlockedPositionIds(?string $applicantEmail)
+    {
+        if (!$applicantEmail) {
+            return collect();
+        }
+
+        return Applicant::where('email', $applicantEmail)
+            ->orderByDesc('id')
+            ->get()
+            ->unique('open_position_id')
+            ->filter(function ($application) {
+                $status = Str::lower(trim((string) $application->application_status));
+
+                if ($status !== 'rejected') {
+                    return true;
+                }
+
+                $baseDate = $application->updated_at ?? $application->created_at;
+                return $baseDate->gt(now()->subMonths(3));
+            })
+            ->pluck('open_position_id');
     }
 }

@@ -46,6 +46,25 @@
 @include('layouts.header')  {{-- UNIVERSAL HEADER --}}
 <div class="header-divider" aria-hidden="true"></div>
 
+@if(session('popup_error'))
+<div class="modal fade" id="applicationPopupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Application Notice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {{ session('popup_error') }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <main>
 <section class="hero text-white py-5 position-relative overflow-hidden">
 
@@ -284,6 +303,17 @@
         locationFilter?.addEventListener('change', applyFilters);
     });
 </script>
+
+@if(session('popup_error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalEl = document.getElementById('applicationPopupModal');
+        if (!modalEl) return;
+        const popup = new bootstrap.Modal(modalEl);
+        popup.show();
+    });
+</script>
+@endif
 
 
 

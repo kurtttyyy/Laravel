@@ -59,6 +59,7 @@
       class="space-y-1"
     >
       <button
+        type="button"
         @click="open = !open"
         class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg font-medium transition text-white hover:bg-green-600/30"
       >

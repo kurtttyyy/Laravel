@@ -101,24 +101,26 @@
               </tr>
             </thead>
             <tbody class="divide-y">
+              @forelse($accept as $acc)
               <tr>
-                @foreach($accept as $acc)
-                <td class="py-3 flex items-center gap-3">
-                  <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">JD</div>
-                  <div>
-                    <p class="font-medium">{{$acc->first_name}} {{$acc->middle_name}} {{$acc->last_name}}</p>
-                    <p class="text-xs text-slate-500">{{$acc->email}}</p>
+                <td class="py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">{{ $acc->initials }}</div>
+                    <div>
+                      <p class="font-medium">{{ trim($acc->first_name.' '.$acc->middle_name.' '.$acc->last_name) }}</p>
+                      <p class="text-xs text-slate-500">{{ $acc->email }}</p>
+                    </div>
                   </div>
                 </td>
-                @if(empty($acc->employee->department))
-                    <td>{{$acc->applicant->position->department}}</td>
-                @else
-                    <td>{{$acc->employee->department}}</td>
-                @endif
+                <td>{{ data_get($acc, 'employee.department') ?? data_get($acc, 'applicant.position.department') ?? 'Unassigned' }}</td>
                     <td><span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded">Active</span></td>
-                    <td>{{$acc->created_at_formatted}}</td>
-                @endforeach
+                    <td>{{ $acc->created_at_formatted ?? '-' }}</td>
               </tr>
+              @empty
+              <tr>
+                <td colspan="4" class="py-4 text-center text-slate-400">No recent employees found.</td>
+              </tr>
+              @endforelse
             </tbody>
           </table>
 
@@ -137,29 +139,37 @@
     </tr>
   </thead>
   <tbody class="divide-y">
+    @forelse($employee as $e)
     <tr>
-        @foreach($employee as $e)
-      <td class="py-3 flex items-center gap-3">
-        <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">{{$e->initials}}</div>
-        <div>
-          <p class="font-medium">{{$e->first_name}} {{$e->last_name}}</p>
-          <p class="text-xs text-slate-500">{{$e->email}}</p>
+      <td class="py-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">{{ $e->initials }}</div>
+          <div>
+            <p class="font-medium">{{ trim($e->first_name.' '.$e->middle_name.' '.$e->last_name) }}</p>
+            <p class="text-xs text-slate-500">{{ $e->email }}</p>
+          </div>
         </div>
       </td>
       <td></td>
-        <td class="flex gap-2">
-            <form action="{{ route('admin.updateEmployee', $e->id)}}" method="POST">
+        <td>
+          <div class="flex gap-2">
+            <form action="{{ route('admin.updateEmployee', $e->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded hover:bg-emerald-200">Accept</button>
             </form>
-            <form action="{{ route('admin.destroyEmployee', $e->id)}}" method="POST">
+            <form action="{{ route('admin.destroyEmployee', $e->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200">Declined</button>
             </form>
+          </div>
         </td>
-      <td>{{$e->created_at_formatted}}</td>
-      @endforeach
+      <td>{{ $e->created_at_formatted ?? '-' }}</td>
     </tr>
+    @empty
+    <tr>
+      <td colspan="4" class="py-4 text-center text-slate-400">No new account employees found.</td>
+    </tr>
+    @endforelse
   </tbody>
 </table>
 
@@ -220,22 +230,30 @@
             <h3 class="font-semibold mb-4">Department Overview</h3>
 
             <div class="space-y-3 text-sm">
-              <div>
-                <div class="flex justify-between"><span>Engineering</span><span>342</span></div>
-                <div class="h-2 bg-slate-100 rounded mt-1"><div class="h-2 bg-emerald-500 rounded w-[70%]"></div></div>
-              </div>
-              <div>
-                <div class="flex justify-between"><span>Marketing</span><span>186</span></div>
-                <div class="h-2 bg-slate-100 rounded mt-1"><div class="h-2 bg-blue-500 rounded w-[45%]"></div></div>
-              </div>
-              <div>
-                <div class="flex justify-between"><span>Sales</span><span>284</span></div>
-                <div class="h-2 bg-slate-100 rounded mt-1"><div class="h-2 bg-orange-500 rounded w-[60%]"></div></div>
-              </div>
-              <div>
-                <div class="flex justify-between"><span>Human Resources</span><span>98</span></div>
-                <div class="h-2 bg-slate-100 rounded mt-1"><div class="h-2 bg-purple-500 rounded w-[30%]"></div></div>
-              </div>
+              @php
+                $colors = ['#10b981', '#3b82f6', '#f97316', '#a855f7', '#ec4899', '#6366f1'];
+                $colorIndex = 0;
+                $totalEmployees = $departments->sum('count') ?? 1;
+              @endphp
+              
+              @forelse($departments as $dept)
+                @php
+                  $percentage = ($dept['count'] / $totalEmployees) * 100;
+                  $color = $colors[$colorIndex % count($colors)];
+                  $colorIndex++;
+                @endphp
+                <div>
+                  <div class="flex justify-between">
+                    <span>{{ $dept['name'] }}</span>
+                    <span>{{ $dept['count'] }} ({{ round($percentage) }}%)</span>
+                  </div>
+                  <div class="h-2 bg-slate-100 rounded mt-1">
+                    <div class="h-2 rounded" style="width: {{ $percentage }}%; background-color: {{ $color }};"></div>
+                  </div>
+                </div>
+              @empty
+                <p class="text-slate-400">No department data available</p>
+              @endforelse
             </div>
           </div>
 

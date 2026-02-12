@@ -39,13 +39,12 @@ class ApplicantController extends Controller
         // Keep applicant identity in session so vacancy pages can hide jobs already applied to.
         session(['applicant_email' => $attrs['email']]);
 
-        $alreadyApplied = Applicant::where('email', $attrs['email'])
-            ->where('open_position_id', $attrs['position'])
+        $existingApplication = Applicant::whereRaw('LOWER(email) = ?', [Str::lower($attrs['email'])])
             ->exists();
 
-        if ($alreadyApplied) {
+        if ($existingApplication) {
             return redirect()->route('guest.index')
-                ->with('error', 'You already applied for this position.');
+                ->with('popup_error', 'You can only apply once using the same email address.');
         }
 
         $applicant_store = Applicant::create([

@@ -15,14 +15,35 @@ class AdministratorPageController extends Controller
 
     public function display_home(){
         $employee = User::where('role', 'Employee')
-                        ->where('status', 'Pending')->get();
+                        ->where('status', 'Pending')
+                        ->latest()
+                        ->get();
         $accept = User::with([
             'employee',
             'applicant',
             'applicant.position:id,department',
         ])->where('role', 'Employee')
-                        ->where('status','Approved')->get();
-        return view('admin.adminHome', compact('employee','accept'));
+                        ->where('status','Approved')
+                        ->latest()
+                        ->get();
+        
+        // Get department overview
+        $departments = User::with('employee')
+                        ->where('role', 'Employee')
+                        ->where('status', 'Approved')
+                        ->get()
+                        ->groupBy(function($user) {
+                            return $user->employee->department ?? 'Unassigned';
+                        })
+                        ->map(function($group) {
+                            return [
+                                'name' => $group->first()->employee->department ?? 'Unassigned',
+                                'count' => $group->count()
+                            ];
+                        })
+                        ->values();
+        
+        return view('admin.adminHome', compact('employee','accept','departments'));
     }
 
     public function display_employee(){
@@ -71,7 +92,7 @@ class AdministratorPageController extends Controller
     public function display_applicant(){
         $applicant = Applicant::with(
             'position:id,title,department,employment,collage_name,work_mode,job_description,responsibilities,requirements,experience_level,location,skills,benifits,job_type,one,two,passionate'
-        )->get();
+        )->latest('created_at')->get();
         $count_applicant = Applicant::count();
         $count_under_review = $applicant->where('application_status','Under Review')->count();
         $count_final_interview = $applicant->where('application_status','Final Interview')->count();

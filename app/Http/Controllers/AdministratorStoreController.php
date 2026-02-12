@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class AdministratorStoreController extends Controller
@@ -152,8 +153,8 @@ class AdministratorStoreController extends Controller
     }
 
     public function store_attendance_excel(Request $request){
-        $attrs = $request->validate([
-            'excel_file' => 'required|file|mimes:xls,xlsx|max:10240',
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx|max:10240',
         ]);
 
         $file = $request->file('excel_file');
@@ -166,48 +167,16 @@ class AdministratorStoreController extends Controller
         $fileName = time().'_'.$originalName;
         $filePath = $file->storeAs('attendance_excels', $fileName, 'public');
 
-        $upload = AttendanceUpload::create([
+        AttendanceUpload::create([
             'original_name' => $originalName,
             'file_path' => $filePath,
             'file_size' => $file->getSize(),
-            'status' => 'Processing',
+            'status' => 'Uploaded',
+            'processed_rows' => 0,
             'uploaded_at' => now(),
         ]);
 
-        try {
-            $absolutePath = Storage::disk('public')->path($filePath);
-            $rows = $this->extractRowsFromExcel($absolutePath, $file->getClientOriginalExtension());
-            $records = $this->buildAttendanceRecords($rows, $upload->id);
-
-            DB::transaction(function () use ($upload, $records) {
-                AttendanceRecord::where('attendance_upload_id', $upload->id)->delete();
-
-                if (!empty($records)) {
-                    AttendanceRecord::insert($records);
-                }
-
-                $upload->update([
-                    'status' => 'Processed',
-                    'processed_rows' => count($records),
-                ]);
-            });
-
-            return back()->with('success', 'Excel file uploaded and analyzed successfully.');
-        } catch (\Throwable $e) {
-            Log::error('Attendance excel parse failed', [
-                'upload_id' => $upload->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            $upload->update([
-                'status' => 'Failed',
-                'processed_rows' => 0,
-            ]);
-
-            return back()->withErrors([
-                'excel_file' => 'Upload saved but parsing failed. Use .xlsx format with employee ID and AM/PM time columns.',
-            ]);
-        }
+        return back()->with('success', 'Excel file uploaded successfully. Click Scan to process it.');
     }
 
     private function extractRowsFromExcel(string $absolutePath, string $extension): array
@@ -223,38 +192,58 @@ class AdministratorStoreController extends Controller
 
     private function extractRowsFromXlsx(string $absolutePath): array
     {
-        $zip = new \ZipArchive();
-        if ($zip->open($absolutePath) !== true) {
-            throw new \RuntimeException('Unable to open xlsx file.');
+        if (!class_exists(\ZipArchive::class) && !class_exists(\PharData::class)) {
+            throw new \RuntimeException('XLSX parsing requires ZipArchive or PharData support in PHP.');
         }
 
         $sharedStrings = [];
-        $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+        $sharedStringsXml = $this->readXlsxEntry($absolutePath, 'xl/sharedStrings.xml');
         if ($sharedStringsXml !== false) {
             $xml = simplexml_load_string($sharedStringsXml);
             if ($xml && isset($xml->si)) {
                 foreach ($xml->si as $item) {
-                    $sharedStrings[] = trim((string) $item->t);
+                    if (isset($item->t)) {
+                        $sharedStrings[] = trim((string) $item->t);
+                        continue;
+                    }
+
+                    // Rich text values are split under r/t nodes.
+                    $richText = '';
+                    if (isset($item->r)) {
+                        foreach ($item->r as $run) {
+                            $richText .= (string) ($run->t ?? '');
+                        }
+                    }
+                    $sharedStrings[] = trim($richText);
                 }
             }
         }
 
-        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $sheetXml = $this->readXlsxEntry($absolutePath, 'xl/worksheets/sheet1.xml');
         if ($sheetXml === false) {
-            $zip->close();
+            foreach ($this->listXlsxWorksheetEntries($absolutePath) as $worksheetEntry) {
+                $sheetXml = $this->readXlsxEntry($absolutePath, $worksheetEntry);
+                if ($sheetXml !== false) {
+                    break;
+                }
+            }
+        }
+
+        if ($sheetXml === false) {
             throw new \RuntimeException('No worksheet found in xlsx.');
         }
 
         $sheet = simplexml_load_string($sheetXml);
-        if (!$sheet || !isset($sheet->sheetData->row)) {
-            $zip->close();
+        $rowsNode = $sheet ? $sheet->xpath("//*[local-name()='sheetData']/*[local-name()='row']") : false;
+        if (!$sheet || $rowsNode === false) {
             throw new \RuntimeException('Invalid worksheet data.');
         }
 
         $rows = [];
-        foreach ($sheet->sheetData->row as $row) {
+        foreach ($rowsNode as $row) {
             $rowData = [];
-            foreach ($row->c as $cell) {
+            $cells = $row->xpath("./*[local-name()='c']") ?: [];
+            foreach ($cells as $cell) {
                 $reference = (string) $cell['r'];
                 $column = preg_replace('/\d+/', '', $reference);
                 $type = (string) $cell['t'];
@@ -279,13 +268,17 @@ class AdministratorStoreController extends Controller
             }
         }
 
-        $zip->close();
-
         if (count($rows) < 2) {
             return [];
         }
 
-        $headerRow = array_shift($rows);
+        $headerIndex = $this->detectHeaderRowIndex($rows);
+        if ($headerIndex === null) {
+            return [];
+        }
+
+        $headerRow = $rows[$headerIndex];
+        $rows = array_slice($rows, $headerIndex + 1);
         $headers = [];
         foreach ($headerRow as $column => $headerText) {
             $headers[$column] = $this->normalizeHeader((string) $headerText);
@@ -311,12 +304,24 @@ class AdministratorStoreController extends Controller
 
     private function buildAttendanceRecords(array $rows, int $uploadId): array
     {
+        $rows = $this->expandRawPunchRows($rows);
+
         $records = [];
         $now = now();
+        $recordColumns = $this->getAttendanceRecordColumnLookup();
+        $availableKeys = $this->collectAvailableKeys($rows);
+        $hasMorningOutColumn = $this->hasAnyKey($availableKeys, ['morning_out', 'am_out', 'time_out_am', 'morning_time_out', 'out_am']);
+        $hasAfternoonOutColumn = $this->hasAnyKey($availableKeys, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
 
         foreach ($rows as $row) {
             $employeeId = $this->pickValue($row, [
                 'employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid',
+            ]);
+            $employeeName = $this->pickValue($row, [
+                'name', 'employee_name', 'full_name', 'employee',
+            ]);
+            $mainGate = $this->pickValue($row, [
+                'main_gate', 'gate', 'entry_point', 'entrance',
             ]);
 
             if (!$employeeId) {
@@ -324,9 +329,9 @@ class AdministratorStoreController extends Controller
             }
 
             $attendanceDateRaw = $this->pickValue($row, ['date', 'attendance_date']);
-            $morningInRaw = $this->pickValue($row, ['morning_in', 'am_in', 'time_in_am', 'morning_time_in', 'in_am']);
+            $morningInRaw = $this->pickValue($row, ['morning_in', 'am_in', 'time_in_am', 'morning_time_in', 'in_am', 'am_time', 'am']);
             $morningOutRaw = $this->pickValue($row, ['morning_out', 'am_out', 'time_out_am', 'morning_time_out', 'out_am']);
-            $afternoonInRaw = $this->pickValue($row, ['afternoon_in', 'pm_in', 'time_in_pm', 'afternoon_time_in', 'in_pm']);
+            $afternoonInRaw = $this->pickValue($row, ['afternoon_in', 'pm_in', 'time_in_pm', 'afternoon_time_in', 'in_pm', 'pm_time', 'pm']);
             $afternoonOutRaw = $this->pickValue($row, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
 
             $attendanceDate = $this->normalizeDate($attendanceDateRaw);
@@ -339,13 +344,13 @@ class AdministratorStoreController extends Controller
             if (!$morningIn) {
                 $missing[] = 'morning_in';
             }
-            if (!$morningOut) {
+            if ($hasMorningOutColumn && !$morningOut) {
                 $missing[] = 'morning_out';
             }
             if (!$afternoonIn) {
                 $missing[] = 'afternoon_in';
             }
-            if (!$afternoonOut) {
+            if ($hasAfternoonOutColumn && !$afternoonOut) {
                 $missing[] = 'afternoon_out';
             }
 
@@ -353,7 +358,7 @@ class AdministratorStoreController extends Controller
             $isAbsent = !empty($missing);
             $isTardy = $lateMinutes > 0;
 
-            $records[] = [
+            $record = [
                 'attendance_upload_id' => $uploadId,
                 'employee_id' => (string) $employeeId,
                 'attendance_date' => $attendanceDate,
@@ -368,9 +373,213 @@ class AdministratorStoreController extends Controller
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
+
+            // Keep compatibility with databases that have not yet run the add_name/main_gate migration.
+            if (isset($recordColumns['employee_name'])) {
+                $record['employee_name'] = $employeeName ? (string) $employeeName : null;
+            }
+            if (isset($recordColumns['main_gate'])) {
+                $record['main_gate'] = $mainGate ? (string) $mainGate : null;
+            }
+
+            $records[] = $record;
         }
 
         return $records;
+    }
+
+    private function getAttendanceRecordColumnLookup(): array
+    {
+        static $columns = null;
+
+        if ($columns === null) {
+            $columns = array_flip(Schema::getColumnListing('attendance_records'));
+        }
+
+        return $columns;
+    }
+
+    private function readXlsxEntry(string $absolutePath, string $entry): string|false
+    {
+        if (class_exists(\ZipArchive::class)) {
+            $zip = new \ZipArchive();
+            if ($zip->open($absolutePath) === true) {
+                $contents = $zip->getFromName($entry);
+                $zip->close();
+                if ($contents !== false) {
+                    return $contents;
+                }
+            }
+        }
+
+        if (class_exists(\PharData::class)) {
+            $pharEntry = 'phar://'.$absolutePath.'/'.$entry;
+            if (is_file($pharEntry)) {
+                $contents = @file_get_contents($pharEntry);
+                if ($contents !== false) {
+                    return $contents;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function listXlsxWorksheetEntries(string $absolutePath): array
+    {
+        $entries = [];
+
+        if (class_exists(\ZipArchive::class)) {
+            $zip = new \ZipArchive();
+            if ($zip->open($absolutePath) === true) {
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $name = $zip->getNameIndex($i);
+                    if ($name && str_starts_with($name, 'xl/worksheets/') && str_ends_with($name, '.xml')) {
+                        $entries[] = $name;
+                    }
+                }
+                $zip->close();
+            }
+        } elseif (class_exists(\PharData::class)) {
+            try {
+                $phar = new \PharData($absolutePath);
+                $prefix = 'phar://'.$absolutePath.'/';
+                foreach (new \RecursiveIteratorIterator($phar) as $filePath => $fileInfo) {
+                    $entry = str_replace($prefix, '', str_replace('\\', '/', (string) $filePath));
+                    if (str_starts_with($entry, 'xl/worksheets/') && str_ends_with($entry, '.xml')) {
+                        $entries[] = $entry;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Keep empty result; caller handles missing worksheet.
+            }
+        }
+
+        sort($entries);
+        return $entries;
+    }
+
+    private function detectHeaderRowIndex(array $rows): ?int
+    {
+        $sample = array_slice($rows, 0, 25);
+        foreach ($sample as $index => $row) {
+            $headers = [];
+            foreach ($row as $value) {
+                $headers[] = $this->normalizeHeader((string) $value);
+            }
+
+            $hasEmployeeId = $this->hasAnyKey($headers, ['employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid']);
+            $hasAmPmColumns = $this->hasAnyKey($headers, ['am_time', 'am_in', 'morning_in', 'am'])
+                && $this->hasAnyKey($headers, ['pm_time', 'pm_in', 'afternoon_in', 'pm']);
+            $hasRawPunchColumns = $this->hasAnyKey($headers, ['date', 'attendance_date'])
+                && $this->hasAnyKey($headers, ['time'])
+                && $this->hasAnyKey($headers, ['type']);
+
+            if ($hasEmployeeId && ($hasAmPmColumns || $hasRawPunchColumns)) {
+                return $index;
+            }
+        }
+
+        return null;
+    }
+
+    private function expandRawPunchRows(array $rows): array
+    {
+        $keys = $this->collectAvailableKeys($rows);
+        $hasAmPmColumns = $this->hasAnyKey($keys, ['am_time', 'am_in', 'morning_in', 'am'])
+            && $this->hasAnyKey($keys, ['pm_time', 'pm_in', 'afternoon_in', 'pm']);
+        if ($hasAmPmColumns) {
+            return $rows;
+        }
+
+        $hasRawPunchColumns = $this->hasAnyKey($keys, ['date', 'attendance_date'])
+            && $this->hasAnyKey($keys, ['time'])
+            && $this->hasAnyKey($keys, ['type']);
+        if (!$hasRawPunchColumns) {
+            return $rows;
+        }
+
+        $grouped = [];
+        foreach ($rows as $row) {
+            $employeeId = $this->pickValue($row, ['employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid']);
+            $date = $this->normalizeDate($this->pickValue($row, ['attendance_date', 'date']));
+            $time = $this->normalizeTime($this->pickValue($row, ['time']));
+            $type = strtoupper(trim((string) $this->pickValue($row, ['type', 'log_type', 'status'])));
+
+            if (!$employeeId || !$date || !$time || !in_array($type, ['IN', 'OUT'], true)) {
+                continue;
+            }
+
+            $key = $employeeId.'|'.$date;
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'employee_id' => (string) $employeeId,
+                    'employee_name' => $this->pickValue($row, ['name', 'employee_name', 'full_name', 'employee']),
+                    'main_gate' => $this->pickValue($row, ['main_gate', 'gate', 'entry_point', 'entrance']),
+                    'attendance_date' => $date,
+                    'morning_in' => null,
+                    'morning_out' => null,
+                    'afternoon_in' => null,
+                    'afternoon_out' => null,
+                ];
+            }
+
+            if (!$grouped[$key]['employee_name']) {
+                $grouped[$key]['employee_name'] = $this->pickValue($row, ['name', 'employee_name', 'full_name', 'employee']);
+            }
+
+            if (!$grouped[$key]['main_gate']) {
+                $grouped[$key]['main_gate'] = $this->pickValue($row, ['main_gate', 'gate', 'entry_point', 'entrance']);
+            }
+
+            if ($type === 'IN') {
+                if ($time < '12:00:00') {
+                    if (!$grouped[$key]['morning_in'] || $time < $grouped[$key]['morning_in']) {
+                        $grouped[$key]['morning_in'] = $time;
+                    }
+                } else {
+                    if (!$grouped[$key]['afternoon_in'] || $time < $grouped[$key]['afternoon_in']) {
+                        $grouped[$key]['afternoon_in'] = $time;
+                    }
+                }
+            } else {
+                if ($time <= '12:30:00') {
+                    if (!$grouped[$key]['morning_out'] || $time > $grouped[$key]['morning_out']) {
+                        $grouped[$key]['morning_out'] = $time;
+                    }
+                } else {
+                    if (!$grouped[$key]['afternoon_out'] || $time > $grouped[$key]['afternoon_out']) {
+                        $grouped[$key]['afternoon_out'] = $time;
+                    }
+                }
+            }
+        }
+
+        return array_values($grouped);
+    }
+
+    private function collectAvailableKeys(array $rows): array
+    {
+        $keys = [];
+        foreach ($rows as $row) {
+            foreach (array_keys($row) as $key) {
+                $keys[$key] = true;
+            }
+        }
+
+        return array_keys($keys);
+    }
+
+    private function hasAnyKey(array $keys, array $candidates): bool
+    {
+        $lookup = array_fill_keys($keys, true);
+        foreach ($candidates as $candidate) {
+            if (isset($lookup[$candidate])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function pickValue(array $row, array $keys): ?string
@@ -389,6 +598,7 @@ class AdministratorStoreController extends Controller
         $normalized = strtolower(trim($value));
         $normalized = str_replace(['(', ')', '.', '-', '/'], ' ', $normalized);
         $normalized = preg_replace('/\s+/', '_', $normalized);
+        $normalized = trim($normalized, '_ ');
 
         return $normalized;
     }
@@ -839,15 +1049,54 @@ class AdministratorStoreController extends Controller
             $attrs = $request->validate([
                 'status' => 'required|string'
             ]);
+            $status = $attrs['status'];
+            $processedRows = $attendanceFile->processed_rows ?? 0;
 
-            $attendanceFile->update([
-                'status' => $attrs['status']
-            ]);
+            if (strtolower($status) === 'processed') {
+                $absolutePath = Storage::disk('public')->path($attendanceFile->file_path);
+                $extension = pathinfo($attendanceFile->file_path, PATHINFO_EXTENSION);
+                $rows = $this->extractRowsFromExcel($absolutePath, $extension);
+                $records = $this->buildAttendanceRecords($rows, $attendanceFile->id);
+
+                DB::transaction(function () use ($attendanceFile, $status, $records, &$processedRows) {
+                    AttendanceRecord::where('attendance_upload_id', $attendanceFile->id)->delete();
+
+                    if (!empty($records)) {
+                        AttendanceRecord::insert($records);
+                    }
+
+                    $processedRows = count($records);
+                    $attendanceFile->update([
+                        'status' => $status,
+                        'processed_rows' => $processedRows,
+                    ]);
+                });
+            } else {
+                $attendanceFile->update([
+                    'status' => $status
+                ]);
+            }
+
+            $records = AttendanceRecord::query()
+                ->where('attendance_upload_id', $attendanceFile->id)
+                ->get();
+
+            $presentCount = $records->where('is_absent', false)->where('late_minutes', 0)->count();
+            $absentCount = $records->where('is_absent', true)->count();
+            $tardyCount = $records->where('late_minutes', '>', 0)->count();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Status updated successfully',
-                'status' => $attrs['status']
+                'status' => $status,
+                'processed_rows' => $processedRows,
+                'upload_id' => $attendanceFile->id,
+                'counts' => [
+                    'present' => $presentCount,
+                    'absent' => $absentCount,
+                    'tardiness' => $tardyCount,
+                ],
+                'redirect_url' => route('admin.attendance.present', ['upload_id' => $attendanceFile->id]),
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating attendance status: ' . $e->getMessage());

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\AttendanceUpload;
 use App\Models\AttendanceRecord;
 use App\Models\Applicant;
+use App\Models\Employee;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -104,7 +106,9 @@ class AdministratorPageController extends Controller
             ->get();
 
         if (!$selectedUploadId) {
-            $selectedUploadId = optional($attendanceFiles->first())->id;
+            $selectedUploadId = optional(
+                $attendanceFiles->firstWhere('status', 'Processed') ?? $attendanceFiles->first()
+            )->id;
         }
 
         $records = collect();
@@ -115,9 +119,32 @@ class AdministratorPageController extends Controller
                 ->get();
         }
 
-        $presentEmployees = $records->where('is_absent', false)->where('late_minutes', 0)->values();
+        $records = $records->map(function ($row) {
+            $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
+            $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
+            $isTardyByRule = !$row->is_absent && !$isWithinPresentWindow && $computedLateMinutes > 0;
+
+            $row->setAttribute('computed_late_minutes', $computedLateMinutes);
+            $row->setAttribute('is_tardy_by_rule', $isTardyByRule);
+            return $row;
+        });
+
+        $presentEmployees = $records
+            ->filter(fn ($row) => !$row->is_absent)
+            ->values();
         $absentEmployees = $records->where('is_absent', true)->values();
-        $tardyEmployees = $records->where('late_minutes', '>', 0)->values();
+        $missingEmployeeAbsences = $this->buildMissingEmployeeAbsences($records, $fromDate);
+        $absentEmployees = $absentEmployees
+            ->concat($missingEmployeeAbsences)
+            ->values();
+        $tardyEmployees = $records
+            ->filter(fn ($row) => (bool) ($row->is_tardy_by_rule ?? false))
+            ->map(function ($row) {
+                // Keep Blade compatibility by showing the computed late minutes in the existing column.
+                $row->late_minutes = (int) ($row->computed_late_minutes ?? 0);
+                return $row;
+            })
+            ->values();
 
         $presentCount = $presentEmployees->count();
         $absentCount = $absentEmployees->count();
@@ -137,6 +164,116 @@ class AdministratorPageController extends Controller
             'tardyCount',
             'totalCount'
         ));
+    }
+
+    private function isPresentByTimeWindow($row): bool
+    {
+        return $this->isTimeWithinRange($row->morning_in, '03:00:00', '08:15:00')
+            && $this->isTimeWithinRange($row->morning_out, '11:55:00', '12:45:00')
+            && $this->isTimeWithinRange($row->afternoon_in, '12:45:00', '13:15:00')
+            && $this->isTimeWithinRange($row->afternoon_out, '17:00:00', '20:00:00');
+    }
+
+    private function isTimeWithinRange(?string $time, string $start, string $end): bool
+    {
+        if (!$time) {
+            return false;
+        }
+
+        try {
+            $timeValue = Carbon::createFromFormat('H:i:s', $time)->format('H:i:s');
+            return $timeValue >= $start && $timeValue <= $end;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    private function calculateLateMinutesFromInTimes($row): int
+    {
+        $late = 0;
+
+        if ($row->morning_in) {
+            try {
+                $morningActual = Carbon::createFromFormat('H:i:s', $row->morning_in);
+                $morningExpected = Carbon::createFromFormat('H:i:s', '08:00:00');
+                if ($morningActual->greaterThan($morningExpected)) {
+                    $late += $morningExpected->diffInMinutes($morningActual);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        if ($row->afternoon_in) {
+            try {
+                $afternoonActual = Carbon::createFromFormat('H:i:s', $row->afternoon_in);
+                $afternoonExpected = Carbon::createFromFormat('H:i:s', '13:00:00');
+                if ($afternoonActual->greaterThan($afternoonExpected)) {
+                    $late += $afternoonExpected->diffInMinutes($afternoonActual);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        return $late;
+    }
+
+    private function buildMissingEmployeeAbsences($records, ?string $fromDate)
+    {
+        $recordedEmployeeIds = $records
+            ->pluck('employee_id')
+            ->map(fn ($id) => trim((string) $id))
+            ->filter()
+            ->values()
+            ->all();
+
+        $employees = Employee::query()
+            ->with('user:id,first_name,middle_name,last_name,role,status')
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'Employee')
+                    ->where('status', 'Approved');
+            })
+            ->orderBy('employee_id')
+            ->get();
+
+        $attendanceDate = null;
+        if ($fromDate) {
+            try {
+                $attendanceDate = Carbon::parse($fromDate)->startOfDay();
+            } catch (\Throwable $e) {
+                $attendanceDate = null;
+            }
+        }
+
+        return $employees
+            ->reject(function ($employee) use ($recordedEmployeeIds) {
+                $employeeId = trim((string) $employee->employee_id);
+                return in_array($employeeId, $recordedEmployeeIds, true);
+            })
+            ->map(function ($employee) use ($attendanceDate) {
+                $user = $employee->user;
+                $name = trim(implode(' ', array_filter([
+                    $user?->first_name,
+                    $user?->middle_name,
+                    $user?->last_name,
+                ])));
+
+                return (object) [
+                    'employee_id' => (string) $employee->employee_id,
+                    'employee_name' => $name !== '' ? $name : null,
+                    'main_gate' => null,
+                    'attendance_date' => $attendanceDate,
+                    'morning_in' => null,
+                    'morning_out' => null,
+                    'afternoon_in' => null,
+                    'afternoon_out' => null,
+                    'late_minutes' => 0,
+                    'computed_late_minutes' => 0,
+                    'missing_time_logs' => ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'],
+                    'is_absent' => true,
+                    'is_tardy_by_rule' => false,
+                ];
+            })
+            ->values();
     }
 
     public function display_leave(){

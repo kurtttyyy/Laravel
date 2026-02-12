@@ -93,11 +93,12 @@
           <label for="excel_file" class="cursor-pointer border-2 border-dashed border-blue-300 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-blue-50 transition">
             <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
             <p class="text-sm text-blue-600 font-medium">Browse Excel file to upload</p>
-            <p class="text-xs text-gray-400 mt-1">(.xls, .xlsx)</p>
+            <p class="text-xs text-gray-400 mt-1">(.xlsx only)</p>
+            <p class="text-xs text-gray-400 mt-1">Required columns: employee_id, am_time, pm_time</p>
             <p id="selected_excel_name" class="text-xs text-slate-500 mt-2">No file selected</p>
           </label>
 
-          <input id="excel_file" name="excel_file" type="file" accept=".xls,.xlsx" class="hidden" required />
+          <input id="excel_file" name="excel_file" type="file" accept=".xlsx" class="hidden" required />
 
           <div class="flex justify-end">
             <button id="upload_excel_btn" type="submit" disabled class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition">
@@ -112,6 +113,9 @@
             <h3 class="text-sm font-semibold text-gray-700">Files Status</h3>
 
             <form method="GET" action="{{ route($currentAttendanceRoute) }}" class="flex items-center gap-2" style="margin-top: -7px;">
+              @if ($selectedUploadId)
+                <input type="hidden" name="upload_id" value="{{ $selectedUploadId }}">
+              @endif
               <label class="text-sm text-gray-600">From Date:</label>
               <input
                 name="from_date"
@@ -189,6 +193,9 @@
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-semibold text-gray-700">Attendance List</h3>
           <form method="GET" action="{{ route($currentAttendanceRoute) }}" class="flex items-center gap-2">
+            @if ($selectedUploadId)
+              <input type="hidden" name="upload_id" value="{{ $selectedUploadId }}">
+            @endif
             <label class="text-sm text-gray-600">From Date:</label>
             <input
               name="from_date"
@@ -323,6 +330,9 @@
             alert('File scan completed successfully!');
             scanBtn.disabled = false;
             scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            if (data.redirect_url) {
+              window.location.href = data.redirect_url;
+            }
           } else {
             alert('Failed to update status');
             scanBtn.disabled = false;

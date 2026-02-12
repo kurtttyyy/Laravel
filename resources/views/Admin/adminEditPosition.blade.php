@@ -118,6 +118,25 @@
 
                 </div>
 
+                <!-- Job Type -->
+                <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">
+                    Job Type
+                </label>
+                <select name="job_type"
+                    class="w-full rounded-lg border border-slate-300 px-4 py-3">
+                    <option value="">Select job type</option>
+                    <option value="Teaching"
+                        {{ old('job_type', $open->job_type) == 'Teaching' ? 'selected' : '' }}>
+                        Teaching
+                    </option>
+                    <option value="Non-Teaching"
+                        {{ old('job_type', $open->job_type) == 'Non-Teaching' ? 'selected' : '' }}>
+                        Non-Teaching
+                    </option>
+                </select>
+                </div>
+
                 <!-- Location -->
                 <div>
                 <label class="block text-sm font-medium text-slate-600 mb-1">

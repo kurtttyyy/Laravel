@@ -22,6 +22,7 @@ class Employee extends Model
         'department',
         'position',
         'classification',
+        'job_type',
         'emergency_contact_name',
         'emergency_contact_relationship',
         'emergency_contact_number',

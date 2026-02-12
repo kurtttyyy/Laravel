@@ -34,6 +34,7 @@
         $attendanceQuery = array_filter([
           'from_date' => $fromDate,
           'upload_id' => $selectedUploadId,
+          'job_type' => $selectedJobType ?? null,
         ], fn ($value) => !is_null($value) && $value !== '');
 
         $baseCardClasses = 'relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center transition';
@@ -116,6 +117,9 @@
               @if ($selectedUploadId)
                 <input type="hidden" name="upload_id" value="{{ $selectedUploadId }}">
               @endif
+              @if (!empty($selectedJobType))
+                <input type="hidden" name="job_type" value="{{ $selectedJobType }}">
+              @endif
               <label class="text-sm text-gray-600">From Date:</label>
               <input
                 name="from_date"
@@ -196,6 +200,18 @@
             @if ($selectedUploadId)
               <input type="hidden" name="upload_id" value="{{ $selectedUploadId }}">
             @endif
+            <label class="text-sm text-gray-600">Job Type:</label>
+            <select
+              name="job_type"
+              class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="">All Job Types</option>
+              @foreach (($jobTypeOptions ?? collect()) as $jobTypeOption)
+                <option value="{{ $jobTypeOption }}" {{ ($selectedJobType ?? null) === $jobTypeOption ? 'selected' : '' }}>
+                  {{ $jobTypeOption }}
+                </option>
+              @endforeach
+            </select>
             <label class="text-sm text-gray-600">From Date:</label>
             <input
               name="from_date"

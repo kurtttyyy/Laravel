@@ -309,6 +309,7 @@ class AdministratorStoreController extends Controller
         $records = [];
         $now = now();
         $recordColumns = $this->getAttendanceRecordColumnLookup();
+        $employeeJobTypeMap = $this->buildEmployeeJobTypeMapFromRows($rows);
         $availableKeys = $this->collectAvailableKeys($rows);
         $hasMorningOutColumn = $this->hasAnyKey($availableKeys, ['morning_out', 'am_out', 'time_out_am', 'morning_time_out', 'out_am']);
         $hasAfternoonOutColumn = $this->hasAnyKey($availableKeys, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
@@ -327,6 +328,7 @@ class AdministratorStoreController extends Controller
             if (!$employeeId) {
                 continue;
             }
+            $normalizedEmployeeId = $this->normalizeEmployeeId($employeeId);
 
             $attendanceDateRaw = $this->pickValue($row, ['date', 'attendance_date']);
             $morningInRaw = $this->pickValue($row, ['morning_in', 'am_in', 'time_in_am', 'morning_time_in', 'in_am', 'am_time', 'am']);
@@ -381,11 +383,53 @@ class AdministratorStoreController extends Controller
             if (isset($recordColumns['main_gate'])) {
                 $record['main_gate'] = $mainGate ? (string) $mainGate : null;
             }
+            if (isset($recordColumns['job_type'])) {
+                $record['job_type'] = $employeeJobTypeMap[$normalizedEmployeeId] ?? null;
+            }
 
             $records[] = $record;
         }
 
         return $records;
+    }
+
+    private function buildEmployeeJobTypeMapFromRows(array $rows): array
+    {
+        $employeeIds = collect($rows)
+            ->map(function ($row) {
+                $employeeId = $this->pickValue($row, [
+                    'employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid',
+                ]);
+
+                return $this->normalizeEmployeeId($employeeId);
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($employeeIds->isEmpty()) {
+            return [];
+        }
+
+        if (!Schema::hasColumn('employees', 'job_type')) {
+            return [];
+        }
+
+        return Employee::query()
+            ->select(['employee_id', 'job_type'])
+            ->whereIn('employee_id', $employeeIds->all())
+            ->get()
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                $jobType = $this->normalizeEmployeeJobType($employee->job_type);
+
+                return [$employeeId => $jobType];
+            })
+            ->all();
     }
 
     private function getAttendanceRecordColumnLookup(): array
@@ -705,13 +749,14 @@ class AdministratorStoreController extends Controller
             'location' => 'required',
             'skills' => 'required',
             //'benefits' => 'required',
-            //'job_type' => 'required',
+            'job_type' => 'required',
             'one' => 'required|date',
             'two' => 'required|date',
             'passionate' => 'required',
         ]);
 
         $open = OpenPosition::findOrFail($id);
+        $normalizedJobType = $this->normalizeEmployeeJobType($attrs['job_type']);
 
         $open->update([
             'title' => $attrs['title'],
@@ -728,11 +773,25 @@ class AdministratorStoreController extends Controller
             'location' => $attrs['location'],
             'skills' => $attrs['skills'],
             //'benifits' => $attrs['benefits'],
-            //'job_type' => $attrs['job_type'],
+            'job_type' => $normalizedJobType,
             'one' => $attrs['one'],
             'two' => $attrs['two'],
             'passionate' => $attrs['passionate'],
         ]);
+
+        // Keep employee records aligned with the updated open-position job type.
+        if (Schema::hasColumn('employees', 'job_type')) {
+            $relatedUserIds = Applicant::query()
+                ->where('open_position_id', $open->id)
+                ->whereNotNull('user_id')
+                ->pluck('user_id');
+
+            if ($relatedUserIds->isNotEmpty()) {
+                Employee::query()
+                    ->whereIn('user_id', $relatedUserIds)
+                    ->update(['job_type' => $normalizedJobType]);
+            }
+        }
 
         return redirect()->route('admin.adminPosition')->with('success','Success Added Position');
     }
@@ -810,6 +869,7 @@ class AdministratorStoreController extends Controller
             'birthday' => 'nullable|date',
             'position' => 'nullable|string|max:255',
             'department' => 'nullable|string|max:255',
+            'job_type' => 'nullable|string|max:50',
             'barangay' => 'nullable|string|max:255',
             'municipality' => 'nullable|string|max:255',
             'province' => 'nullable|string|max:255',
@@ -845,21 +905,27 @@ class AdministratorStoreController extends Controller
             return filled($value);
         });
 
+        $employeePayload = [
+            'employee_id' => $attrs['employee_id'] ?? null,
+            'account_number' => $attrs['account_number'] ?? null,
+            'sex' => $attrs['gender'] ?? null,
+            'contact_number' => $attrs['contact_number'] ?? null,
+            'birthday' => $attrs['birthday'] ?? null,
+            'position' => $attrs['position'] ?? null,
+            'department' => $attrs['department'] ?? null,
+            'address' => count($addressParts) ? implode(', ', $addressParts) : null,
+            'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
+            'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
+            'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
+        ];
+
+        if (array_key_exists('job_type', $attrs)) {
+            $employeePayload['job_type'] = $this->normalizeEmployeeJobType($attrs['job_type']);
+        }
+
         Employee::updateOrCreate(
             ['user_id' => $attrs['user_id']],
-            [
-                'employee_id' => $attrs['employee_id'] ?? null,
-                'account_number' => $attrs['account_number'] ?? null,
-                'sex' => $attrs['gender'] ?? null,
-                'contact_number' => $attrs['contact_number'] ?? null,
-                'birthday' => $attrs['birthday'] ?? null,
-                'position' => $attrs['position'] ?? null,
-                'department' => $attrs['department'] ?? null,
-                'address' => count($addressParts) ? implode(', ', $addressParts) : null,
-                'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
-                'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
-                'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
-            ]
+            $employeePayload
         );
 
         Government::updateOrCreate(
@@ -897,6 +963,7 @@ class AdministratorStoreController extends Controller
             'position' => 'required',
             'department' => 'required',
             'classification' => 'required',
+            'job_type' => 'nullable|string|max:50',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_relationship' => 'nullable|string|max:255',
             'emergency_contact_number' => 'nullable|string|max:255',
@@ -952,6 +1019,7 @@ class AdministratorStoreController extends Controller
                 'department' => $attrs['department'],
                 'position' => $attrs['position'],
                 'classification' => $attrs['classification'],
+                'job_type' => $this->normalizeEmployeeJobType($attrs['job_type'] ?? $attrs['classification']),
                 'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
                 'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
                 'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
@@ -1010,6 +1078,39 @@ class AdministratorStoreController extends Controller
         );
 
         return redirect()->back()->with('success', 'Save Successfully');
+    }
+
+    private function normalizeEmployeeJobType($value): ?string
+    {
+        $normalized = strtolower(trim((string) $value));
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array($normalized, ['teaching', 't'], true)) {
+            return 'Teaching';
+        }
+
+        if (in_array($normalized, ['non-teaching', 'non teaching', 'nonteaching', 'nt'], true)) {
+            return 'Non-Teaching';
+        }
+
+        return ucfirst($normalized);
+    }
+
+    private function normalizeEmployeeId($value): string
+    {
+        $normalized = trim((string) $value);
+        if ($normalized === '') {
+            return '';
+        }
+
+        // Excel often exports numeric IDs as "123.0"; map these back to the base ID.
+        if (preg_match('/^(\d+)\.0+$/', $normalized, $matches)) {
+            return $matches[1];
+        }
+
+        return $normalized;
     }
 
 

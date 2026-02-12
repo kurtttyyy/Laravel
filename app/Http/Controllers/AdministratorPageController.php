@@ -96,6 +96,11 @@ class AdministratorPageController extends Controller
     private function buildAttendanceView(Request $request, string $activeAttendanceTab = 'all'){
         $fromDate = $request->query('from_date');
         $selectedUploadId = $request->query('upload_id');
+        $selectedJobType = $this->normalizeJobType($request->query('job_type'));
+        $allowedJobTypes = ['Teaching', 'Non-Teaching'];
+        if ($selectedJobType && !in_array($selectedJobType, $allowedJobTypes, true)) {
+            $selectedJobType = null;
+        }
 
         $attendanceFiles = AttendanceUpload::query()
             ->when($fromDate, function ($query) use ($fromDate) {
@@ -119,21 +124,61 @@ class AdministratorPageController extends Controller
                 ->get();
         }
 
-        $records = $records->map(function ($row) {
+        $employeesWithJobType = Employee::query()
+            ->select(['employee_id', 'job_type'])
+            ->whereNotNull('employee_id')
+            ->orderBy('employee_id')
+            ->get();
+
+        $employeeJobTypeMap = $employeesWithJobType
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                $jobTypeFromEmployee = $this->normalizeJobType($employee->job_type);
+
+                return [$employeeId => $jobTypeFromEmployee];
+            });
+
+        $jobTypeOptions = collect($allowedJobTypes);
+
+        if ($selectedJobType) {
+            $records = $records
+                ->filter(function ($row) use ($employeeJobTypeMap, $selectedJobType) {
+                    $employeeId = $this->normalizeEmployeeId($row->employee_id);
+                    $employeeJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+                    return $employeeJobType === $selectedJobType;
+                })
+                ->values();
+        }
+
+        $records = $records->map(function ($row) use ($employeeJobTypeMap) {
+            $employeeId = $this->normalizeEmployeeId($row->employee_id);
+            $rowJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
             $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
             $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
             $isTardyByRule = !$row->is_absent && !$isWithinPresentWindow && $computedLateMinutes > 0;
 
+            $row->setAttribute('job_type', $rowJobType);
             $row->setAttribute('computed_late_minutes', $computedLateMinutes);
             $row->setAttribute('is_tardy_by_rule', $isTardyByRule);
             return $row;
         });
 
+        // Enforce exact row-level filtering by normalized job type.
+        if ($selectedJobType) {
+            $records = $records
+                ->filter(fn ($row) => $this->normalizeJobType($row->job_type) === $selectedJobType)
+                ->values();
+        }
+
         $presentEmployees = $records
             ->filter(fn ($row) => !$row->is_absent)
             ->values();
         $absentEmployees = $records->where('is_absent', true)->values();
-        $missingEmployeeAbsences = $this->buildMissingEmployeeAbsences($records, $fromDate);
+        $missingEmployeeAbsences = $this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap);
         $absentEmployees = $absentEmployees
             ->concat($missingEmployeeAbsences)
             ->values();
@@ -155,6 +200,8 @@ class AdministratorPageController extends Controller
             'attendanceFiles',
             'fromDate',
             'selectedUploadId',
+            'selectedJobType',
+            'jobTypeOptions',
             'activeAttendanceTab',
             'presentEmployees',
             'absentEmployees',
@@ -217,11 +264,11 @@ class AdministratorPageController extends Controller
         return $late;
     }
 
-    private function buildMissingEmployeeAbsences($records, ?string $fromDate)
+    private function buildMissingEmployeeAbsences($records, ?string $fromDate, ?string $selectedJobType = null, $employeeJobTypeMap = null)
     {
         $recordedEmployeeIds = $records
             ->pluck('employee_id')
-            ->map(fn ($id) => trim((string) $id))
+            ->map(fn ($id) => $this->normalizeEmployeeId($id))
             ->filter()
             ->values()
             ->all();
@@ -235,6 +282,16 @@ class AdministratorPageController extends Controller
             ->orderBy('employee_id')
             ->get();
 
+        if ($selectedJobType && $employeeJobTypeMap) {
+            $employees = $employees
+                ->filter(function ($employee) use ($employeeJobTypeMap, $selectedJobType) {
+                    $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                    $employeeJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+                    return $employeeJobType === $selectedJobType;
+                })
+                ->values();
+        }
+
         $attendanceDate = null;
         if ($fromDate) {
             try {
@@ -246,20 +303,23 @@ class AdministratorPageController extends Controller
 
         return $employees
             ->reject(function ($employee) use ($recordedEmployeeIds) {
-                $employeeId = trim((string) $employee->employee_id);
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
                 return in_array($employeeId, $recordedEmployeeIds, true);
             })
-            ->map(function ($employee) use ($attendanceDate) {
+            ->map(function ($employee) use ($attendanceDate, $employeeJobTypeMap) {
                 $user = $employee->user;
                 $name = trim(implode(' ', array_filter([
                     $user?->first_name,
                     $user?->middle_name,
                     $user?->last_name,
                 ])));
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
 
                 return (object) [
                     'employee_id' => (string) $employee->employee_id,
                     'employee_name' => $name !== '' ? $name : null,
+                    'job_type' => $jobType,
                     'main_gate' => null,
                     'attendance_date' => $attendanceDate,
                     'morning_in' => null,
@@ -274,6 +334,39 @@ class AdministratorPageController extends Controller
                 ];
             })
             ->values();
+    }
+
+    private function normalizeJobType($value): ?string
+    {
+        $normalized = strtolower(trim((string) $value));
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (in_array($normalized, ['teaching', 't'], true)) {
+            return 'Teaching';
+        }
+
+        if (in_array($normalized, ['non-teaching', 'non teaching', 'nonteaching', 'nt'], true)) {
+            return 'Non-Teaching';
+        }
+
+        return ucwords($normalized);
+    }
+
+    private function normalizeEmployeeId($value): string
+    {
+        $normalized = trim((string) $value);
+        if ($normalized === '') {
+            return '';
+        }
+
+        // Excel often exports numeric IDs as "123.0"; map these back to the base ID.
+        if (preg_match('/^(\d+)\.0+$/', $normalized, $matches)) {
+            return $matches[1];
+        }
+
+        return $normalized;
     }
 
     public function display_leave(){

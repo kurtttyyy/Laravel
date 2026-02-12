@@ -103,7 +103,7 @@
             <div>
                 <h3 class="text-lg font-semibold">{{ $open->title}}</h3>
                 <p class="text-sm text-slate-500">{{ $open->department }}
-                    • {{ $open->employment}} • {{ $open->work_mode}}</p>
+                    • {{ $open->employment}} • {{ $open->job_type }}</p>
             </div>
             <span class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full">Active</span>
         </div>
@@ -142,7 +142,7 @@
 
             <div class="flex gap-2">
                 <button onclick="window.location.href='{{ route('admin.adminShowPosition', $open->id) }}'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">View Details</button>
-                <button onclick="window.location.href='/system/edit/position'" class="border px-4 py-2 rounded-lg text-sm">Edit</button>
+                <button onclick="window.location.href='{{ route('admin.adminEditPosition', $open->id) }}'" class="border px-4 py-2 rounded-lg text-sm">Edit</button>
             </div>
         </div>
     </div>
@@ -171,3 +171,4 @@
   }
 </script>
 </html>
+

@@ -54,7 +54,7 @@
                 <div class="items-start">
                   <h1 class="text-2xl font-bold text-slate-800">{{ $open->title }}</h1>
                   <p class="text-sm text-slate-500">
-                    {{ $open->department }} â€¢ {{ $open->employment }} â€¢ {{ $open->work_mode }}
+                    {{ $open->department }} • {{ $open->employment }} • {{ $open->job_type }}
                   </p>
 
                   <div class="flex gap-3 mt-4">
@@ -239,3 +239,4 @@
   }
 </script>
 </html>
+

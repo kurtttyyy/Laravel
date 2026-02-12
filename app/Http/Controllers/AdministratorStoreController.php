@@ -528,5 +528,57 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Employee not Approve');
     }
 
+    public function update_attendance_status($id, Request $request){
+        try {
+            $attendanceFile = AttendanceUpload::findOrFail($id);
+            
+            $attrs = $request->validate([
+                'status' => 'required|string'
+            ]);
+
+            $attendanceFile->update([
+                'status' => $attrs['status']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'status' => $attrs['status']
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating attendance status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating status'
+            ], 500);
+        }
+    }
+
+    public function delete_attendance_file($id){
+        try {
+            $attendanceFile = AttendanceUpload::findOrFail($id);
+            
+            // Delete the physical file if it exists
+            if ($attendanceFile->file_path && \Storage::exists($attendanceFile->file_path)) {
+                \Storage::delete($attendanceFile->file_path);
+            }
+
+            // Delete the database record
+            $attendanceFile->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting attendance file: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting file'
+            ], 500);
+        }
+    }
+
 
 }
+

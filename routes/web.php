@@ -87,6 +87,8 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/update/employee/{id}', 'update_employee')->name('admin.updateEmployee');
     Route::post('system/employee/update/biometric', 'update_bio')->name('admin.updateBio');
     Route::post('system/employee/update/profile', 'update_general_profile')->name('admin.updateGeneralProfile');
+    Route::post('admin/attendance/update-status/{id}', 'update_attendance_status')->name('admin.updateAttendanceStatus');
+    Route::post('admin/attendance/delete/{id}', 'delete_attendance_file')->name('admin.deleteAttendanceFile');
 
 
     //DELETE

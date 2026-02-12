@@ -41,14 +41,14 @@
         <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
           <div class="text-center">
             <div class="text-4xl font-bold text-gray-800">0</div>
-            <div class="text-sm text-gray-500 mt-1">Leave</div>
+            <div class="text-sm text-gray-500 mt-1">Tardiness</div>
           </div>
         </div>
 
         <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
           <div class="text-center">
             <div class="text-4xl font-bold text-gray-800">0</div>
-            <div class="text-sm text-gray-500 mt-1">Total</div>
+            <div class="text-sm text-gray-500 mt-1">Total Files</div>
           </div>
         </div>
       </div>
@@ -101,31 +101,59 @@
               <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
                 Filter
               </button>
+              <button type="button" id="scan_btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                <i class="fa-solid fa-barcode mr-1"></i>Scan
+              </button>
             </form>
           </div>
 
           <div class="space-y-3">
             @forelse ($attendanceFiles as $file)
-              <div class="flex items-center gap-3 bg-blue-50 p-3 rounded-lg">
+              @php
+                $progress = 0;
+                if ($file->status === 'Processed') {
+                  $progress = 100;
+                } elseif ($file->status === 'Processing' && $file->processed_rows) {
+                  $progress = min(75, $file->processed_rows);
+                } elseif ($file->status === 'Pending') {
+                  $progress = 0;
+                }
+              @endphp
+              <div class="file-item flex items-center gap-3 bg-blue-50 p-3 rounded-lg cursor-pointer hover:bg-blue-100 transition" data-file-id="{{ $file->id }}">
+                <input type="radio" name="selected_file" value="{{ $file->id }}" class="file-checkbox cursor-pointer">
                 <i class="fa-solid fa-file-excel text-green-600 text-xl"></i>
 
                 <div class="flex-1">
-                  <p class="text-sm font-medium">
-                    {{ $file->original_name }}
-                    <span class="text-gray-500">- {{ $file->status }}</span>
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    {{ number_format((float) $file->file_size / 1024, 2) }} KB
-                    @if (!is_null($file->processed_rows))
-                      | {{ $file->processed_rows }} rows processed
-                    @endif
-                  </p>
+                  <div class="flex items-center justify-between mb-2">
+                    <div>
+                      <p class="text-sm font-medium">
+                        {{ $file->original_name }}
+                        <span class="text-gray-500">- <span class="file-status">{{ $file->status }}</span></span>
+                      </p>
+                      <p class="text-xs text-gray-500">
+                        {{ number_format((float) $file->file_size / 1024, 2) }} KB
+                        @if (!is_null($file->processed_rows))
+                          | {{ $file->processed_rows }} rows processed
+                        @endif
+                      </p>
+                    </div>
+                    <div class="text-xs font-semibold text-gray-700 min-w-[40px] text-right">
+                      {{ $progress }}%
+                    </div>
+                  </div>
+                  <div class="w-full bg-gray-300 rounded-full h-2">
+                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                  </div>
                 </div>
 
                 <div class="text-right text-xs text-gray-500 min-w-[120px]">
                   {{ optional($file->uploaded_at)->format('M d, Y') ?? '-' }}<br>
                   {{ optional($file->uploaded_at)->format('h:i A') ?? '-' }}
                 </div>
+
+                <button type="button" class="delete-btn ml-4 text-red-600 hover:text-red-800 transition" data-file-id="{{ $file->id }}" title="Delete file">
+                  <i class="fa-solid fa-trash-can text-lg"></i>
+                </button>
               </div>
             @empty
               <div class="rounded-lg border border-dashed border-gray-300 p-5 text-center text-sm text-gray-500">
@@ -147,6 +175,121 @@
   const excelInput = document.getElementById('excel_file');
   const excelName = document.getElementById('selected_excel_name');
   const uploadBtn = document.getElementById('upload_excel_btn');
+  const scanBtn = document.getElementById('scan_btn');
+  const fileItems = document.querySelectorAll('.file-item');
+  const fileCheckboxes = document.querySelectorAll('.file-checkbox');
+  const deleteButtons = document.querySelectorAll('.delete-btn');
+
+  // File selection handling
+  fileItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+      if (e.target.type !== 'radio') {
+        const checkbox = this.querySelector('.file-checkbox');
+        checkbox.checked = true;
+      }
+      fileItems.forEach(f => f.classList.remove('bg-blue-200'));
+      this.classList.add('bg-blue-200');
+    });
+  });
+
+  fileCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      fileItems.forEach(item => {
+        if (item.querySelector('.file-checkbox') === this) {
+          item.classList.add('bg-blue-200');
+        } else {
+          item.classList.remove('bg-blue-200');
+        }
+      });
+    });
+  });
+
+  // Scan button handler
+  if (scanBtn) {
+    scanBtn.addEventListener('click', function() {
+      const selectedCheckbox = document.querySelector('.file-checkbox:checked');
+      if (!selectedCheckbox) {
+        alert('Please select a file first');
+        return;
+      }
+
+      const fileId = selectedCheckbox.value;
+      const fileItem = document.querySelector(`[data-file-id="${fileId}"]`);
+      const statusElement = fileItem.querySelector('.file-status');
+      const progressBar = fileItem.querySelector('.bg-green-500');
+      const progressTextElement = fileItem.querySelector('.min-w-\\[40px\\]');
+
+      // Disable button during processing
+      scanBtn.disabled = true;
+      scanBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+      // Start progress animation
+      let progress = parseInt(progressTextElement.textContent);
+      const targetProgress = 100;
+      const animationDuration = 3000; // 3 seconds
+      const startTime = Date.now();
+
+      const animateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const fraction = Math.min(elapsed / animationDuration, 1);
+        
+        // Easing function for smooth animation
+        const easeProgress = progress + (targetProgress - progress) * (fraction < 0.8 ? fraction * 1.25 : 0.8 + (fraction - 0.8) * 0.5);
+        const currentProgress = Math.floor(easeProgress);
+
+        if (progressBar) {
+          progressBar.style.width = currentProgress + '%';
+        }
+        if (progressTextElement) {
+          progressTextElement.textContent = currentProgress + '%';
+        }
+
+        if (fraction < 1) {
+          requestAnimationFrame(animateProgress);
+        }
+      };
+
+      // Start animation
+      animateProgress();
+
+      // Send update to server after animation completes
+      setTimeout(() => {
+        fetch(`/admin/attendance/update-status/${fileId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || ''
+          },
+          body: JSON.stringify({ status: 'Processed' })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            statusElement.textContent = 'Processed';
+            if (progressBar) {
+              progressBar.style.width = '100%';
+            }
+            if (progressTextElement) {
+              progressTextElement.textContent = '100%';
+            }
+            alert('File scan completed successfully!');
+            scanBtn.disabled = false;
+            scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          } else {
+            alert('Failed to update status');
+            scanBtn.disabled = false;
+            scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error updating status');
+          scanBtn.disabled = false;
+          scanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        });
+      }, animationDuration);
+    });
+  }
 
   if (excelInput && excelName && uploadBtn) {
     excelInput.addEventListener('change', function () {
@@ -155,6 +298,38 @@
       excelName.textContent = hasFile ? this.files[0].name : 'No file selected';
     });
   }
+
+  // Delete button handler
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const fileId = this.dataset.fileId;
+      
+      if (confirm('Are you sure you want to delete this file?')) {
+        fetch(`/admin/attendance/delete/${fileId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || ''
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const fileItem = document.querySelector(`[data-file-id="${fileId}"]`);
+            fileItem.closest('.file-item').remove();
+            alert('File deleted successfully');
+          } else {
+            alert('Failed to delete file');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error deleting file');
+        });
+      }
+    });
+  });
 
   if (sidebar && main) {
     sidebar.addEventListener('mouseenter', function() {

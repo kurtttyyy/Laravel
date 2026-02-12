@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceUpload;
+use App\Models\AttendanceRecord;
 use App\Models\Applicant;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
@@ -75,7 +76,24 @@ class AdministratorPageController extends Controller
     }
 
     public function display_attendance(Request $request){
+        return $this->buildAttendanceView($request, 'all');
+    }
+
+    public function display_attendance_present(Request $request){
+        return $this->buildAttendanceView($request, 'present');
+    }
+
+    public function display_attendance_absent(Request $request){
+        return $this->buildAttendanceView($request, 'absent');
+    }
+
+    public function display_attendance_tardiness(Request $request){
+        return $this->buildAttendanceView($request, 'tardiness');
+    }
+
+    private function buildAttendanceView(Request $request, string $activeAttendanceTab = 'all'){
         $fromDate = $request->query('from_date');
+        $selectedUploadId = $request->query('upload_id');
 
         $attendanceFiles = AttendanceUpload::query()
             ->when($fromDate, function ($query) use ($fromDate) {
@@ -85,7 +103,40 @@ class AdministratorPageController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('admin.adminAttendance', compact('attendanceFiles', 'fromDate'));
+        if (!$selectedUploadId) {
+            $selectedUploadId = optional($attendanceFiles->first())->id;
+        }
+
+        $records = collect();
+        if ($selectedUploadId) {
+            $records = AttendanceRecord::query()
+                ->where('attendance_upload_id', $selectedUploadId)
+                ->orderBy('employee_id')
+                ->get();
+        }
+
+        $presentEmployees = $records->where('is_absent', false)->where('late_minutes', 0)->values();
+        $absentEmployees = $records->where('is_absent', true)->values();
+        $tardyEmployees = $records->where('late_minutes', '>', 0)->values();
+
+        $presentCount = $presentEmployees->count();
+        $absentCount = $absentEmployees->count();
+        $tardyCount = $tardyEmployees->count();
+        $totalCount = $records->count();
+
+        return view('admin.adminAttendance', compact(
+            'attendanceFiles',
+            'fromDate',
+            'selectedUploadId',
+            'activeAttendanceTab',
+            'presentEmployees',
+            'absentEmployees',
+            'tardyEmployees',
+            'presentCount',
+            'absentCount',
+            'tardyCount',
+            'totalCount'
+        ));
     }
 
     public function display_leave(){

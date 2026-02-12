@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceUpload;
+use App\Models\AttendanceRecord;
 use App\Models\Applicant;
 use App\Models\ApplicantDocument;
 use App\Models\Education;
@@ -14,7 +15,10 @@ use App\Models\OpenPosition;
 use App\Models\Salary;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AdministratorStoreController extends Controller
 {
@@ -162,15 +166,315 @@ class AdministratorStoreController extends Controller
         $fileName = time().'_'.$originalName;
         $filePath = $file->storeAs('attendance_excels', $fileName, 'public');
 
-        AttendanceUpload::create([
+        $upload = AttendanceUpload::create([
             'original_name' => $originalName,
             'file_path' => $filePath,
             'file_size' => $file->getSize(),
-            'status' => 'Uploaded',
+            'status' => 'Processing',
             'uploaded_at' => now(),
         ]);
 
-        return back()->with('success', 'Excel file uploaded successfully.');
+        try {
+            $absolutePath = Storage::disk('public')->path($filePath);
+            $rows = $this->extractRowsFromExcel($absolutePath, $file->getClientOriginalExtension());
+            $records = $this->buildAttendanceRecords($rows, $upload->id);
+
+            DB::transaction(function () use ($upload, $records) {
+                AttendanceRecord::where('attendance_upload_id', $upload->id)->delete();
+
+                if (!empty($records)) {
+                    AttendanceRecord::insert($records);
+                }
+
+                $upload->update([
+                    'status' => 'Processed',
+                    'processed_rows' => count($records),
+                ]);
+            });
+
+            return back()->with('success', 'Excel file uploaded and analyzed successfully.');
+        } catch (\Throwable $e) {
+            Log::error('Attendance excel parse failed', [
+                'upload_id' => $upload->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $upload->update([
+                'status' => 'Failed',
+                'processed_rows' => 0,
+            ]);
+
+            return back()->withErrors([
+                'excel_file' => 'Upload saved but parsing failed. Use .xlsx format with employee ID and AM/PM time columns.',
+            ]);
+        }
+    }
+
+    private function extractRowsFromExcel(string $absolutePath, string $extension): array
+    {
+        $extension = strtolower($extension);
+
+        if ($extension !== 'xlsx') {
+            throw new \RuntimeException('Only .xlsx files are currently supported for attendance analysis.');
+        }
+
+        return $this->extractRowsFromXlsx($absolutePath);
+    }
+
+    private function extractRowsFromXlsx(string $absolutePath): array
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($absolutePath) !== true) {
+            throw new \RuntimeException('Unable to open xlsx file.');
+        }
+
+        $sharedStrings = [];
+        $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+        if ($sharedStringsXml !== false) {
+            $xml = simplexml_load_string($sharedStringsXml);
+            if ($xml && isset($xml->si)) {
+                foreach ($xml->si as $item) {
+                    $sharedStrings[] = trim((string) $item->t);
+                }
+            }
+        }
+
+        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if ($sheetXml === false) {
+            $zip->close();
+            throw new \RuntimeException('No worksheet found in xlsx.');
+        }
+
+        $sheet = simplexml_load_string($sheetXml);
+        if (!$sheet || !isset($sheet->sheetData->row)) {
+            $zip->close();
+            throw new \RuntimeException('Invalid worksheet data.');
+        }
+
+        $rows = [];
+        foreach ($sheet->sheetData->row as $row) {
+            $rowData = [];
+            foreach ($row->c as $cell) {
+                $reference = (string) $cell['r'];
+                $column = preg_replace('/\d+/', '', $reference);
+                $type = (string) $cell['t'];
+                $value = null;
+
+                if ($type === 's') {
+                    $index = (int) ($cell->v ?? 0);
+                    $value = $sharedStrings[$index] ?? null;
+                } elseif ($type === 'inlineStr') {
+                    $value = trim((string) ($cell->is->t ?? ''));
+                } else {
+                    $value = isset($cell->v) ? trim((string) $cell->v) : null;
+                }
+
+                if ($column !== '' && $value !== null && $value !== '') {
+                    $rowData[$column] = $value;
+                }
+            }
+
+            if (!empty($rowData)) {
+                $rows[] = $rowData;
+            }
+        }
+
+        $zip->close();
+
+        if (count($rows) < 2) {
+            return [];
+        }
+
+        $headerRow = array_shift($rows);
+        $headers = [];
+        foreach ($headerRow as $column => $headerText) {
+            $headers[$column] = $this->normalizeHeader((string) $headerText);
+        }
+
+        $mapped = [];
+        foreach ($rows as $row) {
+            $item = [];
+            foreach ($headers as $column => $header) {
+                if ($header === '') {
+                    continue;
+                }
+                $item[$header] = $row[$column] ?? null;
+            }
+
+            if (!empty(array_filter($item, fn ($value) => $value !== null && $value !== ''))) {
+                $mapped[] = $item;
+            }
+        }
+
+        return $mapped;
+    }
+
+    private function buildAttendanceRecords(array $rows, int $uploadId): array
+    {
+        $records = [];
+        $now = now();
+
+        foreach ($rows as $row) {
+            $employeeId = $this->pickValue($row, [
+                'employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid',
+            ]);
+
+            if (!$employeeId) {
+                continue;
+            }
+
+            $attendanceDateRaw = $this->pickValue($row, ['date', 'attendance_date']);
+            $morningInRaw = $this->pickValue($row, ['morning_in', 'am_in', 'time_in_am', 'morning_time_in', 'in_am']);
+            $morningOutRaw = $this->pickValue($row, ['morning_out', 'am_out', 'time_out_am', 'morning_time_out', 'out_am']);
+            $afternoonInRaw = $this->pickValue($row, ['afternoon_in', 'pm_in', 'time_in_pm', 'afternoon_time_in', 'in_pm']);
+            $afternoonOutRaw = $this->pickValue($row, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
+
+            $attendanceDate = $this->normalizeDate($attendanceDateRaw);
+            $morningIn = $this->normalizeTime($morningInRaw);
+            $morningOut = $this->normalizeTime($morningOutRaw);
+            $afternoonIn = $this->normalizeTime($afternoonInRaw);
+            $afternoonOut = $this->normalizeTime($afternoonOutRaw);
+
+            $missing = [];
+            if (!$morningIn) {
+                $missing[] = 'morning_in';
+            }
+            if (!$morningOut) {
+                $missing[] = 'morning_out';
+            }
+            if (!$afternoonIn) {
+                $missing[] = 'afternoon_in';
+            }
+            if (!$afternoonOut) {
+                $missing[] = 'afternoon_out';
+            }
+
+            $lateMinutes = $this->calculateLateMinutes($morningIn, $afternoonIn);
+            $isAbsent = !empty($missing);
+            $isTardy = $lateMinutes > 0;
+
+            $records[] = [
+                'attendance_upload_id' => $uploadId,
+                'employee_id' => (string) $employeeId,
+                'attendance_date' => $attendanceDate,
+                'morning_in' => $morningIn,
+                'morning_out' => $morningOut,
+                'afternoon_in' => $afternoonIn,
+                'afternoon_out' => $afternoonOut,
+                'late_minutes' => $lateMinutes,
+                'missing_time_logs' => !empty($missing) ? json_encode($missing) : null,
+                'is_absent' => $isAbsent,
+                'is_tardy' => $isTardy,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        return $records;
+    }
+
+    private function pickValue(array $row, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $row) && $row[$key] !== null && $row[$key] !== '') {
+                return (string) $row[$key];
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizeHeader(string $value): string
+    {
+        $normalized = strtolower(trim($value));
+        $normalized = str_replace(['(', ')', '.', '-', '/'], ' ', $normalized);
+        $normalized = preg_replace('/\s+/', '_', $normalized);
+
+        return $normalized;
+    }
+
+    private function normalizeDate(?string $value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            $serial = (float) $value;
+            $datePart = (int) floor($serial);
+            if ($datePart > 0) {
+                return Carbon::create(1899, 12, 30)->addDays($datePart)->toDateString();
+            }
+        }
+
+        $formats = ['Y-m-d', 'm/d/Y', 'd/m/Y', 'm-d-Y', 'd-m-Y'];
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, trim($value))->toDateString();
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->toDateString();
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function normalizeTime(?string $value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            $numeric = (float) $value;
+            $fraction = $numeric > 1 ? $numeric - floor($numeric) : $numeric;
+            if ($fraction >= 0 && $fraction < 1) {
+                $seconds = (int) round($fraction * 86400);
+                $hours = intdiv($seconds, 3600);
+                $minutes = intdiv($seconds % 3600, 60);
+                return sprintf('%02d:%02d:00', $hours, $minutes);
+            }
+        }
+
+        $formats = ['H:i', 'H:i:s', 'g:i A', 'g:iA', 'h:i A', 'h:iA'];
+        foreach ($formats as $format) {
+            try {
+                return Carbon::createFromFormat($format, trim($value))->format('H:i:s');
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->format('H:i:s');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function calculateLateMinutes(?string $morningIn, ?string $afternoonIn): int
+    {
+        $late = 0;
+
+        if ($morningIn) {
+            $morningActual = Carbon::createFromFormat('H:i:s', $morningIn);
+            $morningExpected = Carbon::createFromFormat('H:i:s', '08:00:00');
+            if ($morningActual->greaterThan($morningExpected)) {
+                $late += $morningExpected->diffInMinutes($morningActual);
+            }
+        }
+
+        if ($afternoonIn) {
+            $afternoonActual = Carbon::createFromFormat('H:i:s', $afternoonIn);
+            $afternoonExpected = Carbon::createFromFormat('H:i:s', '13:00:00');
+            if ($afternoonActual->greaterThan($afternoonExpected)) {
+                $late += $afternoonExpected->diffInMinutes($afternoonActual);
+            }
+        }
+
+        return $late;
     }
 
     //UPDATE
@@ -559,8 +863,8 @@ class AdministratorStoreController extends Controller
             $attendanceFile = AttendanceUpload::findOrFail($id);
             
             // Delete the physical file if it exists
-            if ($attendanceFile->file_path && \Storage::exists($attendanceFile->file_path)) {
-                \Storage::delete($attendanceFile->file_path);
+            if ($attendanceFile->file_path && Storage::disk('public')->exists($attendanceFile->file_path)) {
+                Storage::disk('public')->delete($attendanceFile->file_path);
             }
 
             // Delete the database record
@@ -581,4 +885,3 @@ class AdministratorStoreController extends Controller
 
 
 }
-

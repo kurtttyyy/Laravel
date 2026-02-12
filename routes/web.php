@@ -47,6 +47,9 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/dashboard', 'display_home')->name('admin.adminHome');
     Route::get('system/employee', 'display_employee')->name('admin.adminEmployee');
     Route::get('system/attendance', 'display_attendance')->name('admin.adminAttendance');
+    Route::get('system/attendance/present', 'display_attendance_present')->name('admin.attendance.present');
+    Route::get('system/attendance/absent', 'display_attendance_absent')->name('admin.attendance.absent');
+    Route::get('system/attendance/tardiness', 'display_attendance_tardiness')->name('admin.attendance.tardiness');
     Route::get('system/leave/management', 'display_leave')->name('admin.adminLeaveManagement');
     Route::get('system/reports', 'display_reports')->name('admin.adminReports');
     Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');

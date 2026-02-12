@@ -18,4 +18,9 @@ class AttendanceUpload extends Model
     protected $casts = [
         'uploaded_at' => 'datetime',
     ];
+
+    public function records()
+    {
+        return $this->hasMany(AttendanceRecord::class);
+    }
 }

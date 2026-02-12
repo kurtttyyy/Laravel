@@ -23,36 +23,57 @@
     @include('components.adminHeader.attendanceHeader')
 
     <div class="p-4 md:p-8 space-y-6 pt-20">
+      @php
+        $currentAttendanceRoute = match ($activeAttendanceTab) {
+          'present' => 'admin.attendance.present',
+          'absent' => 'admin.attendance.absent',
+          'tardiness' => 'admin.attendance.tardiness',
+          default => 'admin.adminAttendance',
+        };
+
+        $attendanceQuery = array_filter([
+          'from_date' => $fromDate,
+          'upload_id' => $selectedUploadId,
+        ], fn ($value) => !is_null($value) && $value !== '');
+
+        $baseCardClasses = 'relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center transition';
+      @endphp
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
+        <a href="{{ route('admin.attendance.present', $attendanceQuery) }}"
+           class="{{ $baseCardClasses }} hover:border-green-400 hover:bg-green-50 {{ $activeAttendanceTab === 'present' ? 'border-green-500 bg-green-50' : '' }}">
           <div class="text-center">
-            <div class="text-4xl font-bold text-gray-800">0</div>
+            <div class="text-4xl font-bold text-gray-800">{{ $presentCount }}</div>
             <div class="text-sm text-gray-500 mt-1">Present</div>
           </div>
-        </div>
+        </a>
 
-        <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
+        <a href="{{ route('admin.attendance.absent', $attendanceQuery) }}"
+           class="{{ $baseCardClasses }} hover:border-red-400 hover:bg-red-50 {{ $activeAttendanceTab === 'absent' ? 'border-red-500 bg-red-50' : '' }}">
           <div class="text-center">
-            <div class="text-4xl font-bold text-gray-800">0</div>
+            <div class="text-4xl font-bold text-gray-800">{{ $absentCount }}</div>
             <div class="text-sm text-gray-500 mt-1">Absent</div>
           </div>
-        </div>
+        </a>
 
-        <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
+        <a href="{{ route('admin.attendance.tardiness', $attendanceQuery) }}"
+           class="{{ $baseCardClasses }} hover:border-amber-400 hover:bg-amber-50 {{ $activeAttendanceTab === 'tardiness' ? 'border-amber-500 bg-amber-50' : '' }}">
           <div class="text-center">
-            <div class="text-4xl font-bold text-gray-800">0</div>
+            <div class="text-4xl font-bold text-gray-800">{{ $tardyCount }}</div>
             <div class="text-sm text-gray-500 mt-1">Tardiness</div>
           </div>
-        </div>
+        </a>
 
-        <div class="relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center">
+        <a href="{{ route('admin.adminAttendance', $attendanceQuery) }}"
+           class="{{ $baseCardClasses }} hover:border-blue-400 hover:bg-blue-50 {{ $activeAttendanceTab === 'all' ? 'border-blue-500 bg-blue-50' : '' }}">
           <div class="text-center">
-            <div class="text-4xl font-bold text-gray-800">0</div>
+            <div class="text-4xl font-bold text-gray-800">{{ $totalCount }}</div>
             <div class="text-sm text-gray-500 mt-1">Total Files</div>
           </div>
-        </div>
+        </a>
       </div>
 
+      @if ($activeAttendanceTab === 'all')
       <div class="bg-white rounded-xl border border-gray-200 p-6 max-full mx-auto">
         @if (session('success'))
           <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
@@ -90,7 +111,7 @@
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-sm font-semibold text-gray-700">Files Status</h3>
 
-            <form method="GET" action="{{ route('admin.adminAttendance') }}" class="flex items-center gap-2" style="margin-top: -7px;">
+            <form method="GET" action="{{ route($currentAttendanceRoute) }}" class="flex items-center gap-2" style="margin-top: -7px;">
               <label class="text-sm text-gray-600">From Date:</label>
               <input
                 name="from_date"
@@ -163,6 +184,33 @@
           </div>
         </div>
       </div>
+      @else
+      <div class="bg-white rounded-xl border border-gray-200 p-6 max-full mx-auto space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-700">Attendance List</h3>
+          <form method="GET" action="{{ route($currentAttendanceRoute) }}" class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">From Date:</label>
+            <input
+              name="from_date"
+              value="{{ $fromDate }}"
+              type="date"
+              class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
+            <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+              Filter
+            </button>
+          </form>
+        </div>
+
+        @if ($activeAttendanceTab === 'present')
+          @include('Admin.attendanceTable.presentEmployee', ['rows' => $presentEmployees])
+        @elseif ($activeAttendanceTab === 'absent')
+          @include('Admin.attendanceTable.absentEmployee', ['rows' => $absentEmployees])
+        @elseif ($activeAttendanceTab === 'tardiness')
+          @include('Admin.attendanceTable.tardinessEmployee', ['rows' => $tardyEmployees])
+        @endif
+      </div>
+      @endif
     </div>
   </main>
 </div>

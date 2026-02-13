@@ -28,6 +28,7 @@
           'present' => 'admin.attendance.present',
           'absent' => 'admin.attendance.absent',
           'tardiness' => 'admin.attendance.tardiness',
+          'total_employee' => 'admin.attendance.totalEmployee',
           default => 'admin.adminAttendance',
         };
 
@@ -65,11 +66,11 @@
           </div>
         </a>
 
-        <a href="{{ route('admin.adminAttendance', $attendanceQuery) }}"
-           class="{{ $baseCardClasses }} hover:border-blue-400 hover:bg-blue-50 {{ $activeAttendanceTab === 'all' ? 'border-blue-500 bg-blue-50' : '' }}">
+        <a href="{{ route('admin.attendance.totalEmployee', $attendanceQuery) }}"
+           class="{{ $baseCardClasses }} hover:border-blue-400 hover:bg-blue-50 {{ $activeAttendanceTab === 'total_employee' ? 'border-blue-500 bg-blue-50' : '' }}">
           <div class="text-center">
             <div class="text-4xl font-bold text-gray-800">{{ $totalCount }}</div>
-            <div class="text-sm text-gray-500 mt-1">Total Files</div>
+            <div class="text-sm text-gray-500 mt-1">Total Employees</div>
           </div>
         </a>
       </div>
@@ -191,6 +192,7 @@
             @endforelse
           </div>
         </div>
+
       </div>
       @else
       <div class="bg-white rounded-xl border border-gray-200 p-6 max-full mx-auto space-y-4">
@@ -231,6 +233,8 @@
           @include('Admin.attendanceTable.absentEmployee', ['rows' => $absentEmployees])
         @elseif ($activeAttendanceTab === 'tardiness')
           @include('Admin.attendanceTable.tardinessEmployee', ['rows' => $tardyEmployees])
+        @elseif ($activeAttendanceTab === 'total_employee')
+          @include('Admin.attendanceTable.totalEmployee', ['rows' => $allEmployees])
         @endif
       </div>
       @endif

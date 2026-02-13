@@ -93,6 +93,10 @@ class AdministratorPageController extends Controller
         return $this->buildAttendanceView($request, 'tardiness');
     }
 
+    public function display_attendance_total_employee(Request $request){
+        return $this->buildAttendanceView($request, 'total_employee');
+    }
+
     private function buildAttendanceView(Request $request, string $activeAttendanceTab = 'all'){
         $fromDate = $request->query('from_date');
         $selectedUploadId = $request->query('upload_id');
@@ -190,6 +194,12 @@ class AdministratorPageController extends Controller
                 return $row;
             })
             ->values();
+        $allEmployees = $records
+            ->map(function ($row) {
+                $row->late_minutes = (int) ($row->computed_late_minutes ?? 0);
+                return $row;
+            })
+            ->values();
 
         $presentCount = $presentEmployees->count();
         $absentCount = $absentEmployees->count();
@@ -206,6 +216,7 @@ class AdministratorPageController extends Controller
             'presentEmployees',
             'absentEmployees',
             'tardyEmployees',
+            'allEmployees',
             'presentCount',
             'absentCount',
             'tardyCount',

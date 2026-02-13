@@ -2,17 +2,40 @@
     @php
         $activeAttendanceTab = $activeAttendanceTab ?? 'all';
     @endphp
-    <div class="flex items-center gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-gray-900">Daily Attendance</h2>
+        <p id="attendance-current-date" class="text-gray-600 mt-1">{{ now()->format('l, F j, Y') }}</p>
         @if ($activeAttendanceTab !== 'all')
-            <a href="{{ route('admin.adminAttendance') }}" class="text-gray-600 hover:text-gray-900 transition">
-                <i class="fa-solid fa-arrow-left text-xl"></i>
+            <a
+                href="{{ route('admin.adminAttendance') }}"
+                class="mt-3 inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+                <i class=""></i>
+                Back
             </a>
         @endif
-        <div>
-            <h2 class="text-3xl font-bold text-gray-900">Daily Attendance</h2>
-            <p class="text-gray-600 mt-1">Friday, January 10, 2025</p>
-        </div>
     </div>
-
-
 </header>
+
+<script>
+  (function () {
+    const dateEl = document.getElementById('attendance-current-date');
+    if (!dateEl) {
+      return;
+    }
+
+    const updateDate = () => {
+      const now = new Date();
+      const formatted = now.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      dateEl.textContent = formatted;
+    };
+
+    updateDate();
+    setInterval(updateDate, 60000);
+  })();
+</script>

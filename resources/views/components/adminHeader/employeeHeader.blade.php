@@ -7,6 +7,7 @@
             <p class="text-gray-600 text-sm mt-1">
                 Manage all employees and their status
             </p>
+            <p class="text-xs text-slate-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
         </div>
 
         <!-- RIGHT : Search + Department -->

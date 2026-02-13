@@ -41,6 +41,16 @@
       <span class="whitespace-nowrap inline-block max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300">Attendance</span>
     </a>
 
+    <!-- Calendar -->
+    <a href="{{ route('admin.adminCalendar') }}"
+       class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition justify-center group-hover:justify-start
+       {{ request()->routeIs('admin.adminCalendar')
+        ? 'bg-green-600 text-white'
+        : 'text-white hover:bg-green-600/30' }}">
+      <i class="fa-solid fa-calendar-days"></i>
+      <span class="whitespace-nowrap inline-block max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300">Calendar</span>
+    </a>
+
     <!-- Leave -->
     <a href="{{ route('admin.adminLeaveManagement') }}"
        class="flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium transition justify-center group-hover:justify-start

@@ -60,6 +60,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/interviewers/ID/{id}', 'display_interview_ID');
     Route::get('system/edit/position/{id}', 'display_edit_position')->name('admin.adminEditPosition');
     Route::get('system/interview', 'display_interview')->name('admin.adminInterview');
+    Route::get('system/calendar', 'display_calendar')->name('admin.adminCalendar');
     Route::get('system/meeting', 'display_meeting')->name('admin.adminMeeting');
     Route::get('system/position', 'display_position')->name('admin.adminPosition');
     Route::get('system/show/position/{id}', 'display_show_position')->name('admin.adminShowPosition');

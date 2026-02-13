@@ -3,6 +3,7 @@
     <div>
         <h2 class="text-3xl font-bold text-gray-900">Leave Management</h2>
         <p class="text-gray-600 mt-1">Manage your time off requests</p>
+        <p class="text-xs text-slate-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
     </div>
 
 </header>

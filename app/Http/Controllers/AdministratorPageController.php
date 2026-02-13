@@ -600,6 +600,10 @@ class AdministratorPageController extends Controller
         return view('admin.adminMeeting');
     }
 
+    public function display_calendar(){
+        return view('admin.adminCalendar');
+    }
+
     public function display_position(){
         $openPosition = OpenPosition::withCount('applicants')->get();
         $openPositions = OpenPosition::all();

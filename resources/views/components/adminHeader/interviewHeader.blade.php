@@ -4,6 +4,7 @@
         <p class="text-gray-600 mt-1">
             Upcoming and completed interviews
         </p>
+        <p class="text-xs text-slate-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
     </div>
 </header>
 

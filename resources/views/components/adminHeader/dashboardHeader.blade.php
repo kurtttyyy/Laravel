@@ -2,6 +2,7 @@
       <div>
         <h1 class="text-3xl font-bold text-gray-900">HR Dashboard</h1>
         <p class="text-sm text-slate-500">Welcome back! Here's what's happening today.</p>
+        <p class="text-xs text-slate-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
       </div>
 
       <div class="flex items-center gap-4">

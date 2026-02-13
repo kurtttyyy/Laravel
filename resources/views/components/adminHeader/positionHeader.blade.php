@@ -5,6 +5,7 @@
         <p class="text-gray-600 mt-1">
             Manage available positions and hiring needs
         </p>
+        <p class="text-xs text-slate-500 mt-1">{{ now()->format('l, F j, Y') }}</p>
     </div>
 
 </header>

@@ -143,6 +143,9 @@
                 @php
                     $statusStyles = [
                         'pending' => 'background-color: rgba(255, 193, 7, 0.3); color: #ff9307;', // yellow
+                        'Initial Interview' => 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;', // blue
+                        'Final Interview' => 'background-color: rgba(111, 66, 193, 0.2); color: #6f42c1;', // purple
+                        'Completed' => 'background-color: rgba(25, 135, 84, 0.2); color: #198754;', // green
                         'Hired' => 'background-color: rgba(25, 135, 84, 0.2); color: #198754;',  // green
                         'Rejected' => 'background-color: rgba(220, 53, 69, 0.2); color: #dc3545;', // red
                         'default' => 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;' // blue
@@ -258,6 +261,8 @@
                 >
                 <option value="-- Choose Option --">-- Choose Option --</option>
                 <option value="Under Review">Under Review</option>
+                <option value="Initial Interview">Initial Interview</option>
+                <option value="Final Interview">Final Interview</option>
                 <option value="Hired">Hired</option>
                 <option value="Rejected">Rejected</option>
                 <option value="Passing Document">Passing Document</option>
@@ -720,6 +725,9 @@
     paginatedItems.forEach(app => {
       const statusStyles = {
         'pending': 'background-color: rgba(255, 193, 7, 0.3); color: #ff9307;',
+        'Initial Interview': 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;',
+        'Final Interview': 'background-color: rgba(111, 66, 193, 0.2); color: #6f42c1;',
+        'Completed': 'background-color: rgba(25, 135, 84, 0.2); color: #198754;',
         'Hired': 'background-color: rgba(25, 135, 84, 0.2); color: #198754;',
         'Rejected': 'background-color: rgba(220, 53, 69, 0.2); color: #dc3545;',
         'default': 'background-color: rgba(13, 110, 253, 0.2); color: #0d6efd;'

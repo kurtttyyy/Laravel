@@ -43,7 +43,7 @@
             📅
         </div>
         <p class="text-sm text-slate-400">Today</p>
-        <p class="text-3xl font-bold mt-2">{{$count_daily}}</p>
+        <p id="todayCountValue" class="text-3xl font-bold mt-2">{{$count_daily}}</p>
         <p class="text-sm text-slate-400">Today's Interviews</p>
     </div>
 
@@ -53,7 +53,7 @@
             ✔️
         </div>
         <p class="text-sm text-green-500">+15%</p>
-        <p class="text-3xl font-bold mt-2">{{$count_month}}</p>
+        <p id="monthCountValue" class="text-3xl font-bold mt-2">{{$count_month}}</p>
         <p class="text-sm text-slate-400">Completed This Month</p>
     </div>
 
@@ -63,7 +63,7 @@
             ⏰
         </div>
         <p class="text-sm text-orange-500">Yearly</p>
-        <p class="text-3xl font-bold mt-2">{{$count_year}}</p>
+        <p id="yearCountValue" class="text-3xl font-bold mt-2">{{$count_year}}</p>
         <p class="text-sm text-slate-400">Completed this year</p>
     </div>
 
@@ -73,83 +73,97 @@
             ⏰
         </div>
         <p class="text-sm text-orange-500">Upcoming</p>
-        <p class="text-3xl font-bold mt-2">{{$count_upcoming}}</p>
+        <p id="upcomingCountValue" class="text-3xl font-bold mt-2">{{$count_upcoming}}</p>
         <p class="text-sm text-slate-400">Scheduled</p>
     </div>
 </div>
-        @foreach($interview as $inter)
-        <!-- INTERVIEW LIST -->
         <div class="bg-white rounded-xl border p-6 interview-wrapper">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="font-semibold text-lg">Interview Schedule</h2>
-
-                <div class="flex gap-3">
-                    <select class="border rounded-lg px-3 py-2">
-                        <option>This Week</option>
-                    </select>
-
-                    <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">
-                        + Schedule New
-                    </button>
-                </div>
+                <p class="text-sm text-slate-400">TODAY – {{ now()->format('F j, Y') }}</p>
             </div>
 
-            <p class="text-sm text-slate-400 mb-4">TODAY – {{ now()->format('F j, Y') }}</p>
+            <h3 class="text-sm font-semibold text-indigo-700 mb-3">Upcoming Interviews</h3>
+            <div id="upcomingInterviewList">
+            @forelse($upcomingInterviews as $inter)
+                <div
+                    class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between interview-card"
+                    data-scheduled-date="{{ $inter->date->format('Y-m-d') }}"
+                    data-scheduled-time="{{ \Carbon\Carbon::parse($inter->time)->format('H:i:s') }}"
+                    data-duration-minutes="{{ (int) filter_var($inter->duration, FILTER_SANITIZE_NUMBER_INT) }}"
+                >
+                    <div class="flex gap-6">
+                        <div class="text-indigo-600 font-bold text-xl">
+                            {{ \Carbon\Carbon::parse($inter->time)->format('h:i') }}
+                            <p class="text-xs font-normal">{{ \Carbon\Carbon::parse($inter->time)->format('A') }}</p>
+                        </div>
 
-            <!-- CARD 1 -->
-            <div
-                class="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-4 flex justify-between interview-card"
-                data-scheduled-date="{{ $inter->date->format('Y-m-d') }}"
-                data-scheduled-time="{{ \Carbon\Carbon::parse($inter->time)->format('H:i:s') }}"
-                data-duration-minutes="{{ (int) filter_var($inter->duration, FILTER_SANITIZE_NUMBER_INT) }}"
-            >
-                <div class="flex gap-6">
-                    <div class="text-indigo-600 font-bold text-xl">
-                        {{ \Carbon\Carbon::parse($inter->time)->format('h:i') }}
-                        <p class="text-xs font-normal">{{ \Carbon\Carbon::parse($inter->time)->format('A') }}</p>
-                    </div>
+                        <div>
+                            <p class="font-semibold">{{$inter->interview_type}} – {{$inter->applicant->first_name}} {{$inter->applicant->last_name}}</p>
+                            <p class="text-sm text-slate-500">{{ $inter->applicant->position->title ?? $inter->applicant->applied_position ?? '-' }}</p>
+                            <p class="text-sm text-slate-400 mt-1">⏱ {{$inter->duration}} · 👥 {{$inter->interviewers}}</p>
+                            <p class="text-xs text-indigo-600 mt-1" data-role="time-remaining"></p>
 
-                    <div>
-                        <p class="font-semibold">{{$inter->interview_type}} – {{$inter->applicant->first_name}} {{$inter->applicant->last_name}}</p>
-                        <p class="text-sm text-slate-500">{{$inter->applicant->applied_position}}</p>
-                        <p class="text-sm text-slate-400 mt-1">
-                            ⏱ {{$inter->duration}} · 👥 {{$inter->interviewers}}
-                        </p>
-
-                        <p class="text-xs text-indigo-600 mt-1" data-role="time-remaining"></p>
-
-                        <div class="mt-3 flex gap-3">
-                            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm"
-                            onclick="scheduleInterview({{ $inter->applicant_id }})"
-                            >
-                                Reschedule
-                            </button>
-                            <form action="{{ route('admin.interviewCancel', $inter->applicant_id)}}" method="POST">
-                                @csrf
-                            <button class="border px-4 py-2 rounded-lg text-sm" type='submit'>
-                                Cancel
-                            </button>
-                            </form>
+                            <div class="mt-3 flex gap-3">
+                                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm" onclick="scheduleInterview({{ $inter->applicant_id }})">
+                                    Reschedule
+                                </button>
+                                <form action="{{ route('admin.interviewCancel', $inter->applicant_id)}}" method="POST">
+                                    @csrf
+                                    <button class="border px-4 py-2 rounded-lg text-sm" type='submit'>Cancel</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="flex flex-col items-end gap-2">
-                    <span class="hidden next-interview-label bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs">
-                        Next Interview
-                    </span>
-                    <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm h-fit">
-                        @if($inter->date->isToday())
-                            Today
-                        @else
-                            Upcoming
-                        @endif
-                    </span>
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="hidden next-interview-label bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs">Next Interview</span>
+                        <span class="bg-indigo-100 text-indigo-600 px-4 py-1 rounded-full text-sm h-fit">
+                            @if($inter->date->isToday())
+                                Today
+                            @else
+                                Upcoming
+                            @endif
+                        </span>
+                    </div>
                 </div>
+            @empty
+                <div id="upcomingEmptyState" class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500 mb-6">
+                    No upcoming interviews.
+                </div>
+            @endforelse
             </div>
 
+            <h3 class="text-sm font-semibold text-emerald-700 mb-3 mt-6">Completed Interviews</h3>
+            <div id="completedInterviewList">
+            @forelse($completedInterviews as $inter)
+                <div
+                    class="bg-emerald-50 border border-emerald-100 rounded-xl p-5 mb-4 flex justify-between opacity-80 completed-card"
+                    data-scheduled-date="{{ $inter->date->format('Y-m-d') }}"
+                    data-scheduled-time="{{ \Carbon\Carbon::parse($inter->time)->format('H:i:s') }}"
+                    data-duration-minutes="{{ (int) filter_var($inter->duration, FILTER_SANITIZE_NUMBER_INT) }}"
+                >
+                    <div class="flex gap-6">
+                        <div class="text-emerald-700 font-bold text-xl">
+                            {{ \Carbon\Carbon::parse($inter->time)->format('h:i') }}
+                            <p class="text-xs font-normal">{{ \Carbon\Carbon::parse($inter->time)->format('A') }}</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">{{$inter->interview_type}} – {{$inter->applicant->first_name}} {{$inter->applicant->last_name}}</p>
+                            <p class="text-sm text-slate-500">{{ $inter->applicant->position->title ?? $inter->applicant->applied_position ?? '-' }}</p>
+                            <p class="text-sm text-slate-400 mt-1">⏱ {{$inter->duration}} · 👥 {{$inter->interviewers}}</p>
+                            <p class="text-xs text-emerald-700 mt-1">Completed</p>
+                        </div>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-sm h-fit">Completed</span>
+                </div>
+            @empty
+                <div id="completedEmptyState" class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
+                    No completed interviews yet.
+                </div>
+            @endforelse
+            </div>
         </div>
-        @endforeach
         <!-- ===================== SCHEDULE INTERVIEW MODAL ===================== -->
         <div id="scheduleInterviewModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-50 flex items-center justify-center">
 
@@ -300,6 +314,121 @@
 </script>
 
 <script>
+  function ensureEmptyState(containerId, emptyId, message) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const hasCards = container.querySelectorAll('.interview-card, .completed-card').length > 0;
+    let emptyState = document.getElementById(emptyId);
+
+    if (!hasCards && !emptyState) {
+      emptyState = document.createElement('div');
+      emptyState.id = emptyId;
+      emptyState.className = 'rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500 mb-6';
+      emptyState.textContent = message;
+      container.appendChild(emptyState);
+    }
+
+    if (hasCards && emptyState) {
+      emptyState.remove();
+    }
+  }
+
+  function moveCardToCompleted(card) {
+    const completedList = document.getElementById('completedInterviewList');
+    if (!completedList || card.dataset.movedToCompleted === '1') return;
+
+    card.dataset.movedToCompleted = '1';
+    card.classList.remove('bg-indigo-50', 'border-indigo-100');
+    card.classList.add('bg-emerald-50', 'border-emerald-100', 'opacity-80', 'completed-card');
+
+    const remainingEl = card.querySelector('[data-role="time-remaining"]');
+    if (remainingEl) {
+      remainingEl.textContent = 'Completed';
+      remainingEl.classList.remove('text-indigo-600');
+      remainingEl.classList.add('text-emerald-700');
+    }
+
+    const nextLabel = card.querySelector('.next-interview-label');
+    if (nextLabel) nextLabel.classList.add('hidden');
+
+    const actionWrap = card.querySelector('.mt-3.flex.gap-3');
+    if (actionWrap) actionWrap.remove();
+
+    const statusBadge = card.querySelector('.bg-indigo-100.text-indigo-600');
+    if (statusBadge) {
+      statusBadge.classList.remove('bg-indigo-100', 'text-indigo-600');
+      statusBadge.classList.add('bg-emerald-100', 'text-emerald-700');
+      statusBadge.textContent = 'Completed';
+    }
+
+    completedList.prepend(card);
+  }
+
+  function refreshUpcomingCount() {
+    const upcomingCountEl = document.getElementById('upcomingCountValue');
+    const upcomingList = document.getElementById('upcomingInterviewList');
+    if (!upcomingCountEl || !upcomingList) return;
+    const count = upcomingList.querySelectorAll('.interview-card').length;
+    upcomingCountEl.textContent = String(count);
+  }
+
+  function refreshCompletedStats() {
+    const todayCountEl = document.getElementById('todayCountValue');
+    const monthCountEl = document.getElementById('monthCountValue');
+    const yearCountEl = document.getElementById('yearCountValue');
+    if (!todayCountEl || !monthCountEl || !yearCountEl) return;
+
+    const now = new Date();
+    const nowMs = now.getTime();
+    const completedCards = Array.from(document.querySelectorAll('[data-scheduled-date][data-scheduled-time][data-duration-minutes]'))
+      .filter((card) => {
+        const scheduledDate = card.dataset.scheduledDate;
+        const scheduledTime = card.dataset.scheduledTime;
+        const durationMinutes = parseInt(card.dataset.durationMinutes || '0', 10);
+        if (!scheduledDate || !scheduledTime || Number.isNaN(durationMinutes)) return false;
+        const startMs = new Date(`${scheduledDate}T${scheduledTime}`).getTime();
+        if (Number.isNaN(startMs)) return false;
+        const endMs = startMs + (durationMinutes * 60 * 1000);
+        return nowMs >= endMs;
+      });
+
+    let todayCount = 0;
+    let monthCount = 0;
+    let yearCount = 0;
+
+    completedCards.forEach((card) => {
+      const scheduledDate = card.dataset.scheduledDate;
+      const scheduledTime = card.dataset.scheduledTime;
+      const durationMinutes = parseInt(card.dataset.durationMinutes || '0', 10);
+      const startMs = new Date(`${scheduledDate}T${scheduledTime}`).getTime();
+      const endDate = new Date(startMs + (durationMinutes * 60 * 1000));
+
+      if (
+        endDate.getFullYear() === now.getFullYear() &&
+        endDate.getMonth() === now.getMonth() &&
+        endDate.getDate() === now.getDate()
+      ) {
+        todayCount += 1;
+      }
+
+      if (
+        endDate.getFullYear() === now.getFullYear() &&
+        endDate.getMonth() === now.getMonth()
+      ) {
+        monthCount += 1;
+      }
+
+      if (endDate.getFullYear() === now.getFullYear()) {
+        yearCount += 1;
+      }
+    });
+
+    todayCountEl.textContent = String(todayCount);
+    monthCountEl.textContent = String(monthCount);
+    yearCountEl.textContent = String(yearCount);
+  }
+
   function formatRemainingTime(ms) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
@@ -335,10 +464,10 @@
       const endMs = scheduledMs + (durationMinutes * 60 * 1000);
 
       if (nowMs >= endMs) {
-        card.classList.add('hidden');
-        if (remainingEl) remainingEl.textContent = '';
+        moveCardToCompleted(card);
       } else {
         card.classList.remove('hidden');
+        card.classList.remove('opacity-70');
 
         if (nowMs < scheduledMs) {
           if (remainingEl) {
@@ -356,7 +485,7 @@
 
       const wrapper = card.closest('.interview-wrapper');
       if (wrapper) {
-        wrapper.classList.toggle('hidden', card.classList.contains('hidden'));
+        wrapper.classList.remove('hidden');
       }
     });
 
@@ -364,6 +493,11 @@
       const nextLabel = nextCard.querySelector('.next-interview-label');
       if (nextLabel) nextLabel.classList.remove('hidden');
     }
+
+    refreshUpcomingCount();
+    refreshCompletedStats();
+    ensureEmptyState('upcomingInterviewList', 'upcomingEmptyState', 'No upcoming interviews.');
+    ensureEmptyState('completedInterviewList', 'completedEmptyState', 'No completed interviews yet.');
   }
 
   updateInterviewCards();

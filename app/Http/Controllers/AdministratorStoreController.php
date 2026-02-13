@@ -76,7 +76,7 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Position');
     }
 
-    public function store_interview(Request $request){
+    public function store_interview(Request $request){ ///////////////// Update applicant status to "For Interview" when interview is scheduled
         Log::info($request);
         $attrs = $request->validate([
             'applicants_id' => 'required',
@@ -100,6 +100,10 @@ class AdministratorStoreController extends Controller
             'email_link' => $attrs['email_link'],
             'url' => $attrs['url'],
             'notes' => $attrs['notes'],
+        ]);
+
+        Applicant::where('id', $attrs['applicants_id'])->update([
+            'application_status' => $this->resolveApplicantStatusFromInterviewType($attrs['interview_type']),
         ]);
 
         Mail::to($store->applicant->email)
@@ -849,7 +853,18 @@ class AdministratorStoreController extends Controller
             'notes' => $attrs['notes'],
         ]);
 
+        Applicant::where('id', $attrs['applicantId'])->update([
+            'application_status' => $this->resolveApplicantStatusFromInterviewType($attrs['interview_type']),
+        ]);
+
         return redirect()->back()->with('success','Success Added Interview');
+    }
+
+    private function resolveApplicantStatusFromInterviewType(string $interviewType): string
+    {
+        return strcasecmp(trim($interviewType), 'Final Interview') === 0
+            ? 'Final Interview'
+            : 'Initial Interview';
     }
 
     public function update_employee($id){

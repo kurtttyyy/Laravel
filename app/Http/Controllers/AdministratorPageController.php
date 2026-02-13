@@ -400,7 +400,9 @@ class AdministratorPageController extends Controller
         )->latest('created_at')->get();
         $count_applicant = Applicant::count();
         $count_under_review = $applicant->where('application_status','Under Review')->count();
-        $count_final_interview = $applicant->where('application_status','Final Interview')->count();
+        $count_final_interview = $applicant
+            ->whereIn('application_status', ['Initial Interview', 'Final Interview'])
+            ->count();
         $hired = Applicant::where('application_status', 'Hired')->whereMonth('created_at', now()->month)
                                         ->whereYear('created_at', now()->year)
                                         ->count();
@@ -450,43 +452,110 @@ class AdministratorPageController extends Controller
         return view('admin.adminEditPosition', compact('open'));
     }
 
-    public function display_interview(){
-        $allInterviews = Interviewer::with('applicant')
+    public function display_interview(){/////sync interview status to applicant status if interview is completed
+        $this->syncFinishedInterviewApplicantStatuses();
+
+        $allInterviews = Interviewer::with(['applicant.position'])
+            ->whereHas('applicant')
             ->orderBy('date')
             ->orderBy('time')
             ->get();
 
-        $interview = $allInterviews
+        // Show all scheduled interviews in the list; card state is handled in the view.
+        $interview = $allInterviews->values();
+        $upcomingInterviews = $allInterviews
             ->filter(function ($item) {
                 $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
                 $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
-                return now()->lte($end);
+                return now()->lt($end);
+            })
+            ->values();
+        $completedInterviews = $allInterviews
+            ->filter(function ($item) {
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return now()->gte($end);
             })
             ->values();
 
         $count_daily = $allInterviews
             ->filter(function ($item) {
-                if (!$item->date->isToday()) {
-                    return false;
-                }
-
                 $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return $end->isToday() && now()->gte($end);
+            })
+            ->count();
+        $count_month = $allInterviews
+            ->filter(function ($item) {
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return $end->isCurrentMonth() && $end->isCurrentYear() && now()->gte($end);
+            })
+            ->count();
+        $count_year = $allInterviews
+            ->filter(function ($item) {
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                return $end->isCurrentYear() && now()->gte($end);
+            })
+            ->count();
+        $count_upcoming = $allInterviews
+            ->filter(function ($item) {
+                $start = \Carbon\Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                return now()->lt($start);
+            })
+            ->count();
+        return view('admin.adminInterview', compact(
+            'interview',
+            'upcomingInterviews',
+            'completedInterviews',
+            'count_daily',
+            'count_month',
+            'count_year',
+            'count_upcoming'
+        ));
+    }
+
+    private function syncFinishedInterviewApplicantStatuses(): void
+    {
+        $allInterviews = Interviewer::query()
+            ->select(['applicant_id', 'date', 'time', 'duration'])
+            ->whereNotNull('applicant_id')
+            ->get();
+
+        if ($allInterviews->isEmpty()) {
+            return;
+        }
+
+        $latestByApplicant = $allInterviews
+            ->groupBy('applicant_id')
+            ->map(function ($items) {
+                return $items->sortBy(function ($item) {
+                    $start = Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
+                    $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
+                    return $end->timestamp;
+                })->last();
+            })
+            ->filter();
+
+        $completedApplicantIds = $latestByApplicant
+            ->filter(function ($item) {
+                $start = Carbon::parse($item->date->format('Y-m-d').' '.$item->time);
                 $end = (clone $start)->addMinutes($this->durationToMinutes($item->duration));
                 return now()->gte($end);
             })
-            ->count();
-        $count_month = Interviewer::whereMonth('date', now()->month)
-                                    ->whereYear('date', now()->year)
-                                    ->whereDate('date', '<', today())
-                                    ->count();
-        $count_year = Interviewer::whereYear('date', now()->year)
-                                    ->whereDate('date', '<', today())
-                                    ->count();
-        $count_upcoming = Interviewer::whereDate('date', today())
-                                    ->whereTime('time', '>', now())
-                                    ->count();
-        return view('admin.adminInterview', compact('interview','count_daily','count_month',
-                                                    'count_year','count_upcoming'));
+            ->keys()
+            ->values()
+            ->all();
+
+        if (empty($completedApplicantIds)) {
+            return;
+        }
+
+        Applicant::query()
+            ->whereIn('id', $completedApplicantIds)
+            ->whereIn('application_status', ['Initial Interview', 'Final Interview'])
+            ->update(['application_status' => 'Completed']);
     }
 
     private function durationToMinutes(?string $duration): int

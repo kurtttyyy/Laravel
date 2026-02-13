@@ -243,7 +243,8 @@ class AdministratorPageController extends Controller
             try {
                 $morningActual = Carbon::createFromFormat('H:i:s', $row->morning_in);
                 $morningExpected = Carbon::createFromFormat('H:i:s', '08:00:00');
-                if ($morningActual->greaterThan($morningExpected)) {
+                $morningGraceEnd = Carbon::createFromFormat('H:i:s', '08:15:00');
+                if ($morningActual->greaterThan($morningGraceEnd)) {
                     $late += $morningExpected->diffInMinutes($morningActual);
                 }
             } catch (\Throwable $e) {
@@ -254,7 +255,8 @@ class AdministratorPageController extends Controller
             try {
                 $afternoonActual = Carbon::createFromFormat('H:i:s', $row->afternoon_in);
                 $afternoonExpected = Carbon::createFromFormat('H:i:s', '13:00:00');
-                if ($afternoonActual->greaterThan($afternoonExpected)) {
+                $afternoonGraceEnd = Carbon::createFromFormat('H:i:s', '13:15:00');
+                if ($afternoonActual->greaterThan($afternoonGraceEnd)) {
                     $late += $afternoonExpected->diffInMinutes($afternoonActual);
                 }
             } catch (\Throwable $e) {

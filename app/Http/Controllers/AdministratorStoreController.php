@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\ApplicationUpdatedMail;
+use App\Mail\ApplicationInterviewMail;
+use Illuminate\Support\Facades\Mail;
+
 
 class AdministratorStoreController extends Controller
 {
@@ -97,6 +101,9 @@ class AdministratorStoreController extends Controller
             'url' => $attrs['url'],
             'notes' => $attrs['notes'],
         ]);
+
+        Mail::to($store->applicant->email)
+                ->send(new ApplicationInterviewMail($store));
 
         return redirect()->back()->with('success','Success Added Interview');
     }
@@ -1146,7 +1153,7 @@ class AdministratorStoreController extends Controller
     public function update_attendance_status($id, Request $request){
         try {
             $attendanceFile = AttendanceUpload::findOrFail($id);
-            
+
             $attrs = $request->validate([
                 'status' => 'required|string'
             ]);
@@ -1211,7 +1218,7 @@ class AdministratorStoreController extends Controller
     public function delete_attendance_file($id){
         try {
             $attendanceFile = AttendanceUpload::findOrFail($id);
-            
+
             // Delete the physical file if it exists
             if ($attendanceFile->file_path && Storage::disk('public')->exists($attendanceFile->file_path)) {
                 Storage::disk('public')->delete($attendanceFile->file_path);

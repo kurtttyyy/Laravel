@@ -23,7 +23,7 @@ class Interviewer extends Model
     ];
 
     public function applicant(){
-        return $this->belongsTo(Applicant::class, 'applicant_id', 'id');
+        return $this->belongsTo(Applicant::class, 'applicant_id');
     }
 
     protected $casts = [

@@ -49,13 +49,13 @@
               Add Event
             </button>
             <button
-              id="removeCustomEventBtn"
+              id="addExamDayBtn"
               type="button"
-              class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled
             >
-              <i class="fa-solid fa-trash"></i>
-              Remove Event
+              <i class="fa-solid fa-graduation-cap"></i>
+              Add Exam Day
             </button>
             <button
               id="addCustomHolidayBtn"
@@ -65,6 +65,24 @@
             >
               <i class="fa-solid fa-plus"></i>
               Add Holiday
+            </button>
+            <button
+              id="convertEventToHolidayBtn"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled
+            >
+              <i class="fa-solid fa-arrows-rotate"></i>
+              Event to Holiday
+            </button>
+            <button
+              id="removeCustomEventBtn"
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled
+            >
+              <i class="fa-solid fa-trash"></i>
+              Remove Event
             </button>
             <button
               id="removeCustomHolidayBtn"
@@ -99,12 +117,16 @@
             <span>No Classes</span>
           </span>
           <span class="inline-flex items-center gap-2">
-            <span class="inline-block h-2.5 w-2.5 rounded-full bg-violet-500"></span>
+            <span class="inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span>
             <span>Special Events</span>
           </span>
           <span class="inline-flex items-center gap-2">
             <span class="inline-block h-2.5 w-2.5 rounded-full bg-yellow-500"></span>
-            <span>School Events</span>
+            <span>School Events/Activities</span>
+          </span>
+          <span class="inline-flex items-center gap-2">
+            <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+            <span>Exam Day</span>
           </span>
           <span id="holidayStatus" class="ml-auto text-slate-500"></span>
         </div>
@@ -135,19 +157,31 @@
   const selectedDateLabel = document.getElementById('selectedDateLabel');
   const addCustomEventBtn = document.getElementById('addCustomEventBtn');
   const removeCustomEventBtn = document.getElementById('removeCustomEventBtn');
+  const addExamDayBtn = document.getElementById('addExamDayBtn');
   const addCustomHolidayBtn = document.getElementById('addCustomHolidayBtn');
+  const convertEventToHolidayBtn = document.getElementById('convertEventToHolidayBtn');
   const removeCustomHolidayBtn = document.getElementById('removeCustomHolidayBtn');
 
   const HOLIDAY_COUNTRY = 'US';
   const CUSTOM_EVENT_STORAGE_KEY = 'school_custom_events_v1';
   const CUSTOM_HOLIDAY_STORAGE_KEY = 'school_custom_holidays_v1';
+  const RECURRING_EVENT_STORAGE_KEY = 'school_recurring_events_v1';
+  const RECURRING_EXAM_STORAGE_KEY = 'school_recurring_exams_v1';
+  const RECURRING_HOLIDAY_STORAGE_KEY = 'school_recurring_holidays_v1';
   const HIDDEN_OFFICIAL_HOLIDAY_STORAGE_KEY = 'hidden_official_holidays_v1';
+  const HIDDEN_SPECIAL_EVENT_STORAGE_KEY = 'hidden_special_events_v1';
   const holidayCache = {};
   const specialEventCache = {};
   let customEvents = loadCustomEvents();
   let customHolidays = loadCustomHolidays();
+  let recurringEvents = loadRecurringEvents();
+  let recurringExamDays = loadRecurringExams();
+  let recurringHolidays = loadRecurringHolidays();
   let hiddenOfficialHolidays = loadHiddenOfficialHolidays();
+  let hiddenSpecialEvents = loadHiddenSpecialEvents();
+  let currentEventEntriesByDate = {};
   let currentHolidayEntriesByDate = {};
+  let currentSpecialEventEntriesByDate = {};
   let selectedDateForCustomEvent = null;
   let calendarDate = new Date();
 
@@ -166,6 +200,36 @@
     localStorage.setItem(CUSTOM_EVENT_STORAGE_KEY, JSON.stringify(customEvents));
   }
 
+  function loadRecurringEvents() {
+    try {
+      const raw = localStorage.getItem(RECURRING_EVENT_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveRecurringEvents() {
+    localStorage.setItem(RECURRING_EVENT_STORAGE_KEY, JSON.stringify(recurringEvents));
+  }
+
+  function loadRecurringExams() {
+    try {
+      const raw = localStorage.getItem(RECURRING_EXAM_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveRecurringExams() {
+    localStorage.setItem(RECURRING_EXAM_STORAGE_KEY, JSON.stringify(recurringExamDays));
+  }
+
   function loadCustomHolidays() {
     try {
       const raw = localStorage.getItem(CUSTOM_HOLIDAY_STORAGE_KEY);
@@ -179,6 +243,21 @@
 
   function saveCustomHolidays() {
     localStorage.setItem(CUSTOM_HOLIDAY_STORAGE_KEY, JSON.stringify(customHolidays));
+  }
+
+  function loadRecurringHolidays() {
+    try {
+      const raw = localStorage.getItem(RECURRING_HOLIDAY_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveRecurringHolidays() {
+    localStorage.setItem(RECURRING_HOLIDAY_STORAGE_KEY, JSON.stringify(recurringHolidays));
   }
 
   function loadHiddenOfficialHolidays() {
@@ -196,13 +275,47 @@
     localStorage.setItem(HIDDEN_OFFICIAL_HOLIDAY_STORAGE_KEY, JSON.stringify(hiddenOfficialHolidays));
   }
 
+  function loadHiddenSpecialEvents() {
+    try {
+      const raw = localStorage.getItem(HIDDEN_SPECIAL_EVENT_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveHiddenSpecialEvents() {
+    localStorage.setItem(HIDDEN_SPECIAL_EVENT_STORAGE_KEY, JSON.stringify(hiddenSpecialEvents));
+  }
+
   function getCustomEventNamesForDate(isoDate) {
     const events = customEvents[isoDate];
     return Array.isArray(events) ? events : [];
   }
 
+  function getMonthDayKey(isoDate) {
+    return isoDate.slice(5);
+  }
+
+  function getRecurringEventNamesForDate(isoDate) {
+    const events = recurringEvents[getMonthDayKey(isoDate)];
+    return Array.isArray(events) ? events : [];
+  }
+
+  function getRecurringExamNamesForDate(isoDate) {
+    const exams = recurringExamDays[getMonthDayKey(isoDate)];
+    return Array.isArray(exams) ? exams : [];
+  }
+
   function getCustomHolidayNamesForDate(isoDate) {
     const holidays = customHolidays[isoDate];
+    return Array.isArray(holidays) ? holidays : [];
+  }
+
+  function getRecurringHolidayNamesForDate(isoDate) {
+    const holidays = recurringHolidays[getMonthDayKey(isoDate)];
     return Array.isArray(holidays) ? holidays : [];
   }
 
@@ -217,8 +330,10 @@
     });
     selectedDateLabel.textContent = `Selected: ${readable}`;
     addCustomEventBtn.disabled = false;
-    removeCustomEventBtn.disabled = getCustomEventNamesForDate(isoDate).length === 0;
+    removeCustomEventBtn.disabled = (currentEventEntriesByDate[isoDate] || []).length === 0;
+    addExamDayBtn.disabled = false;
     addCustomHolidayBtn.disabled = false;
+    convertEventToHolidayBtn.disabled = (currentSpecialEventEntriesByDate[isoDate] || []).length === 0;
     removeCustomHolidayBtn.disabled = (currentHolidayEntriesByDate[isoDate] || []).length === 0;
   }
 
@@ -263,7 +378,9 @@
     const month = calendarDate.getMonth();
     const holidays = await getHolidaysForYear(year);
     const specialEvents = getSpecialEventsForYear(year);
+    currentEventEntriesByDate = {};
     currentHolidayEntriesByDate = {};
+    currentSpecialEventEntriesByDate = {};
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -297,17 +414,26 @@
         holidayEntries.push({ name: officialHolidayName, type: 'official' });
       }
       getCustomHolidayNamesForDate(isoDate).forEach((name) => {
-        holidayEntries.push({ name, type: 'custom' });
+        holidayEntries.push({ name, type: 'custom_exact' });
+      });
+      getRecurringHolidayNamesForDate(isoDate).forEach((name) => {
+        holidayEntries.push({ name, type: 'custom_recurring' });
       });
 
       const dayOfWeek = new Date(year, month, day).getDay();
       const isHoliday = holidayEntries.length > 0;
       const isNoClassSunday = dayOfWeek === 0;
       const noClassLabel = isHoliday ? 'No Classes (Holiday)' : (isNoClassSunday ? 'No Classes (Sunday)' : null);
-      const events = specialEvents[isoDate] || [];
+      const hiddenEventsForDate = Array.isArray(hiddenSpecialEvents[isoDate]) ? hiddenSpecialEvents[isoDate] : [];
+      const events = (specialEvents[isoDate] || []).filter((eventName) => !hiddenEventsForDate.includes(eventName));
       const hasSpecialEvent = events.length > 0;
-      const customEventNames = getCustomEventNamesForDate(isoDate);
-      const hasCustomEvent = customEventNames.length > 0;
+      const customEventEntries = [
+        ...getCustomEventNamesForDate(isoDate).map((name) => ({ name, type: 'custom_exact' })),
+        ...getRecurringEventNamesForDate(isoDate).map((name) => ({ name, type: 'custom_recurring' })),
+      ];
+      const examEntries = getRecurringExamNamesForDate(isoDate);
+      const hasCustomEvent = customEventEntries.length > 0;
+      const hasExamDay = examEntries.length > 0;
 
       const cell = document.createElement('div');
       cell.className = [
@@ -317,8 +443,9 @@
           : 'border-slate-200 bg-white text-slate-700',
         isHoliday ? 'ring-1 ring-rose-300 bg-rose-50/60' : '',
         !isHoliday && isNoClassSunday ? 'ring-1 ring-red-300 bg-red-50/60' : '',
-        !isHoliday && !isNoClassSunday && hasSpecialEvent ? 'ring-1 ring-violet-300 bg-violet-50/60' : '',
+        !isHoliday && !isNoClassSunday && hasSpecialEvent ? 'ring-1 ring-red-300 bg-red-50/60' : '',
         hasCustomEvent ? 'ring-2 ring-yellow-400 bg-yellow-50/60' : '',
+        hasExamDay ? 'ring-2 ring-emerald-400 bg-emerald-50/70' : '',
         'cursor-pointer hover:border-indigo-300',
       ].join(' ');
       cell.innerHTML = `<span>${day}</span>`;
@@ -342,20 +469,29 @@
 
       events.forEach((eventName) => {
         const eventEl = document.createElement('span');
-        eventEl.className = 'mt-1 inline-flex items-center gap-1 text-[10px] leading-tight font-medium text-violet-700';
-        eventEl.innerHTML = `<span class="inline-block h-1.5 w-1.5 rounded-full bg-violet-500"></span>${eventName}`;
+        eventEl.className = 'mt-1 inline-flex items-center gap-1 text-[10px] leading-tight font-medium text-red-700';
+        eventEl.innerHTML = `<span class="inline-block h-1.5 w-1.5 rounded-full bg-red-500"></span>${eventName}`;
         cell.appendChild(eventEl);
       });
 
-      customEventNames.forEach((eventName) => {
+      customEventEntries.forEach((eventEntry) => {
         const customEventEl = document.createElement('span');
         customEventEl.className = 'mt-1 inline-flex items-center gap-1 text-[10px] leading-tight font-medium text-yellow-700';
-        customEventEl.innerHTML = `<span class="inline-block h-1.5 w-1.5 rounded-full bg-yellow-500"></span>${eventName}`;
+        customEventEl.innerHTML = `<span class="inline-block h-1.5 w-1.5 rounded-full bg-yellow-500"></span>${eventEntry.name}`;
         cell.appendChild(customEventEl);
       });
 
+      examEntries.forEach((examName) => {
+        const examEl = document.createElement('span');
+        examEl.className = 'mt-1 inline-flex items-center gap-1 text-[10px] leading-tight font-medium text-emerald-700';
+        examEl.innerHTML = `<span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"></span>${examName}`;
+        cell.appendChild(examEl);
+      });
+
       grid.appendChild(cell);
+      currentEventEntriesByDate[isoDate] = customEventEntries;
       currentHolidayEntriesByDate[isoDate] = holidayEntries;
+      currentSpecialEventEntriesByDate[isoDate] = events;
     }
 
     const totalCells = firstDay + daysInMonth;
@@ -387,9 +523,10 @@
     const trimmed = eventTitle.trim();
     if (!trimmed) return;
 
-    const current = getCustomEventNamesForDate(selectedDateForCustomEvent);
-    customEvents[selectedDateForCustomEvent] = [...current, trimmed];
-    saveCustomEvents();
+    const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+    const current = Array.isArray(recurringEvents[monthDay]) ? recurringEvents[monthDay] : [];
+    recurringEvents[monthDay] = [...current, trimmed];
+    saveRecurringEvents();
     renderCalendar();
     removeCustomEventBtn.disabled = false;
   });
@@ -397,26 +534,42 @@
   removeCustomEventBtn?.addEventListener('click', function () {
     if (!selectedDateForCustomEvent) return;
 
-    const events = getCustomEventNamesForDate(selectedDateForCustomEvent);
-    if (!events.length) return;
+    const eventEntries = currentEventEntriesByDate[selectedDateForCustomEvent] || [];
+    if (!eventEntries.length) return;
 
-    const optionsText = events.map((eventName, index) => `${index + 1}. ${eventName}`).join('\n');
+    const optionsText = eventEntries
+      .map((eventEntry, index) => `${index + 1}. ${eventEntry.name} (${eventEntry.type === 'custom_recurring' ? 'Recurring' : 'One-time'})`)
+      .join('\n');
     const selected = window.prompt(`Select event number to remove:\n${optionsText}`);
     if (selected === null) return;
 
     const selectedIndex = parseInt(selected, 10) - 1;
-    if (Number.isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= events.length) return;
+    if (Number.isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= eventEntries.length) return;
 
-    const nextEvents = events.filter((_, index) => index !== selectedIndex);
-    if (nextEvents.length > 0) {
-      customEvents[selectedDateForCustomEvent] = nextEvents;
+    const target = eventEntries[selectedIndex];
+    if (target.type === 'custom_recurring') {
+      const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+      const recurringList = Array.isArray(recurringEvents[monthDay]) ? recurringEvents[monthDay] : [];
+      const nextRecurring = recurringList.filter((eventName) => eventName !== target.name);
+      if (nextRecurring.length > 0) {
+        recurringEvents[monthDay] = nextRecurring;
+      } else {
+        delete recurringEvents[monthDay];
+      }
+      saveRecurringEvents();
     } else {
-      delete customEvents[selectedDateForCustomEvent];
+      const exactList = getCustomEventNamesForDate(selectedDateForCustomEvent);
+      const nextExact = exactList.filter((eventName) => eventName !== target.name);
+      if (nextExact.length > 0) {
+        customEvents[selectedDateForCustomEvent] = nextExact;
+      } else {
+        delete customEvents[selectedDateForCustomEvent];
+      }
+      saveCustomEvents();
     }
 
-    saveCustomEvents();
     renderCalendar();
-    removeCustomEventBtn.disabled = getCustomEventNamesForDate(selectedDateForCustomEvent).length === 0;
+    removeCustomEventBtn.disabled = (currentEventEntriesByDate[selectedDateForCustomEvent] || []).length === 0;
   });
 
   addCustomHolidayBtn?.addEventListener('click', function () {
@@ -428,11 +581,65 @@
     const trimmed = holidayTitle.trim();
     if (!trimmed) return;
 
-    const current = getCustomHolidayNamesForDate(selectedDateForCustomEvent);
-    customHolidays[selectedDateForCustomEvent] = [...current, trimmed];
-    saveCustomHolidays();
+    const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+    const current = Array.isArray(recurringHolidays[monthDay]) ? recurringHolidays[monthDay] : [];
+    recurringHolidays[monthDay] = [...current, trimmed];
+    saveRecurringHolidays();
     renderCalendar();
     removeCustomHolidayBtn.disabled = false;
+  });
+
+  convertEventToHolidayBtn?.addEventListener('click', function () {
+    if (!selectedDateForCustomEvent) return;
+
+    const eventEntries = currentSpecialEventEntriesByDate[selectedDateForCustomEvent] || [];
+    if (!eventEntries.length) {
+      window.alert('No special events available on the selected date.');
+      return;
+    }
+
+    const optionsText = eventEntries
+      .map((eventName, index) => `${index + 1}. ${eventName}`)
+      .join('\n');
+    const selected = window.prompt(`Select special event number to convert into holiday:\n${optionsText}`);
+    if (selected === null) return;
+
+    const selectedIndex = parseInt(selected, 10) - 1;
+    if (Number.isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= eventEntries.length) return;
+
+    const targetEvent = eventEntries[selectedIndex];
+    const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+    const holidayList = Array.isArray(recurringHolidays[monthDay]) ? recurringHolidays[monthDay] : [];
+
+    if (!holidayList.includes(targetEvent)) {
+      recurringHolidays[monthDay] = [...holidayList, targetEvent];
+      saveRecurringHolidays();
+    }
+
+    const hiddenList = Array.isArray(hiddenSpecialEvents[selectedDateForCustomEvent])
+      ? hiddenSpecialEvents[selectedDateForCustomEvent]
+      : [];
+    hiddenSpecialEvents[selectedDateForCustomEvent] = [...new Set([...hiddenList, targetEvent])];
+    saveHiddenSpecialEvents();
+
+    renderCalendar();
+    removeCustomHolidayBtn.disabled = false;
+  });
+
+  addExamDayBtn?.addEventListener('click', function () {
+    if (!selectedDateForCustomEvent) return;
+
+    const examTitle = window.prompt('Enter exam day title (e.g., Midterm Exam):');
+    if (examTitle === null) return;
+
+    const trimmed = examTitle.trim();
+    if (!trimmed) return;
+
+    const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+    const current = Array.isArray(recurringExamDays[monthDay]) ? recurringExamDays[monthDay] : [];
+    recurringExamDays[monthDay] = [...current, trimmed];
+    saveRecurringExams();
+    renderCalendar();
   });
 
   removeCustomHolidayBtn?.addEventListener('click', function () {
@@ -442,7 +649,12 @@
     if (!holidayEntries.length) return;
 
     const optionsText = holidayEntries
-      .map((holidayEntry, index) => `${index + 1}. ${holidayEntry.name} (${holidayEntry.type === 'official' ? 'Official' : 'Custom'})`)
+      .map((holidayEntry, index) => {
+        const label = holidayEntry.type === 'official'
+          ? 'Official'
+          : (holidayEntry.type === 'custom_recurring' ? 'Recurring Custom' : 'One-time Custom');
+        return `${index + 1}. ${holidayEntry.name} (${label})`;
+      })
       .join('\n');
     const selected = window.prompt(`Select holiday number to remove:\n${optionsText}`);
     if (selected === null) return;
@@ -451,7 +663,17 @@
     if (Number.isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= holidayEntries.length) return;
 
     const target = holidayEntries[selectedIndex];
-    if (target.type === 'custom') {
+    if (target.type === 'custom_recurring') {
+      const monthDay = getMonthDayKey(selectedDateForCustomEvent);
+      const recurringList = Array.isArray(recurringHolidays[monthDay]) ? recurringHolidays[monthDay] : [];
+      const nextRecurring = recurringList.filter((holidayName) => holidayName !== target.name);
+      if (nextRecurring.length > 0) {
+        recurringHolidays[monthDay] = nextRecurring;
+      } else {
+        delete recurringHolidays[monthDay];
+      }
+      saveRecurringHolidays();
+    } else if (target.type === 'custom_exact') {
       const customList = getCustomHolidayNamesForDate(selectedDateForCustomEvent);
       const nextHolidays = customList.filter((holidayName) => holidayName !== target.name);
       if (nextHolidays.length > 0) {

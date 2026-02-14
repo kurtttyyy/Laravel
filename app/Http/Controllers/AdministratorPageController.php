@@ -12,7 +12,9 @@ use App\Models\OpenPosition;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AdministratorPageController extends Controller
 {
@@ -97,31 +99,75 @@ class AdministratorPageController extends Controller
         return $this->buildAttendanceView($request, 'total_employee');
     }
 
-    private function buildAttendanceView(Request $request, string $activeAttendanceTab = 'all'){
+    private function buildAttendanceView(Request $request, string $activeAttendanceTab = 'all'){// activeAttendanceTab can be 'all', 'present', 'absent', 'tardiness', 'total_employee'
         $fromDate = $request->query('from_date');
+        $toDate = $request->query('to_date');
         $selectedUploadId = $request->query('upload_id');
+        $normalizedFromDate = $this->normalizeFilterDate($fromDate);
+        $normalizedToDate = $this->normalizeFilterDate($toDate);
         $selectedJobType = $this->normalizeJobType($request->query('job_type'));
         $allowedJobTypes = ['Teaching', 'Non-Teaching'];
         if ($selectedJobType && !in_array($selectedJobType, $allowedJobTypes, true)) {
             $selectedJobType = null;
         }
 
+        $hasDateFilter = (bool) ($normalizedFromDate || $normalizedToDate);
+        $exactDateFilter = null;
+        $rangeStartDate = null;
+        $rangeEndDate = null;
+
+        if ($normalizedFromDate && $normalizedToDate) {
+            if ($normalizedFromDate === $normalizedToDate) {
+                $exactDateFilter = $normalizedFromDate;
+            } elseif ($normalizedFromDate < $normalizedToDate) {
+                $rangeStartDate = $normalizedFromDate;
+                $rangeEndDate = $normalizedToDate;
+            } else {
+                $rangeStartDate = $normalizedToDate;
+                $rangeEndDate = $normalizedFromDate;
+            }
+        } elseif ($normalizedFromDate) {
+            $exactDateFilter = $normalizedFromDate;
+        } elseif ($normalizedToDate) {
+            $exactDateFilter = $normalizedToDate;
+        }
+
         $attendanceFiles = AttendanceUpload::query()
-            ->when($fromDate, function ($query) use ($fromDate) {
-                $query->whereDate('uploaded_at', '>=', $fromDate);
+            ->when($hasDateFilter, function ($query) use ($exactDateFilter, $rangeStartDate, $rangeEndDate) {
+                $query->whereHas('records', function ($recordsQuery) use ($exactDateFilter, $rangeStartDate, $rangeEndDate) {
+                    if ($exactDateFilter) {
+                        $recordsQuery->whereDate('attendance_date', $exactDateFilter);
+                    } elseif ($rangeStartDate && $rangeEndDate) {
+                        $recordsQuery->whereDate('attendance_date', '>=', $rangeStartDate)
+                            ->whereDate('attendance_date', '<=', $rangeEndDate);
+                    }
+                });
             })
             ->orderByDesc('uploaded_at')
             ->orderByDesc('id')
             ->get();
 
-        if (!$selectedUploadId) {
+        if (!$selectedUploadId && !$hasDateFilter) {
             $selectedUploadId = optional(
                 $attendanceFiles->firstWhere('status', 'Processed') ?? $attendanceFiles->first()
             )->id;
         }
 
         $records = collect();
-        if ($selectedUploadId) {
+        if ($hasDateFilter) {
+            $recordsQuery = AttendanceRecord::query();
+            if ($exactDateFilter) {
+                $recordsQuery->whereDate('attendance_date', $exactDateFilter);
+            } elseif ($rangeStartDate && $rangeEndDate) {
+                $recordsQuery->whereDate('attendance_date', '>=', $rangeStartDate)
+                    ->whereDate('attendance_date', '<=', $rangeEndDate);
+            }
+
+            $records = $recordsQuery
+                ->orderByDesc('attendance_date')
+                ->orderBy('employee_id')
+                ->get();
+        } elseif ($selectedUploadId) {
             $records = AttendanceRecord::query()
                 ->where('attendance_upload_id', $selectedUploadId)
                 ->orderBy('employee_id')
@@ -145,8 +191,37 @@ class AdministratorPageController extends Controller
 
                 return [$employeeId => $jobTypeFromEmployee];
             });
+        $employeeDepartmentMap = Employee::query()
+            ->select(['employee_id', 'department'])
+            ->whereNotNull('employee_id')
+            ->orderBy('employee_id')
+            ->get()
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                return [$employeeId => $employee->department ? (string) $employee->department : null];
+            });
 
         $jobTypeOptions = collect($allowedJobTypes);
+
+        $isSundayNoClassDate = $exactDateFilter ? $this->isSundayDate($exactDateFilter) : false;
+        $isHolidayDate = $exactDateFilter ? $this->isHolidayDate($exactDateFilter) : false;
+        $shouldAutoPresentHolidayDate = $isHolidayDate && !$isSundayNoClassDate;
+
+        // No-class Sundays are excluded from attendance counting.
+        if ($isSundayNoClassDate) {
+            $records = collect();
+        } elseif ($shouldAutoPresentHolidayDate) {
+            if ($exactDateFilter) {
+                $this->persistHolidayAttendanceForDate($exactDateFilter, $employeeJobTypeMap);
+                $records = $this->getAttendanceRecordsByDate($exactDateFilter);
+            } else {
+                $records = $this->buildHolidayPresentEmployees($fromDate, $selectedJobType, $employeeJobTypeMap);
+            }
+        }
 
         if ($selectedJobType) {
             $records = $records
@@ -158,16 +233,27 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
-        $records = $records->map(function ($row) use ($employeeJobTypeMap) {
+        $records = $records->map(function ($row) use ($employeeJobTypeMap, $employeeDepartmentMap) {
             $employeeId = $this->normalizeEmployeeId($row->employee_id);
             $rowJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+            $rowDepartment = $employeeDepartmentMap->get($employeeId);
             $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
             $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
             $isTardyByRule = !$row->is_absent && !$isWithinPresentWindow && $computedLateMinutes > 0;
 
-            $row->setAttribute('job_type', $rowJobType);
-            $row->setAttribute('computed_late_minutes', $computedLateMinutes);
-            $row->setAttribute('is_tardy_by_rule', $isTardyByRule);
+            if (method_exists($row, 'setAttribute')) {
+                $row->setAttribute('job_type', $rowJobType);
+                $row->setAttribute('department', $row->department ?? $rowDepartment);
+                $row->setAttribute('computed_late_minutes', $computedLateMinutes);
+                $row->setAttribute('is_tardy_by_rule', $isTardyByRule);
+                $row->setAttribute('is_holiday_present', (bool) ($row->is_holiday_present ?? false));
+            } else {
+                $row->job_type = $rowJobType;
+                $row->department = $row->department ?? $rowDepartment;
+                $row->computed_late_minutes = $computedLateMinutes;
+                $row->is_tardy_by_rule = $isTardyByRule;
+                $row->is_holiday_present = (bool) ($row->is_holiday_present ?? false);
+            }
             return $row;
         });
 
@@ -178,14 +264,21 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
-        $presentEmployees = $records
-            ->filter(fn ($row) => !$row->is_absent)
-            ->values();
-        $absentEmployees = $records->where('is_absent', true)->values();
-        $missingEmployeeAbsences = $this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap);
-        $absentEmployees = $absentEmployees
-            ->concat($missingEmployeeAbsences)
-            ->values();
+        // Business rule: if an employee has any attendance record for the day, count as present.
+        $presentEmployees = $records->values();
+        $absentEmployees = collect();
+        if (!$shouldAutoPresentHolidayDate && !$isSundayNoClassDate) {
+            if ($exactDateFilter) {
+                $absentEmployees = $this->buildMissingEmployeeAbsences($records, $exactDateFilter, $selectedJobType, $employeeJobTypeMap)
+                    ->values();
+            } elseif ($rangeStartDate && $rangeEndDate) {
+                $absentEmployees = $this->buildMissingEmployeeAbsencesForRange($records, $rangeStartDate, $rangeEndDate, $selectedJobType, $employeeJobTypeMap)
+                    ->values();
+            } else {
+                $absentEmployees = $this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap)
+                    ->values();
+            }
+        }
         $tardyEmployees = $records
             ->filter(fn ($row) => (bool) ($row->is_tardy_by_rule ?? false))
             ->map(function ($row) {
@@ -209,6 +302,7 @@ class AdministratorPageController extends Controller
         return view('admin.adminAttendance', compact(
             'attendanceFiles',
             'fromDate',
+            'toDate',
             'selectedUploadId',
             'selectedJobType',
             'jobTypeOptions',
@@ -222,6 +316,265 @@ class AdministratorPageController extends Controller
             'tardyCount',
             'totalCount'
         ));
+    }
+
+    private function isSundayDate(?string $fromDate): bool
+    {
+        if (!$fromDate) {
+            return false;
+        }
+
+        try {
+            $date = Carbon::parse($fromDate)->startOfDay();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return $date->isSunday();
+    }
+
+    private function isHolidayDate(?string $fromDate): bool
+    {
+        if (!$fromDate) {
+            return false;
+        }
+
+        try {
+            $date = Carbon::parse($fromDate)->startOfDay();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        if ($this->isUsPublicHoliday($date)) {
+            return true;
+        }
+
+        if ($this->isChineseNewYearDate($date)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isUsPublicHoliday(Carbon $date): bool
+    {
+        try {
+            $response = Http::timeout(6)
+                ->acceptJson()
+                ->get("https://date.nager.at/api/v3/PublicHolidays/{$date->year}/US");
+
+            if (!$response->ok()) {
+                return false;
+            }
+
+            $holidays = $response->json();
+            if (!is_array($holidays)) {
+                return false;
+            }
+
+            $targetDate = $date->toDateString();
+            foreach ($holidays as $holiday) {
+                if (($holiday['date'] ?? null) === $targetDate) {
+                    return true;
+                }
+            }
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return false;
+    }
+
+    private function isChineseNewYearDate(Carbon $date): bool
+    {
+        $chineseNewYearByYear = [
+            2024 => '2024-02-10',
+            2025 => '2025-01-29',
+            2026 => '2026-02-17',
+            2027 => '2027-02-06',
+            2028 => '2028-01-26',
+            2029 => '2029-02-13',
+            2030 => '2030-02-03',
+            2031 => '2031-01-23',
+            2032 => '2032-02-11',
+            2033 => '2033-01-31',
+            2034 => '2034-02-19',
+            2035 => '2035-02-08',
+        ];
+
+        $target = $chineseNewYearByYear[$date->year] ?? null;
+        return $target === $date->toDateString();
+    }
+
+    private function buildHolidayPresentEmployees(?string $fromDate, ?string $selectedJobType = null, $employeeJobTypeMap = null)
+    {
+        $attendanceDate = null;
+        if ($fromDate) {
+            try {
+                $attendanceDate = Carbon::parse($fromDate)->startOfDay();
+            } catch (\Throwable $e) {
+                $attendanceDate = null;
+            }
+        }
+
+        // Use the Admin Employee master list as source of truth.
+        $employees = User::query()
+            ->with('employee')
+            ->where('role', 'Employee')
+            ->whereHas('employee', function ($query) {
+                $query->whereNotNull('employee_id')
+                    ->where('employee_id', '!=', '');
+            })
+            ->orderBy('id')
+            ->get();
+
+        if ($selectedJobType && $employeeJobTypeMap) {
+            $employees = $employees
+                ->filter(function ($user) use ($employeeJobTypeMap, $selectedJobType) {
+                    $employeeId = $this->normalizeEmployeeId($user->employee?->employee_id);
+                    $employeeJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+                    return $employeeJobType === $selectedJobType;
+                })
+                ->values();
+        }
+
+        return $employees
+            ->map(function ($user) use ($attendanceDate, $employeeJobTypeMap) {
+                $employeeProfile = $user->employee;
+                $name = trim(implode(' ', array_filter([
+                    $user->first_name,
+                    $user->middle_name,
+                    $user->last_name,
+                ])));
+                $employeeId = $this->normalizeEmployeeId($employeeProfile?->employee_id);
+                $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
+
+                return (object) [
+                    'employee_id' => (string) ($employeeProfile?->employee_id ?? ''),
+                    'employee_name' => $name !== '' ? $name : null,
+                    'job_type' => $jobType,
+                    'main_gate' => null,
+                    'attendance_date' => $attendanceDate,
+                    'morning_in' => null,
+                    'morning_out' => null,
+                    'afternoon_in' => null,
+                    'afternoon_out' => null,
+                    'late_minutes' => 0,
+                    'computed_late_minutes' => 0,
+                    'missing_time_logs' => [],
+                    'is_absent' => false,
+                    'is_tardy_by_rule' => false,
+                    'is_holiday_present' => true,
+                ];
+            })
+            ->values();
+    }
+
+    private function getAttendanceRecordsByDate(string $date)  // Retrieves attendance records for a specific date, ensuring uniqueness by normalized employee ID and sorted by employee ID for consistent display.
+    {
+        return AttendanceRecord::query()
+            ->whereDate('attendance_date', $date)
+            ->orderByDesc('id')
+            ->get()
+            ->unique(function ($row) {
+                return $this->normalizeEmployeeId($row->employee_id);
+            })
+            ->sortBy('employee_id')
+            ->values();
+    }
+
+    private function persistHolidayAttendanceForDate(string $date, $employeeJobTypeMap = null): void // For a given date, creates a synthetic AttendanceUpload record if not already exists, and inserts AttendanceRecord entries for all employees without existing records on that date, marking them as present for the holiday. This ensures that holiday attendance is consistently represented in the system, even if the holiday is auto-detected after the fact.
+    {
+        $holidayUpload = AttendanceUpload::query()->firstOrCreate(
+            ['original_name' => "System Holiday Attendance {$date}"],
+            [
+                'file_path' => "attendance_excels/system_holiday_{$date}.txt",
+                'file_size' => 0,
+                'status' => 'Processed',
+                'processed_rows' => 0,
+                'uploaded_at' => Carbon::parse($date)->endOfDay(),
+            ]
+        );
+
+        $existingEmployeeIds = AttendanceRecord::query()
+            ->whereDate('attendance_date', $date)
+            ->pluck('employee_id')
+            ->map(fn ($id) => $this->normalizeEmployeeId($id))
+            ->filter()
+            ->values()
+            ->all();
+
+        $employees = User::query()
+            ->with('employee')
+            ->where('role', 'Employee')
+            ->whereHas('employee', function ($query) {
+                $query->whereNotNull('employee_id')
+                    ->where('employee_id', '!=', '');
+            })
+            ->orderBy('id')
+            ->get();
+
+        $hasEmployeeNameColumn = Schema::hasColumn('attendance_records', 'employee_name');
+        $hasDepartmentColumn = Schema::hasColumn('attendance_records', 'department');
+        $hasMainGateColumn = Schema::hasColumn('attendance_records', 'main_gate');
+        $hasJobTypeColumn = Schema::hasColumn('attendance_records', 'job_type');
+        $now = now();
+        $recordsToInsert = [];
+
+        foreach ($employees as $user) {
+            $employeeId = $this->normalizeEmployeeId($user->employee?->employee_id);
+            if ($employeeId === '' || in_array($employeeId, $existingEmployeeIds, true)) {
+                continue;
+            }
+
+            $name = trim(implode(' ', array_filter([
+                $user->first_name,
+                $user->middle_name,
+                $user->last_name,
+            ])));
+
+            $record = [
+                'attendance_upload_id' => $holidayUpload->id,
+                'employee_id' => (string) $employeeId,
+                'attendance_date' => $date,
+                'morning_in' => null,
+                'morning_out' => null,
+                'afternoon_in' => null,
+                'afternoon_out' => null,
+                'late_minutes' => 0,
+                'missing_time_logs' => json_encode([]),
+                'is_absent' => false,
+                'is_tardy' => false,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            if ($hasEmployeeNameColumn) {
+                $record['employee_name'] = $name !== '' ? $name : null;
+            }
+            if ($hasDepartmentColumn) {
+                $record['department'] = $user->employee?->department ?: null;
+            }
+            if ($hasMainGateColumn) {
+                $record['main_gate'] = 'Holiday - No Class';
+            }
+            if ($hasJobTypeColumn) {
+                $record['job_type'] = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
+            }
+
+            $recordsToInsert[] = $record;
+        }
+
+        if (!empty($recordsToInsert)) {
+            AttendanceRecord::insert($recordsToInsert);
+        }
+
+        $holidayUpload->update([
+            'status' => 'Processed',
+            'processed_rows' => AttendanceRecord::query()
+                ->where('attendance_upload_id', $holidayUpload->id)
+                ->count(),
+        ]);
     }
 
     private function isPresentByTimeWindow($row): bool
@@ -288,10 +641,8 @@ class AdministratorPageController extends Controller
 
         $employees = Employee::query()
             ->with('user:id,first_name,middle_name,last_name,role,status')
-            ->whereHas('user', function ($query) {
-                $query->where('role', 'Employee')
-                    ->where('status', 'Approved');
-            })
+            ->whereNotNull('employee_id')
+            ->where('employee_id', '!=', '')
             ->orderBy('employee_id')
             ->get();
 
@@ -349,7 +700,188 @@ class AdministratorPageController extends Controller
             ->values();
     }
 
-    private function normalizeJobType($value): ?string
+    private function buildMissingEmployeeAbsencesForRange($records, string $startDate, string $endDate, ?string $selectedJobType = null, $employeeJobTypeMap = null)
+    {
+        $recordedEmployeeIds = $records
+            ->pluck('employee_id')
+            ->map(fn ($id) => $this->normalizeEmployeeId($id))
+            ->filter()
+            ->values()
+            ->all();
+
+        $employees = Employee::query()
+            ->with('user:id,first_name,middle_name,last_name,role,status')
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'Employee')
+                    ->where('status', 'Approved');
+            })
+            ->orderBy('employee_id')
+            ->get();
+
+        if ($selectedJobType && $employeeJobTypeMap) {
+            $employees = $employees
+                ->filter(function ($employee) use ($employeeJobTypeMap, $selectedJobType) {
+                    $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                    $employeeJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+                    return $employeeJobType === $selectedJobType;
+                })
+                ->values();
+        }
+
+        return $employees
+            ->reject(function ($employee) use ($recordedEmployeeIds) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                return in_array($employeeId, $recordedEmployeeIds, true);
+            })
+            ->map(function ($employee) use ($employeeJobTypeMap) {
+                $user = $employee->user;
+                $name = trim(implode(' ', array_filter([
+                    $user?->first_name,
+                    $user?->middle_name,
+                    $user?->last_name,
+                ])));
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
+
+                return (object) [
+                    'employee_id' => (string) $employee->employee_id,
+                    'employee_name' => $name !== '' ? $name : null,
+                    'job_type' => $jobType,
+                    'main_gate' => null,
+                    'attendance_date' => null,
+                    'morning_in' => null,
+                    'morning_out' => null,
+                    'afternoon_in' => null,
+                    'afternoon_out' => null,
+                    'late_minutes' => 0,
+                    'computed_late_minutes' => 0,
+                    'missing_time_logs' => ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'],
+                    'is_absent' => true,
+                    'is_tardy_by_rule' => false,
+                ];
+            })
+            ->values();
+    }
+
+    private function expandRecordsForDateRange(
+        $records,
+        string $startDate,
+        string $endDate,
+        ?string $selectedJobType = null,
+        $employeeJobTypeMap = null,
+        $employeeDepartmentMap = null
+    ) {
+        $existingByEmployeeDate = collect($records)
+            ->filter(function ($row) {
+                return !empty($row->employee_id) && !empty($row->attendance_date);
+            })
+            ->sortByDesc('id')
+            ->reduce(function ($carry, $row) {
+                $employeeId = $this->normalizeEmployeeId($row->employee_id);
+                if ($employeeId === '') {
+                    return $carry;
+                }
+
+                $date = optional($row->attendance_date)->format('Y-m-d');
+                if (!$date) {
+                    try {
+                        $date = Carbon::parse($row->attendance_date)->toDateString();
+                    } catch (\Throwable $e) {
+                        $date = null;
+                    }
+                }
+
+                if (!$date) {
+                    return $carry;
+                }
+
+                $key = $employeeId.'|'.$date;
+                if (!$carry->has($key)) {
+                    $carry->put($key, $row);
+                }
+
+                return $carry;
+            }, collect());
+
+        $employees = Employee::query()
+            ->with('user:id,first_name,middle_name,last_name,role,status')
+            ->whereHas('user', function ($query) {
+                $query->where('role', 'Employee')
+                    ->where('status', 'Approved');
+            })
+            ->orderBy('employee_id')
+            ->get();
+
+        if ($selectedJobType && $employeeJobTypeMap) {
+            $employees = $employees
+                ->filter(function ($employee) use ($employeeJobTypeMap, $selectedJobType) {
+                    $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                    $employeeJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
+                    return $employeeJobType === $selectedJobType;
+                })
+                ->values();
+        }
+
+        $expanded = collect();
+        $current = Carbon::parse($startDate)->startOfDay();
+        $last = Carbon::parse($endDate)->startOfDay();
+
+        while ($current->lte($last)) {
+            $date = $current->toDateString();
+
+            foreach ($employees as $employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    continue;
+                }
+
+                $key = $employeeId.'|'.$date;
+                $existing = $existingByEmployeeDate->get($key);
+
+                if ($existing) {
+                    $expanded->push($existing);
+                    continue;
+                }
+
+                $user = $employee->user;
+                $name = trim(implode(' ', array_filter([
+                    $user?->first_name,
+                    $user?->middle_name,
+                    $user?->last_name,
+                ])));
+
+                $expanded->push((object) [
+                    'employee_id' => (string) $employee->employee_id,
+                    'employee_name' => $name !== '' ? $name : null,
+                    'department' => $employeeDepartmentMap?->get($employeeId),
+                    'job_type' => $this->normalizeJobType($employeeJobTypeMap?->get($employeeId)),
+                    'main_gate' => null,
+                    'attendance_date' => Carbon::parse($date)->startOfDay(),
+                    'morning_in' => null,
+                    'morning_out' => null,
+                    'afternoon_in' => null,
+                    'afternoon_out' => null,
+                    'late_minutes' => 0,
+                    'computed_late_minutes' => 0,
+                    'missing_time_logs' => ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'],
+                    'is_absent' => true,
+                    'is_tardy_by_rule' => false,
+                    'is_holiday_present' => false,
+                ]);
+            }
+
+            $current->addDay();
+        }
+
+        return $expanded
+            ->sortBy(function ($row) {
+                $date = optional($row->attendance_date)->format('Y-m-d') ?? '';
+                return $date.'|'.$this->normalizeEmployeeId($row->employee_id);
+            })
+            ->values();
+    }
+
+    private function normalizeJobType($value): ?string // Normalizes various user inputs for job type into consistent values used in the system. Returns null for empty or unrecognized inputs.
     {
         $normalized = strtolower(trim((string) $value));
         if ($normalized === '') {
@@ -380,6 +912,19 @@ class AdministratorPageController extends Controller
         }
 
         return $normalized;
+    }
+
+    private function normalizeFilterDate(?string $fromDate): ?string
+    {
+        if (!$fromDate) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($fromDate)->toDateString();
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     public function display_leave(){

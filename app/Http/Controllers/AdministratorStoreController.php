@@ -184,7 +184,7 @@ class AdministratorStoreController extends Controller
             'file_size' => $file->getSize(),
             'status' => 'Uploaded',
             'processed_rows' => 0,
-            'uploaded_at' => now(),
+            'uploaded_at' => Carbon::now('Asia/Manila'),
         ]);
 
         return back()->with('success', 'Excel file uploaded successfully. Click Scan to process it.');
@@ -313,7 +313,7 @@ class AdministratorStoreController extends Controller
         return $mapped;
     }
 
-    private function buildAttendanceRecords(array $rows, int $uploadId): array
+    private function buildAttendanceRecords(array $rows, int $uploadId, ?string $fallbackAttendanceDate = null): array  // Accepts rows with either separate morning/afternoon columns or raw punch logs; returns normalized attendance record data ready for database insertion.
     {
         $rows = $this->expandRawPunchRows($rows);
 
@@ -321,6 +321,7 @@ class AdministratorStoreController extends Controller
         $now = now();
         $recordColumns = $this->getAttendanceRecordColumnLookup();
         $employeeJobTypeMap = $this->buildEmployeeJobTypeMapFromRows($rows);
+        $employeeDepartmentMap = $this->buildEmployeeDepartmentMapFromRows($rows);
         $availableKeys = $this->collectAvailableKeys($rows);
         $hasMorningOutColumn = $this->hasAnyKey($availableKeys, ['morning_out', 'am_out', 'time_out_am', 'morning_time_out', 'out_am']);
         $hasAfternoonOutColumn = $this->hasAnyKey($availableKeys, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
@@ -347,7 +348,7 @@ class AdministratorStoreController extends Controller
             $afternoonInRaw = $this->pickValue($row, ['afternoon_in', 'pm_in', 'time_in_pm', 'afternoon_time_in', 'in_pm', 'pm_time', 'pm']);
             $afternoonOutRaw = $this->pickValue($row, ['afternoon_out', 'pm_out', 'time_out_pm', 'afternoon_time_out', 'out_pm']);
 
-            $attendanceDate = $this->normalizeDate($attendanceDateRaw);
+            $attendanceDate = $this->normalizeDate($attendanceDateRaw) ?: $fallbackAttendanceDate;
             $morningIn = $this->normalizeTime($morningInRaw);
             $morningOut = $this->normalizeTime($morningOutRaw);
             $afternoonIn = $this->normalizeTime($afternoonInRaw);
@@ -368,7 +369,8 @@ class AdministratorStoreController extends Controller
             }
 
             $lateMinutes = $this->calculateLateMinutes($morningIn, $afternoonIn);
-            $isAbsent = !empty($missing);
+            $missingInLogs = array_values(array_intersect($missing, ['morning_in', 'afternoon_in']));
+            $isAbsent = !empty($missingInLogs);
             $isTardy = $lateMinutes > 0;
 
             $record = [
@@ -396,6 +398,9 @@ class AdministratorStoreController extends Controller
             }
             if (isset($recordColumns['job_type'])) {
                 $record['job_type'] = $employeeJobTypeMap[$normalizedEmployeeId] ?? null;
+            }
+            if (isset($recordColumns['department'])) {
+                $record['department'] = $employeeDepartmentMap[$normalizedEmployeeId] ?? null;
             }
 
             $records[] = $record;
@@ -452,6 +457,43 @@ class AdministratorStoreController extends Controller
         }
 
         return $columns;
+    }
+
+    private function buildEmployeeDepartmentMapFromRows(array $rows): array
+    {
+        $employeeIds = collect($rows)
+            ->map(function ($row) {
+                $employeeId = $this->pickValue($row, [
+                    'employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid',
+                ]);
+
+                return $this->normalizeEmployeeId($employeeId);
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($employeeIds->isEmpty()) {
+            return [];
+        }
+
+        if (!Schema::hasColumn('employees', 'department')) {
+            return [];
+        }
+
+        return Employee::query()
+            ->select(['employee_id', 'department'])
+            ->whereIn('employee_id', $employeeIds->all())
+            ->get()
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                return [$employeeId => $employee->department ? (string) $employee->department : null];
+            })
+            ->all();
     }
 
     private function readXlsxEntry(string $absolutePath, string $entry): string|false
@@ -1172,16 +1214,21 @@ class AdministratorStoreController extends Controller
             $attendanceFile = AttendanceUpload::findOrFail($id);
 
             $attrs = $request->validate([
-                'status' => 'required|string'
+                'status' => 'required|string',
+                'from_date' => 'nullable|date',
+                'to_date' => 'nullable|date',
             ]);
             $status = $attrs['status'];
+            $fromDate = $attrs['from_date'] ?? null;
+            $toDate = $attrs['to_date'] ?? null;
             $processedRows = $attendanceFile->processed_rows ?? 0;
 
             if (strtolower($status) === 'processed') {
                 $absolutePath = Storage::disk('public')->path($attendanceFile->file_path);
                 $extension = pathinfo($attendanceFile->file_path, PATHINFO_EXTENSION);
                 $rows = $this->extractRowsFromExcel($absolutePath, $extension);
-                $records = $this->buildAttendanceRecords($rows, $attendanceFile->id);
+                $fallbackAttendanceDate = $fromDate ?: optional($attendanceFile->uploaded_at)->format('Y-m-d');
+                $records = $this->buildAttendanceRecords($rows, $attendanceFile->id, $fallbackAttendanceDate);
 
                 DB::transaction(function () use ($attendanceFile, $status, $records, &$processedRows) {
                     AttendanceRecord::where('attendance_upload_id', $attendanceFile->id)->delete();
@@ -1221,7 +1268,11 @@ class AdministratorStoreController extends Controller
                     'absent' => $absentCount,
                     'tardiness' => $tardyCount,
                 ],
-                'redirect_url' => route('admin.attendance.present', ['upload_id' => $attendanceFile->id]),
+                'redirect_url' => route('admin.attendance.present', array_filter([
+                    'upload_id' => $attendanceFile->id,
+                    'from_date' => $fromDate,
+                    'to_date' => $toDate,
+                ])),
             ]);
         } catch (\Exception $e) {
             Log::error('Error updating attendance status: ' . $e->getMessage());

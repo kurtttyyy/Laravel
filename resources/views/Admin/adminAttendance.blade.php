@@ -34,6 +34,7 @@
 
         $attendanceQuery = array_filter([
           'from_date' => $fromDate,
+          'to_date' => $toDate ?? null,
           'upload_id' => $selectedUploadId,
           'job_type' => $selectedJobType ?? null,
         ], fn ($value) => !is_null($value) && $value !== '');
@@ -125,6 +126,13 @@
               <input
                 name="from_date"
                 value="{{ $fromDate }}"
+                type="date"
+                class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <label class="text-sm text-gray-600">To Date:</label>
+              <input
+                name="to_date"
+                value="{{ $toDate ?? '' }}"
                 type="date"
                 class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
@@ -221,6 +229,13 @@
               type="date"
               class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
+            <label class="text-sm text-gray-600">To Date:</label>
+            <input
+              name="to_date"
+              value="{{ $toDate ?? '' }}"
+              type="date"
+              class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
             <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
               Filter
             </button>
@@ -254,6 +269,8 @@
   const fileItems = document.querySelectorAll('.file-item');
   const fileCheckboxes = document.querySelectorAll('.file-checkbox');
   const deleteButtons = document.querySelectorAll('.delete-btn');
+  const fromDateInput = document.querySelector('input[name="from_date"]');
+  const toDateInput = document.querySelector('input[name="to_date"]');
 
   // File selection handling
   fileItems.forEach(item => {
@@ -335,7 +352,11 @@
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value || ''
           },
-          body: JSON.stringify({ status: 'Processed' })
+          body: JSON.stringify({
+            status: 'Processed',
+            from_date: fromDateInput?.value || null,
+            to_date: toDateInput?.value || null
+          })
         })
         .then(response => response.json())
         .then(data => {

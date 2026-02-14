@@ -10,6 +10,7 @@ class AttendanceRecord extends Model
         'attendance_upload_id',
         'employee_id',
         'employee_name',
+        'department',
         'job_type',
         'main_gate',
         'attendance_date',

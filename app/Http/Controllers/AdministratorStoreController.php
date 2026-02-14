@@ -76,7 +76,7 @@ class AdministratorStoreController extends Controller
         return redirect()->back()->with('success','Success Added Position');
     }
 
-    public function store_interview(Request $request){ ///////////////// Update applicant status to "For Interview" when interview is scheduled
+    public function store_interview(Request $request){ /// Update applicant status to "For Interview" when interview is scheduled
         Log::info($request);
         $attrs = $request->validate([
             'applicants_id' => 'required',
@@ -102,6 +102,8 @@ class AdministratorStoreController extends Controller
             'notes' => $attrs['notes'],
         ]);
 
+        // === APPLICANT STATUS UPDATE #1 === Store Interview Method
+        // Updates applicant status based on interview type (Initial Interview or Final Interview)
         Applicant::where('id', $attrs['applicants_id'])->update([
             'application_status' => $this->resolveApplicantStatusFromInterviewType($attrs['interview_type']),
         ]);
@@ -851,6 +853,8 @@ class AdministratorStoreController extends Controller
         return redirect()->route('admin.adminPosition')->with('success','Success Added Position');
     }
 
+    // === APPLICANT STATUS UPDATE #2 === Direct Status Update Method
+    // Allows direct manual update of applicant status from request
     public function update_application_status(Request $request){
         $attrs = $request->validate([
             'reviewId' => 'required',
@@ -895,6 +899,8 @@ class AdministratorStoreController extends Controller
             'notes' => $attrs['notes'],
         ]);
 
+        // === APPLICANT STATUS UPDATE #3 === Updated Interview Method
+        // Updates applicant status when an existing interview is modified
         Applicant::where('id', $attrs['applicantId'])->update([
             'application_status' => $this->resolveApplicantStatusFromInterviewType($attrs['interview_type']),
         ]);

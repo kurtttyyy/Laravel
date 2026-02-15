@@ -322,6 +322,7 @@ class AdministratorStoreController extends Controller
         $records = [];
         $now = now();
         $recordColumns = $this->getAttendanceRecordColumnLookup();
+        $knownEmployeeIdLookup = $this->buildKnownEmployeeIdLookupFromRows($rows);
         $employeeJobTypeMap = $this->buildEmployeeJobTypeMapFromRows($rows);
         $employeeDepartmentMap = $this->buildEmployeeDepartmentMapFromRows($rows);
         $availableKeys = $this->collectAvailableKeys($rows);
@@ -343,6 +344,9 @@ class AdministratorStoreController extends Controller
                 continue;
             }
             $normalizedEmployeeId = $this->normalizeEmployeeId($employeeId);
+            if ($normalizedEmployeeId === '' || !isset($knownEmployeeIdLookup[$normalizedEmployeeId])) {
+                continue;
+            }
 
             $attendanceDateRaw = $this->pickValue($row, ['date', 'attendance_date']);
             $morningInRaw = $this->pickValue($row, ['morning_in', 'am_in', 'time_in_am', 'morning_time_in', 'in_am', 'am_time', 'am']);
@@ -409,6 +413,37 @@ class AdministratorStoreController extends Controller
         }
 
         return $records;
+    }
+
+    private function buildKnownEmployeeIdLookupFromRows(array $rows): array
+    {
+        $employeeIds = collect($rows)
+            ->map(function ($row) {
+                $employeeId = $this->pickValue($row, [
+                    'employee_id', 'employeeid', 'id_no', 'idno', 'emp_id', 'empid',
+                ]);
+
+                return $this->normalizeEmployeeId($employeeId);
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($employeeIds->isEmpty()) {
+            return [];
+        }
+
+        return Employee::query()
+            ->select(['employee_id'])
+            ->whereIn('employee_id', $employeeIds->all())
+            ->get()
+            ->map(function ($employee) {
+                return $this->normalizeEmployeeId($employee->employee_id);
+            })
+            ->filter()
+            ->flip()
+            ->map(fn () => true)
+            ->all();
     }
 
     private function buildEmployeeJobTypeMapFromRows(array $rows): array
@@ -991,7 +1026,7 @@ class AdministratorStoreController extends Controller
             'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
         ];
 
-        if (array_key_exists('job_type', $attrs)) {
+        if (Schema::hasColumn('employees', 'job_type') && array_key_exists('job_type', $attrs)) {
             $employeePayload['job_type'] = $this->normalizeEmployeeJobType($attrs['job_type']);
         }
 
@@ -1091,7 +1126,9 @@ class AdministratorStoreController extends Controller
                 'department' => $attrs['department'],
                 'position' => $attrs['position'],
                 'classification' => $attrs['classification'],
-                'job_type' => $this->normalizeEmployeeJobType($attrs['job_type'] ?? $attrs['classification']),
+                ...(Schema::hasColumn('employees', 'job_type')
+                    ? ['job_type' => $this->normalizeEmployeeJobType($attrs['job_type'] ?? $attrs['classification'])]
+                    : []),
                 'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
                 'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
                 'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,

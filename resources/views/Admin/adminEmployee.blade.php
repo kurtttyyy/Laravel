@@ -73,10 +73,21 @@
           salary: {},
         },
         async setEmployee(emp) {
+          const applicantPosition = emp?.applicant?.position ?? {};
+          const employeeData = { ...(emp?.employee ?? {}) };
+
+          if (!employeeData.position && applicantPosition.title) {
+            employeeData.position = applicantPosition.title;
+          }
+
+          if (!employeeData.department && applicantPosition.department) {
+            employeeData.department = applicantPosition.department;
+          }
+
           this.selectedEmployee = {
             ...emp,
             applicant: { documents: [], position: {}, ...(emp?.applicant ?? {}) },
-            employee: emp?.employee ?? {},
+            employee: employeeData,
             education: emp?.education ?? {},
             government: emp?.government ?? {},
             license: emp?.license ?? {},

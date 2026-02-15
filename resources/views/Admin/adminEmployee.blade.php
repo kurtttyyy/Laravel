@@ -170,6 +170,15 @@
     <div class="flex flex-wrap gap-6">
 
         @foreach ($employee as $emp)
+        @php
+          $themeSeed = (string) ($emp->id ?? data_get($emp, 'employee.employee_id') ?? $loop->index);
+          $hue = ((int) sprintf('%u', crc32($themeSeed))) % 360;
+          $headerStart = "hsl({$hue}, 78%, 58%)";
+          $headerEndHue = ($hue + 36) % 360;
+          $headerEnd = "hsl({$headerEndHue}, 78%, 46%)";
+          $avatarHue = ($hue + 18) % 360;
+          $avatarColor = "hsl({$avatarHue}, 72%, 40%)";
+        @endphp
         <!-- Employee Card -->
         <div
             class="bg-white rounded-xl shadow-md overflow-hidden w-72"
@@ -177,8 +186,8 @@
                     matchesSearch(@js(trim(($emp->first_name ?? '').' '.($emp->middle_name ?? '').' '.($emp->last_name ?? ''))) ) &&
                     matchesStatus(@js($emp->account_status ?? ''))"
         >
-            <div class="h-24 bg-gradient-to-r from-purple-500 to-indigo-500 flex justify-center items-center">
-                <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24">
+            <div class="h-24 flex justify-center items-center" style="background-image: linear-gradient(to right, {{ $headerStart }}, {{ $headerEnd }});">
+                <div class="w-16 h-16 rounded-full text-white flex items-center justify-center text-lg font-bold border-4 border-white mt-24" style="background-color: {{ $avatarColor }};">
                     {{$emp->initials}}
                 </div>
             </div>

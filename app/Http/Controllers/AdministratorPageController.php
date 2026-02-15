@@ -264,18 +264,43 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
-        // Business rule: if an employee has any attendance record for the day, count as present.
-        $presentEmployees = $records->values();
-        $absentEmployees = collect();
+        $isExpandedRangeRecords = false;
+        if (!$shouldAutoPresentHolidayDate && !$isSundayNoClassDate && $rangeStartDate && $rangeEndDate) {
+            // For range filters, build a full employee-day matrix so absences always appear.
+            $records = $this->expandRecordsForDateRange(
+                $records,
+                $rangeStartDate,
+                $rangeEndDate,
+                $selectedJobType,
+                $employeeJobTypeMap,
+                $employeeDepartmentMap
+            );
+            $isExpandedRangeRecords = true;
+        }
+
+        $rowLevelAbsentEmployees = $records
+            ->filter(fn ($row) => (bool) ($row->is_absent ?? false))
+            ->values();
+        $presentEmployees = $records
+            ->reject(fn ($row) => (bool) ($row->is_absent ?? false))
+            ->values();
+        $absentEmployees = $rowLevelAbsentEmployees;
+
+        // Business rule: employees with no attendance row for a day are also absent.
         if (!$shouldAutoPresentHolidayDate && !$isSundayNoClassDate) {
             if ($exactDateFilter) {
-                $absentEmployees = $this->buildMissingEmployeeAbsences($records, $exactDateFilter, $selectedJobType, $employeeJobTypeMap)
+                $absentEmployees = $absentEmployees
+                    ->concat($this->buildMissingEmployeeAbsences($records, $exactDateFilter, $selectedJobType, $employeeJobTypeMap))
                     ->values();
             } elseif ($rangeStartDate && $rangeEndDate) {
-                $absentEmployees = $this->buildMissingEmployeeAbsencesForRange($records, $rangeStartDate, $rangeEndDate, $selectedJobType, $employeeJobTypeMap)
-                    ->values();
+                if (!$isExpandedRangeRecords) {
+                    $absentEmployees = $absentEmployees
+                        ->concat($this->buildMissingEmployeeAbsencesForRange($records, $rangeStartDate, $rangeEndDate, $selectedJobType, $employeeJobTypeMap))
+                        ->values();
+                }
             } else {
-                $absentEmployees = $this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap)
+                $absentEmployees = $absentEmployees
+                    ->concat($this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap))
                     ->values();
             }
         }
@@ -294,10 +319,29 @@ class AdministratorPageController extends Controller
             })
             ->values();
 
+        if ($activeAttendanceTab === 'total_employee' && $absentEmployees->isNotEmpty() && !$isExpandedRangeRecords) {
+            $allEmployees = $allEmployees
+                ->concat($absentEmployees->map(function ($row) {
+                    $row->late_minutes = (int) ($row->late_minutes ?? 0);
+                    return $row;
+                }))
+                ->sortBy(function ($row) {
+                    $date = null;
+                    try {
+                        $date = $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : '';
+                    } catch (\Throwable $e) {
+                        $date = '';
+                    }
+
+                    return $date.'|'.$this->normalizeEmployeeId($row->employee_id);
+                })
+                ->values();
+        }
+
         $presentCount = $presentEmployees->count();
         $absentCount = $absentEmployees->count();
         $tardyCount = $tardyEmployees->count();
-        $totalCount = $records->count();
+        $totalCount = $presentEmployees->count() + $absentEmployees->count();
 
         return view('admin.adminAttendance', compact(
             'attendanceFiles',
@@ -702,15 +746,35 @@ class AdministratorPageController extends Controller
 
     private function buildMissingEmployeeAbsencesForRange($records, string $startDate, string $endDate, ?string $selectedJobType = null, $employeeJobTypeMap = null)
     {
-        $recordedEmployeeIds = $records
-            ->pluck('employee_id')
-            ->map(fn ($id) => $this->normalizeEmployeeId($id))
+        $recordedEmployeeDateKeys = collect($records)
+            ->filter(function ($row) {
+                return !empty($row->employee_id) && !empty($row->attendance_date);
+            })
+            ->map(function ($row) {
+                $employeeId = $this->normalizeEmployeeId($row->employee_id);
+                if ($employeeId === '') {
+                    return null;
+                }
+
+                try {
+                    $date = Carbon::parse($row->attendance_date)->toDateString();
+                } catch (\Throwable $e) {
+                    $date = null;
+                }
+
+                if (!$date) {
+                    return null;
+                }
+
+                return $employeeId.'|'.$date;
+            })
             ->filter()
-            ->values()
-            ->all();
+            ->flip();
 
         $employees = Employee::query()
             ->with('user:id,first_name,middle_name,last_name,role,status')
+            ->whereNotNull('employee_id')
+            ->where('employee_id', '!=', '')
             ->whereHas('user', function ($query) {
                 $query->where('role', 'Employee')
                     ->where('status', 'Approved');
@@ -728,27 +792,38 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
-        return $employees
-            ->reject(function ($employee) use ($recordedEmployeeIds) {
+        $absences = collect();
+        $current = Carbon::parse($startDate)->startOfDay();
+        $last = Carbon::parse($endDate)->startOfDay();
+
+        while ($current->lte($last)) {
+            $date = $current->toDateString();
+
+            foreach ($employees as $employee) {
                 $employeeId = $this->normalizeEmployeeId($employee->employee_id);
-                return in_array($employeeId, $recordedEmployeeIds, true);
-            })
-            ->map(function ($employee) use ($employeeJobTypeMap) {
+                if ($employeeId === '') {
+                    continue;
+                }
+
+                $employeeDateKey = $employeeId.'|'.$date;
+                if ($recordedEmployeeDateKeys->has($employeeDateKey)) {
+                    continue;
+                }
+
                 $user = $employee->user;
                 $name = trim(implode(' ', array_filter([
                     $user?->first_name,
                     $user?->middle_name,
                     $user?->last_name,
                 ])));
-                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
                 $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
 
-                return (object) [
+                $absences->push((object) [
                     'employee_id' => (string) $employee->employee_id,
                     'employee_name' => $name !== '' ? $name : null,
                     'job_type' => $jobType,
                     'main_gate' => null,
-                    'attendance_date' => null,
+                    'attendance_date' => Carbon::parse($date)->startOfDay(),
                     'morning_in' => null,
                     'morning_out' => null,
                     'afternoon_in' => null,
@@ -758,7 +833,16 @@ class AdministratorPageController extends Controller
                     'missing_time_logs' => ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'],
                     'is_absent' => true,
                     'is_tardy_by_rule' => false,
-                ];
+                ]);
+            }
+
+            $current->addDay();
+        }
+
+        return $absences
+            ->sortBy(function ($row) {
+                $date = optional($row->attendance_date)->format('Y-m-d') ?? '';
+                return $date.'|'.$this->normalizeEmployeeId($row->employee_id);
             })
             ->values();
     }
@@ -805,10 +889,8 @@ class AdministratorPageController extends Controller
 
         $employees = Employee::query()
             ->with('user:id,first_name,middle_name,last_name,role,status')
-            ->whereHas('user', function ($query) {
-                $query->where('role', 'Employee')
-                    ->where('status', 'Approved');
-            })
+            ->whereNotNull('employee_id')
+            ->where('employee_id', '!=', '')
             ->orderBy('employee_id')
             ->get();
 

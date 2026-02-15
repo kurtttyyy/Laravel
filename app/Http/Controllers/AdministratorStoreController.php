@@ -375,9 +375,16 @@ class AdministratorStoreController extends Controller
             }
 
             $lateMinutes = $this->calculateLateMinutes($morningIn, $afternoonIn);
-            $missingInLogs = array_values(array_intersect($missing, ['morning_in', 'afternoon_in']));
-            $isAbsent = !empty($missingInLogs);
-            $isTardy = $lateMinutes > 0;
+            $actualTimeLogs = array_filter([
+                'morning_in' => $morningIn,
+                'morning_out' => $morningOut,
+                'afternoon_in' => $afternoonIn,
+                'afternoon_out' => $afternoonOut,
+            ], fn ($value) => !empty($value));
+
+            // Mark absent only when all four time logs are missing.
+            $isAbsent = count($actualTimeLogs) === 0;
+            $isTardy = !$isAbsent && $lateMinutes > 0;
 
             $record = [
                 'attendance_upload_id' => $uploadId,
@@ -468,6 +475,8 @@ class AdministratorStoreController extends Controller
             return [];
         }
 
+        $this->syncEmployeeJobTypesFromOpenPositions($employeeIds->all());
+
         return Employee::query()
             ->select(['employee_id', 'job_type'])
             ->whereIn('employee_id', $employeeIds->all())
@@ -483,6 +492,161 @@ class AdministratorStoreController extends Controller
                 return [$employeeId => $jobType];
             })
             ->all();
+    }
+
+    private function syncEmployeeJobTypesFromOpenPositions(array $employeeIds = []): void
+    {
+        if (!Schema::hasColumn('employees', 'job_type')) {
+            return;
+        }
+
+        $employees = Employee::query()
+            ->select(['id', 'user_id', 'employee_id', 'job_type'])
+            ->whereNotNull('user_id')
+            ->when(!empty($employeeIds), function ($query) use ($employeeIds) {
+                $query->whereIn('employee_id', $employeeIds);
+            })
+            ->get();
+
+        if ($employees->isEmpty()) {
+            return;
+        }
+
+        $userIds = $employees->pluck('user_id')->filter()->unique()->values();
+        if ($userIds->isEmpty()) {
+            return;
+        }
+
+        $latestApplicantsByUser = Applicant::query()
+            ->select(['id', 'user_id', 'open_position_id'])
+            ->whereIn('user_id', $userIds->all())
+            ->whereNotNull('open_position_id')
+            ->orderByDesc('id')
+            ->get()
+            ->unique('user_id')
+            ->keyBy('user_id');
+
+        if ($latestApplicantsByUser->isEmpty()) {
+            return;
+        }
+
+        $openPositionIds = $latestApplicantsByUser
+            ->pluck('open_position_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($openPositionIds->isEmpty()) {
+            return;
+        }
+
+        $openPositionJobTypeMap = OpenPosition::query()
+            ->whereIn('id', $openPositionIds->all())
+            ->pluck('job_type', 'id');
+
+        foreach ($employees as $employee) {
+            $openPositionId = optional($latestApplicantsByUser->get($employee->user_id))->open_position_id;
+            if (!$openPositionId) {
+                continue;
+            }
+
+            $jobTypeFromOpenPosition = $this->normalizeEmployeeJobType($openPositionJobTypeMap->get($openPositionId));
+            if (!$jobTypeFromOpenPosition) {
+                continue;
+            }
+
+            if ($this->normalizeEmployeeJobType($employee->job_type) === $jobTypeFromOpenPosition) {
+                continue;
+            }
+
+            Employee::query()
+                ->whereKey($employee->id)
+                ->update(['job_type' => $jobTypeFromOpenPosition]);
+        }
+    }
+
+    private function resolveJobTypeFromOpenPositionForUser($userId): ?string
+    {
+        if (!$userId) {
+            return null;
+        }
+
+        $applicant = Applicant::query()
+            ->select(['open_position_id'])
+            ->where('user_id', $userId)
+            ->whereNotNull('open_position_id')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$applicant || !$applicant->open_position_id) {
+            return null;
+        }
+
+        $jobType = OpenPosition::query()
+            ->whereKey($applicant->open_position_id)
+            ->value('job_type');
+
+        return $this->normalizeEmployeeJobType($jobType);
+    }
+
+    private function syncAttendanceRecordJobTypesForUpload(int $uploadId): void
+    {
+        if (!Schema::hasColumn('attendance_records', 'job_type') || !Schema::hasColumn('employees', 'job_type')) {
+            return;
+        }
+
+        $records = AttendanceRecord::query()
+            ->select(['id', 'employee_id', 'job_type'])
+            ->where('attendance_upload_id', $uploadId)
+            ->get();
+
+        if ($records->isEmpty()) {
+            return;
+        }
+
+        $employeeIds = $records
+            ->pluck('employee_id')
+            ->map(fn ($value) => $this->normalizeEmployeeId($value))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($employeeIds->isEmpty()) {
+            return;
+        }
+
+        $employeeJobTypeMap = Employee::query()
+            ->select(['employee_id', 'job_type'])
+            ->whereIn('employee_id', $employeeIds->all())
+            ->get()
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                return [$employeeId => $this->normalizeEmployeeJobType($employee->job_type)];
+            });
+
+        foreach ($records as $record) {
+            $employeeId = $this->normalizeEmployeeId($record->employee_id);
+            if ($employeeId === '') {
+                continue;
+            }
+
+            $targetJobType = $employeeJobTypeMap->get($employeeId);
+            if (!$targetJobType) {
+                continue;
+            }
+
+            if ($this->normalizeEmployeeJobType($record->job_type) === $targetJobType) {
+                continue;
+            }
+
+            AttendanceRecord::query()
+                ->whereKey($record->id)
+                ->update(['job_type' => $targetJobType]);
+        }
     }
 
     private function getAttendanceRecordColumnLookup(): array
@@ -1029,8 +1193,11 @@ class AdministratorStoreController extends Controller
             'emergency_contact_number' => $attrs['emergency_contact_number'] ?? null,
         ];
 
-        if (Schema::hasColumn('employees', 'job_type') && array_key_exists('job_type', $attrs)) {
-            $employeePayload['job_type'] = $this->normalizeEmployeeJobType($attrs['job_type']);
+        if (Schema::hasColumn('employees', 'job_type')) {
+            $employeePayload['job_type'] = $this->resolveJobTypeFromOpenPositionForUser($attrs['user_id'])
+                ?? (array_key_exists('job_type', $attrs)
+                    ? $this->normalizeEmployeeJobType($attrs['job_type'])
+                    : null);
         }
 
         Employee::updateOrCreate(
@@ -1130,7 +1297,8 @@ class AdministratorStoreController extends Controller
                 'position' => $attrs['position'],
                 'classification' => $attrs['classification'],
                 ...(Schema::hasColumn('employees', 'job_type')
-                    ? ['job_type' => $this->normalizeEmployeeJobType($attrs['job_type'] ?? $attrs['classification'])]
+                    ? ['job_type' => $this->resolveJobTypeFromOpenPositionForUser($attrs['user_id'])
+                        ?? $this->normalizeEmployeeJobType($attrs['job_type'] ?? $attrs['classification'])]
                     : []),
                 'emergency_contact_name' => $attrs['emergency_contact_name'] ?? null,
                 'emergency_contact_relationship' => $attrs['emergency_contact_relationship'] ?? null,
@@ -1203,11 +1371,22 @@ class AdministratorStoreController extends Controller
             return 'Teaching';
         }
 
-        if (in_array($normalized, ['non-teaching', 'non teaching', 'nonteaching', 'nt'], true)) {
+        if (in_array($normalized, [
+            'non-teaching',
+            'non teaching',
+            'nonteaching',
+            'nt',
+            'full-time',
+            'full time',
+            'fulltime',
+            'part-time',
+            'part time',
+            'parttime',
+        ], true)) {
             return 'Non-Teaching';
         }
 
-        return ucfirst($normalized);
+        return 'Non-Teaching';
     }
 
     private function normalizeEmployeeId($value): string
@@ -1281,6 +1460,7 @@ class AdministratorStoreController extends Controller
 
                     if (!empty($records)) {
                         AttendanceRecord::insert($records);
+                        $this->syncAttendanceRecordJobTypesForUpload($attendanceFile->id);
                     }
 
                     $processedRows = count($records);

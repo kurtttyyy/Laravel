@@ -11,6 +11,13 @@
       </button>
       <button
         type="button"
+        id="view_total_employee_chart"
+        class="hidden inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+      >
+        <i class="fa-solid fa-chart-column mr-2"></i>Chart
+      </button>
+      <button
+        type="button"
         id="export_total_employee_excel"
         class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
       >
@@ -49,18 +56,45 @@
             $remainingMinutes = $lateMinutes % 60;
             $hourText = $lateHours === 1 ? 'hour' : 'hours';
             $minuteText = $remainingMinutes === 1 ? 'minute' : 'minutes';
+            $hasAnyTimeLog = !empty($row->morning_in) || !empty($row->morning_out) || !empty($row->afternoon_in) || !empty($row->afternoon_out);
 
             $statusText = 'Present';
             $statusClass = 'bg-green-100 text-green-700';
-            if (!empty($row->is_absent)) {
+            $summaryStatus = 'present';
+            if (!$hasAnyTimeLog && !empty($row->is_absent)) {
               $statusText = 'Absent';
               $statusClass = 'bg-red-100 text-red-700';
+              $summaryStatus = 'absent';
             } elseif ($lateMinutes > 0) {
-              $statusText = 'Tardy';
-              $statusClass = 'bg-amber-100 text-amber-700';
+              // Keep table status as Present even when late.
+              $summaryStatus = 'tardy';
             }
 
             $attendanceDateText = optional($row->attendance_date)->format('Y-m-d') ?? '-';
+            $missingLogs = $row->missing_time_logs ?? [];
+            if (is_string($missingLogs)) {
+              $decoded = json_decode($missingLogs, true);
+              $missingLogs = is_array($decoded) ? $decoded : [];
+            }
+            if (!is_array($missingLogs)) {
+              $missingLogs = [];
+            }
+            $missingLogs = array_values(array_filter(array_map(function ($item) {
+              $label = strtolower(trim((string) $item));
+              if ($label === '') {
+                return null;
+              }
+
+              $codeMap = [
+                'morning_in' => 'NTI',
+                'morning_out' => 'NTO',
+                'afternoon_in' => 'NBI',
+                'afternoon_out' => 'NBO',
+              ];
+
+              return $codeMap[$label] ?? strtoupper(str_replace('_', ' ', $label));
+            }, $missingLogs)));
+            $missingLogsForData = implode('|', $missingLogs);
           @endphp
           <tr
             class="border-b border-slate-100"
@@ -68,7 +102,9 @@
             data-employee-name="{{ $row->employee_name ?? '-' }}"
             data-department="{{ $row->department ?? '-' }}"
             data-attendance-date="{{ $attendanceDateText }}"
-            data-status="{{ strtolower($statusText) }}"
+            data-status="{{ $summaryStatus }}"
+            data-late-minutes="{{ $lateMinutes }}"
+            data-missing-logs="{{ $missingLogsForData }}"
           >
             <td class="px-3 py-2">{{ $row->employee_id }}</td>
             <td class="px-3 py-2">{{ $row->employee_name ?? '-' }}</td>
@@ -103,14 +139,18 @@
       </tbody>
     </table>
   </div>
+  <div id="total_employee_chart_container" class="hidden mt-4 space-y-3"></div>
 </div>
 
 <script>
   (function () {
     const table = document.getElementById('total_employee_table');
     const summaryBtn = document.getElementById('view_total_employee_summary');
+    const chartBtn = document.getElementById('view_total_employee_chart');
+    const chartContainer = document.getElementById('total_employee_chart_container');
     const excelBtn = document.getElementById('export_total_employee_excel');
     const pdfBtn = document.getElementById('export_total_employee_pdf');
+    const tableWrapper = table ? table.closest('.overflow-x-auto') : null;
 
     if (!table) {
       return;
@@ -148,7 +188,9 @@
     const summaryToDate = @json($toDate ?? null);
     const originalTheadHtml = table.querySelector('thead')?.innerHTML || '';
     const originalTbodyHtml = table.querySelector('tbody')?.innerHTML || '';
+    const rawSourceRows = Array.from(table.querySelectorAll('tbody tr')).filter((row) => row.querySelectorAll('td').length > 1);
     let isSummaryView = false;
+    let isChartView = false;
 
     function formatDateLabel(dateStr) {
       const dateObj = new Date(`${dateStr}T00:00:00`);
@@ -197,7 +239,7 @@
 
     function renderSummaryTable() {
       const dateRange = buildDateRange();
-      const sourceRows = Array.from(table.querySelectorAll('tbody tr')).filter((row) => row.querySelectorAll('td').length > 1);
+      const sourceRows = rawSourceRows;
       const employeeMap = new Map();
 
       sourceRows.forEach((row) => {
@@ -206,6 +248,9 @@
         const department = (row.getAttribute('data-department') || '-').trim();
         const attendanceDate = (row.getAttribute('data-attendance-date') || '').trim();
         const status = (row.getAttribute('data-status') || '').trim();
+        const missingLogsRaw = (row.getAttribute('data-missing-logs') || '').trim();
+        const missingLogs = missingLogsRaw ? missingLogsRaw.split('|').map((value) => value.trim()).filter(Boolean) : [];
+        const hasMissingLogs = missingLogs.length > 0;
 
         if (!employeeId) return;
 
@@ -217,15 +262,34 @@
             byDate: {},
             absent: 0,
             tardy: 0,
+            totalLateMinutes: 0,
           });
         }
 
         const record = employeeMap.get(employeeId);
+        const lateMinutes = parseInt(row.getAttribute('data-late-minutes') || '0', 10) || 0;
         if (attendanceDate) {
-          record.byDate[attendanceDate] = status;
+          const currentDay = record.byDate[attendanceDate] || { status: '', lateMinutes: 0, hasMissingLogs: false, missingLogs: [] };
+          const statusRank = { '': 0, present: 1, absent: 2, tardy: 3 };
+          const mergedStatus = (statusRank[status] || 0) >= (statusRank[currentDay.status] || 0)
+            ? status
+            : currentDay.status;
+          const mergedMissingLogs = Array.from(new Set([...(currentDay.missingLogs || []), ...missingLogs]));
+
+          record.byDate[attendanceDate] = {
+            status: mergedStatus,
+            lateMinutes: Math.max(currentDay.lateMinutes || 0, lateMinutes),
+            hasMissingLogs: currentDay.hasMissingLogs || hasMissingLogs,
+            missingLogs: mergedMissingLogs,
+          };
         }
-        if (status === 'absent') record.absent += 1;
-        if (status === 'tardy') record.tardy += 1;
+      });
+
+      Array.from(employeeMap.values()).forEach((emp) => {
+        const dayValues = Object.values(emp.byDate);
+        emp.absent = dayValues.filter((day) => day.status === 'absent').length;
+        emp.tardy = dayValues.filter((day) => day.status === 'tardy').length;
+        emp.totalLateMinutes = dayValues.reduce((sum, day) => sum + (day.lateMinutes || 0), 0);
       });
 
       const departmentAbsenceTotals = {};
@@ -239,7 +303,7 @@
         'Employee Name',
         'Department',
         ...dateRange.map((date) => formatDateLabel(date)),
-        'Total % Tardiness',
+        'Total Tardiness',
         'Total Absence',
         'Total Absence Department',
       ];
@@ -265,22 +329,35 @@
       });
       const renderedDepartmentCell = {};
 
-      const bodyHtml = employees.map((emp, index) => {
-        const dateCells = dateRange.map((date) => {
-          const status = emp.byDate[date];
-          if (status === 'present') return `<td class="px-3 py-2">P</td>`;
-          if (status === 'tardy') return `<td class="px-3 py-2">T</td>`;
+        const bodyHtml = employees.map((emp, index) => {
+          const dateCells = dateRange.map((date) => {
+          const day = emp.byDate[date] || { status: '', lateMinutes: 0, hasMissingLogs: false, missingLogs: [] };
+          const status = day.status;
+          const missingLogsText = (day.missingLogs || []).join(', ');
+          if (status === 'present' && day.hasMissingLogs) return `<td class="px-3 py-2">${missingLogsText || 'Missing Logs'}</td>`;
+          if (status === 'present') return `<td class="px-3 py-2">-</td>`;
+          if (status === 'tardy') {
+            const tardyPercent = ((day.lateMinutes || 0) / 100).toFixed(2);
+            if (day.hasMissingLogs) {
+              return `<td class="px-3 py-2">${tardyPercent} ${missingLogsText || 'Missing Logs'}</td>`;
+            }
+            return `<td class="px-3 py-2">${tardyPercent}</td>`;
+          }
           if (status === 'absent') return `<td class="px-3 py-2">A</td>`;
+          if (day.hasMissingLogs) return `<td class="px-3 py-2">${missingLogsText || 'Missing Logs'}</td>`;
           return `<td class="px-3 py-2">-</td>`;
         }).join('');
 
-        const tardyPercent = ((emp.tardy / totalDays) * 100).toFixed(2);
+        const tardyDecimal = (emp.totalLateMinutes / 100).toFixed(2);
+        const hasAttendanceIssue = emp.absent > 0 || emp.totalLateMinutes > 0;
+        const tardinessDisplay = hasAttendanceIssue ? tardyDecimal : '-';
+        const absenceDisplay = hasAttendanceIssue ? emp.absent : '-';
         const deptKey = emp.department || '-';
         const deptAbs = departmentAbsenceTotals[deptKey] || 0;
         let departmentAbsenceCell = '';
         if (!renderedDepartmentCell[deptKey]) {
           renderedDepartmentCell[deptKey] = true;
-          departmentAbsenceCell = `<td class="px-3 py-2 align-top" rowspan="${departmentRowspans[deptKey]}">${deptAbs}</td>`;
+          departmentAbsenceCell = `<td class="px-3 py-2 align-middle text-center" rowspan="${departmentRowspans[deptKey]}">${deptAbs}</td>`;
         }
 
         return `
@@ -289,14 +366,117 @@
             <td class="px-3 py-2">${emp.employeeName || '-'}</td>
             <td class="px-3 py-2">${emp.department || '-'}</td>
             ${dateCells}
-            <td class="px-3 py-2">${tardyPercent}%</td>
-            <td class="px-3 py-2">${emp.absent}</td>
+            <td class="px-3 py-2">${tardinessDisplay}</td>
+            <td class="px-3 py-2">${absenceDisplay}</td>
             ${departmentAbsenceCell}
           </tr>
         `;
       }).join('');
 
       table.querySelector('tbody').innerHTML = bodyHtml;
+
+      return {
+        employees,
+        dateRange,
+      };
+    }
+
+    function renderSummaryChart() {
+      if (!chartContainer) {
+        return;
+      }
+
+      const summaryData = renderSummaryTable();
+      const employees = (summaryData?.employees || []);
+      if (!employees.length) {
+        chartContainer.innerHTML = '<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">No summary data to chart.</div>';
+        return;
+      }
+
+      const tardinessByDepartment = {};
+      const employeeCountByDepartment = {};
+      employees.forEach((emp) => {
+        const department = (emp.department || '-').trim() || '-';
+        const tardiness = Number(((emp.totalLateMinutes || 0) / 100).toFixed(2));
+        tardinessByDepartment[department] = (tardinessByDepartment[department] || 0) + tardiness;
+        employeeCountByDepartment[department] = (employeeCountByDepartment[department] || 0) + 1;
+      });
+
+      const departmentEntries = Object.entries(tardinessByDepartment)
+        .sort((a, b) => b[1] - a[1]);
+
+      if (!departmentEntries.length) {
+        chartContainer.innerHTML = '<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">No tardiness data to chart.</div>';
+        return;
+      }
+
+      const totalTardiness = departmentEntries.reduce((sum, [, value]) => sum + value, 0);
+      const totalEmployees = employees.length;
+      const totalAbsences = employees.reduce((sum, emp) => sum + (emp.absent || 0), 0);
+      const colors = [
+        '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
+        '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b',
+      ];
+
+      let currentDeg = 0;
+      const gradientStops = totalTardiness > 0
+        ? departmentEntries.map(([, value], index) => {
+            const percentage = value / totalTardiness;
+            const start = currentDeg;
+            const end = currentDeg + (percentage * 360);
+            currentDeg = end;
+            const color = colors[index % colors.length];
+            return `${color} ${start.toFixed(2)}deg ${end.toFixed(2)}deg`;
+          })
+        : [];
+
+      const pieStyle = totalTardiness > 0
+        ? `background: conic-gradient(${gradientStops.join(', ')});`
+        : 'background: #e2e8f0;';
+      const legendHtml = departmentEntries.map(([department, value], index) => {
+        const color = colors[index % colors.length];
+        const percentage = totalTardiness > 0 ? ((value / totalTardiness) * 100).toFixed(1) : '0.0';
+        const employeeCount = employeeCountByDepartment[department] || 0;
+        return `
+          <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="h-3 w-3 rounded-sm" style="background:${color}"></span>
+              <span class="font-medium text-slate-700">${department}</span>
+            </div>
+            <div class="text-right text-slate-600">
+              <div>${value.toFixed(2)} (${percentage}%)</div>
+              <div class="text-[11px] text-slate-500">Employees: ${employeeCount}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      chartContainer.innerHTML = `
+        <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-700">
+          Pie Chart: Total Tardiness per Department
+        </div>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div class="rounded-xl border border-red-200 bg-red-50 p-3">
+            <div class="text-[11px] font-semibold tracking-wide text-red-700">TOTAL ABSENCES</div>
+            <div class="mt-1 text-xl font-bold text-red-800">${totalAbsences}</div>
+          </div>
+          <div class="rounded-xl border border-blue-200 bg-blue-50 p-3">
+            <div class="text-[11px] font-semibold tracking-wide text-blue-700">TOTAL EMPLOYEE</div>
+            <div class="mt-1 text-xl font-bold text-blue-800">${totalEmployees}</div>
+          </div>
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <div class="text-[11px] font-semibold tracking-wide text-amber-700">TOTAL TARDINESS</div>
+            <div class="mt-1 text-xl font-bold text-amber-800">${totalTardiness.toFixed(2)}</div>
+          </div>
+        </div>
+        <div class="grid gap-4 md:grid-cols-[260px_1fr]">
+          <div class="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
+            <div class="h-52 w-52 rounded-full border border-slate-200" style="${pieStyle}"></div>
+            <div class="mt-3 text-xs text-slate-500">Total Tardiness: ${totalTardiness.toFixed(2)}</div>
+          </div>
+          <div class="space-y-2">${legendHtml}</div>
+        </div>
+      `;
     }
 
     if (summaryBtn) {
@@ -304,14 +484,61 @@
         if (!isSummaryView) {
           renderSummaryTable();
           summaryBtn.innerHTML = '<i class="fa-solid fa-table mr-2"></i>Back to Table';
+          if (chartBtn) {
+            chartBtn.classList.remove('hidden');
+            chartBtn.innerHTML = '<i class="fa-solid fa-chart-column mr-2"></i>Chart';
+          }
           isSummaryView = true;
+          isChartView = false;
           return;
         }
 
+        if (chartContainer) {
+          chartContainer.classList.add('hidden');
+          chartContainer.innerHTML = '';
+        }
+        if (tableWrapper) {
+          tableWrapper.classList.remove('hidden');
+        }
         table.querySelector('thead').innerHTML = originalTheadHtml;
         table.querySelector('tbody').innerHTML = originalTbodyHtml;
         summaryBtn.innerHTML = '<i class="fa-solid fa-chart-pie mr-2"></i>Summary';
+        if (chartBtn) {
+          chartBtn.classList.add('hidden');
+          chartBtn.innerHTML = '<i class="fa-solid fa-chart-column mr-2"></i>Chart';
+        }
         isSummaryView = false;
+        isChartView = false;
+      });
+    }
+
+    if (chartBtn) {
+      chartBtn.addEventListener('click', function () {
+        if (!isSummaryView) {
+          return;
+        }
+
+        if (!isChartView) {
+          renderSummaryChart();
+          if (tableWrapper) {
+            tableWrapper.classList.add('hidden');
+          }
+          if (chartContainer) {
+            chartContainer.classList.remove('hidden');
+          }
+          chartBtn.innerHTML = '<i class="fa-solid fa-table mr-2"></i>Back to Summary';
+          isChartView = true;
+          return;
+        }
+
+        if (chartContainer) {
+          chartContainer.classList.add('hidden');
+        }
+        if (tableWrapper) {
+          tableWrapper.classList.remove('hidden');
+        }
+        chartBtn.innerHTML = '<i class="fa-solid fa-chart-column mr-2"></i>Chart';
+        isChartView = false;
       });
     }
 

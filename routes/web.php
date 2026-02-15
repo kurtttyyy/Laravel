@@ -4,6 +4,7 @@ use App\Http\Controllers\AdministratorPageController;
 use App\Http\Controllers\AdministratorStoreController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\EmployeePageController;
+use App\Http\Controllers\EmployeeStoreController;
 use App\Http\Controllers\GuestPageController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RegisterLoginController;
@@ -41,6 +42,12 @@ Route::controller(EmployeePageController::class)->group(function () {
     Route::get('employee/communication', 'display_communication')->name('employee.employeeCommunication');
     Route::get('employee/document', 'display_document')->name('employee.employeeDocument');
     Route::get('employee/payslip', 'display_payslip')->name('employee.employeePayslip');
+});
+
+Route::controller(EmployeeStoreController::class)->group(function () {
+    //POST
+    Route::post('upload/documents', 'upload_store')->name('employee.upload_documents');
+
 });
 
 Route::controller(AdministratorPageController::class)->group(function () {

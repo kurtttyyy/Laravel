@@ -9,15 +9,15 @@
 
     <style>
         body { font-family: Inter, system-ui, sans-serif; transition: margin-left 0.3s ease; }
-        
+
         main {
             transition: margin-left 0.3s ease;
         }
-        
+
         aside:not(:hover) ~ main {
             margin-left: 4rem;
         }
-        
+
         aside:hover ~ main {
             margin-left: 14rem;
         }
@@ -45,17 +45,23 @@
                 </p>
 
                 <!-- Upload Box -->
-                <div class="border-2 border-dashed border-gray-300 rounded-xl py-10 text-center mb-6">
-                    <div class="w-14 h-14 mx-auto bg-indigo-100 rounded-xl flex items-center justify-center mb-3">
-                        <i class="fa-solid fa-cloud-arrow-up text-indigo-600 text-xl"></i>
+                <form action="{{ route('employee.upload_documents')}}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="text" name="document_name" placeholder="Document Type" required>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl py-10 text-center mb-6">
+                        <div class="w-14 h-14 mx-auto bg-indigo-100 rounded-xl flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-cloud-arrow-up text-indigo-600 text-xl"></i>
+                        </div>
+                        <p class="font-medium text-gray-900">Click to upload documents</p>
+                        <p class="text-sm text-gray-500">PDF, JPG, PNG up to 10MB</p>
+                        <input type="file" name="uploadFile">
+                        <button type="submit">Save</button>
                     </div>
-                    <p class="font-medium text-gray-900">Click to upload documents</p>
-                    <p class="text-sm text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                </div>
+                </form>
 
                 <!-- Container -->
                 <div class="bg-green-100 border border-green-500 rounded-xl p-4 max-w mb-4">
-                    
+
                     <!-- Uploaded -->
                     <div class="status uploaded flex items-center gap-4 bg-green-100">
                         <span class="icon bg-green-200 text-green-600 w-10 h-10 rounded-full flex items-center justify-center">
@@ -201,13 +207,13 @@
 <script>
     const sidebar = document.querySelector('aside');
     const main = document.querySelector('main');
-    
+
     if (sidebar && main) {
         sidebar.addEventListener('mouseenter', function() {
             main.classList.remove('ml-16');
             main.classList.add('ml-56');
         });
-        
+
         sidebar.addEventListener('mouseleave', function() {
             main.classList.remove('ml-56');
             main.classList.add('ml-16');

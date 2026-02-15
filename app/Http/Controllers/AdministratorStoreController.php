@@ -905,6 +905,9 @@ class AdministratorStoreController extends Controller
             'application_status' => $this->resolveApplicantStatusFromInterviewType($attrs['interview_type']),
         ]);
 
+        // Mail::to($store->applicant->email)
+        //         ->send(new ApplicationInterviewMail($store));
+
         return redirect()->back()->with('success','Success Added Interview');
     }
 

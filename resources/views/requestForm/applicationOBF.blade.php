@@ -220,13 +220,14 @@
 
             </div>
 
-            <!-- Submit Button -->
+            <!-- Download Button -->
             <div class="flex justify-end">
                 <button
-                    type="submit"
+                    type="button"
+                    onclick="window.print()"
                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                    Submit Application
+                    Download Form
                 </button>
             </div>
             

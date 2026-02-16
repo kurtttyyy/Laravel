@@ -12,6 +12,7 @@ use App\Models\OpenPosition;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -1364,8 +1365,221 @@ class AdministratorPageController extends Controller
         }
     }
 
-    public function display_leave(){
-        return view('admin.adminLeaveManagement');
+    public function display_leave(Request $request){
+        $selectedMonth = trim((string) $request->query('month', now()->format('Y-m')));
+        try {
+            $monthCursor = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+        } catch (\Throwable $e) {
+            $monthCursor = now()->startOfMonth();
+            $selectedMonth = $monthCursor->format('Y-m');
+        }
+
+        // Temporary in-controller dataset until leave records are persisted in DB.
+        $leaveRecords = collect([
+            [
+                'employee_name' => 'Santos, Maria L.',
+                'department' => 'Faculty',
+                'leave_type' => 'Sick Leave',
+                'start_date' => '2026-02-12',
+                'end_date' => '2026-02-12',
+                'status' => 'Approved',
+                'reason' => 'Flu and medical check-up',
+            ],
+            [
+                'employee_name' => 'Reyes, John Paulo A.',
+                'department' => 'Admin',
+                'leave_type' => 'Annual Leave',
+                'start_date' => '2026-02-10',
+                'end_date' => '2026-02-14',
+                'status' => 'Approved',
+                'reason' => 'Family vacation',
+            ],
+            [
+                'employee_name' => 'Dela Cruz, Anna P.',
+                'department' => 'Faculty',
+                'leave_type' => 'Study Leave',
+                'start_date' => '2026-02-17',
+                'end_date' => '2026-02-18',
+                'status' => 'Pending',
+                'reason' => 'Graduate exam preparation',
+            ],
+            [
+                'employee_name' => 'Garcia, Miguel R.',
+                'department' => 'Registrar',
+                'leave_type' => 'Emergency Leave',
+                'start_date' => '2026-02-08',
+                'end_date' => '2026-02-08',
+                'status' => 'Approved',
+                'reason' => 'Immediate family concern',
+            ],
+            [
+                'employee_name' => 'Lopez, Carla M.',
+                'department' => 'Faculty',
+                'leave_type' => 'Maternity Leave',
+                'start_date' => '2026-01-20',
+                'end_date' => '2026-02-20',
+                'status' => 'Approved',
+                'reason' => 'Maternity recovery',
+            ],
+            [
+                'employee_name' => 'Torres, Noel B.',
+                'department' => 'Guidance',
+                'leave_type' => 'Paternity Leave',
+                'start_date' => '2026-02-05',
+                'end_date' => '2026-02-11',
+                'status' => 'Approved',
+                'reason' => 'Child birth support',
+            ],
+            [
+                'employee_name' => 'Nolasco, Irene T.',
+                'department' => 'HR',
+                'leave_type' => 'Personal Leave',
+                'start_date' => '2026-02-22',
+                'end_date' => '2026-02-22',
+                'status' => 'Declined',
+                'reason' => 'Personal errand',
+            ],
+        ])->map(function ($record) {
+            $start = Carbon::parse($record['start_date'])->startOfDay();
+            $end = Carbon::parse($record['end_date'])->startOfDay();
+            $days = $end->gte($start) ? ($start->diffInDays($end) + 1) : 1;
+            $record['days'] = $days;
+            $record['start_date_carbon'] = $start;
+            $record['end_date_carbon'] = $end;
+            return $record;
+        });
+
+        $approvedRecords = $leaveRecords
+            ->filter(fn ($record) => strtolower((string) $record['status']) === 'approved')
+            ->values();
+
+        $monthRecords = $approvedRecords
+            ->filter(function ($record) use ($monthCursor) {
+                $start = $record['start_date_carbon'];
+                $end = $record['end_date_carbon'];
+                return $start->format('Y-m') === $monthCursor->format('Y-m')
+                    || $end->format('Y-m') === $monthCursor->format('Y-m')
+                    || ($start->lt($monthCursor->copy()->startOfMonth()) && $end->gt($monthCursor->copy()->endOfMonth()));
+            })
+            ->values();
+
+        $totalLeaveUsedDays = (int) $monthRecords->sum('days');
+        $sickLeaveUsedDays = (int) $monthRecords
+            ->filter(fn ($record) => strcasecmp((string) $record['leave_type'], 'Sick Leave') === 0)
+            ->sum('days');
+
+        $academyLeaveTypes = [
+            'Annual Leave',
+            'Sick Leave',
+            'Personal Leave',
+            'Study Leave',
+            'Emergency Leave',
+            'Maternity Leave',
+            'Paternity Leave',
+            'Bereavement Leave',
+            'Service Incentive Leave',
+        ];
+
+        $defaultLeaveAllowances = [
+            'Annual Leave' => 15,
+            'Sick Leave' => 10,
+            'Personal Leave' => 5,
+            'Study Leave' => 5,
+            'Emergency Leave' => 3,
+            'Maternity Leave' => 105,
+            'Paternity Leave' => 7,
+            'Bereavement Leave' => 5,
+            'Service Incentive Leave' => 5,
+        ];
+        $storedMonthlyAllowances = Cache::get('leave_allowances:'.$selectedMonth, []);
+        $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
+            ->mapWithKeys(function ($defaultValue, $leaveType) use ($storedMonthlyAllowances) {
+                $value = $storedMonthlyAllowances[$leaveType] ?? $defaultValue;
+                return [$leaveType => max(0, (int) $value)];
+            })
+            ->all();
+
+        $leaveTypeCounts = collect($academyLeaveTypes)
+            ->mapWithKeys(function ($type) use ($monthRecords) {
+                return [$type => $monthRecords
+                    ->where('leave_type', $type)
+                    ->sum('days')];
+            });
+
+        $usageByEmployeeByType = $monthRecords
+            ->groupBy(fn ($record) => (string) ($record['employee_name'] ?? '-'))
+            ->map(function ($employeeRecords) {
+                return $employeeRecords
+                    ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
+                    ->map(fn ($typeRecords) => (int) $typeRecords->sum('days'));
+            });
+
+        $leaveTypeOverLimitCounts = collect($academyLeaveTypes)
+            ->mapWithKeys(function ($leaveType) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
+                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
+                $overLimitCount = $usageByEmployeeByType
+                    ->filter(function ($perTypeUsage) use ($leaveType, $monthlyLimitPerEmployee) {
+                        $used = (int) ($perTypeUsage->get($leaveType, 0));
+                        return $used > $monthlyLimitPerEmployee;
+                    })
+                    ->count();
+
+                return [$leaveType => $overLimitCount];
+            });
+
+        $monthRecords = $monthRecords
+            ->map(function ($record) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
+                $employeeName = (string) ($record['employee_name'] ?? '-');
+                $leaveType = (string) ($record['leave_type'] ?? 'Leave');
+                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
+                $employeeUsageForType = (int) (
+                    $usageByEmployeeByType
+                        ->get($employeeName, collect())
+                        ->get($leaveType, 0)
+                );
+                $remainingForEmployee = max(0, $monthlyLimitPerEmployee - $employeeUsageForType);
+
+                $record['monthly_limit_per_employee'] = $monthlyLimitPerEmployee;
+                $record['employee_usage_for_type'] = $employeeUsageForType;
+                $record['employee_remaining_for_type'] = $remainingForEmployee;
+                $record['is_employee_over_limit'] = $employeeUsageForType > $monthlyLimitPerEmployee;
+
+                return $record;
+            })
+            ->values();
+
+        return view('admin.adminLeaveManagement', compact(
+            'selectedMonth',
+            'totalLeaveUsedDays',
+            'sickLeaveUsedDays',
+            'monthRecords',
+            'leaveTypeCounts',
+            'academyLeaveTypes',
+            'monthlyLeaveAllowances',
+            'leaveTypeOverLimitCounts'
+        ));
+    }
+
+    public function update_leave_allowances(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => ['required', 'date_format:Y-m'],
+            'allowances' => ['required', 'array'],
+            'allowances.*' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $month = (string) $validated['month'];
+        $allowances = collect($validated['allowances'] ?? [])
+            ->mapWithKeys(function ($value, $leaveType) {
+                return [(string) $leaveType => max(0, (int) $value)];
+            })
+            ->all();
+
+        Cache::forever('leave_allowances:'.$month, $allowances);
+
+        return redirect()
+            ->route('admin.adminLeaveManagement', ['month' => $month])
+            ->with('success', 'Monthly leave allowances updated successfully.');
     }
 
     public function display_reports(){

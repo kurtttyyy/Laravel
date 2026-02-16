@@ -3,213 +3,231 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PeopleHub – HR Dashboard</title>
+  <title>PeopleHub - Leave Management</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
-        body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; transition: margin-left 0.3s ease; }
-        main { transition: margin-left 0.3s ease; }
-        aside ~ main { margin-left: 16rem; }
+    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; transition: margin-left 0.3s ease; }
+    main { transition: margin-left 0.3s ease; }
+    aside ~ main { margin-left: 16rem; }
   </style>
 </head>
 <body class="bg-slate-100">
-
 <div class="flex min-h-screen">
+  @include('components.adminSideBar')
 
-    <!-- Sidebar -->
-        @include('components.adminSideBar')
-
-
-    <!-- Main Content -->
   <main class="flex-1 ml-16 transition-all duration-300">
-    <!-- Header -->
-     @include('components.adminHeader.leaveHeader')
+    @include('components.adminHeader.leaveHeader')
 
-    <!-- Dashboard Content -->
-    <div class="p-8 space-y-6">
+    <div class="p-4 md:p-8 pt-20 space-y-6">
+      @if (session('success'))
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {{ session('success') }}
+        </div>
+      @endif
 
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <form method="GET" action="{{ route('admin.adminLeaveManagement') }}" class="flex items-center gap-3">
+          <label class="text-sm font-medium text-gray-700">Month</label>
+          <input
+            type="month"
+            name="month"
+            value="{{ $selectedMonth ?? now()->format('Y-m') }}"
+            class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+            Apply
+          </button>
+        </form>
+      </div>
 
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <div class="mb-3">
+          <h3 class="text-sm font-semibold text-gray-700">Monthly Leave Allocation (Editable)</h3>
+          <p class="text-xs text-gray-500 mt-1">Set monthly leave limit per employee for each leave type (for {{ $selectedMonth ?? now()->format('Y-m') }}).</p>
+        </div>
+        <form method="POST" action="{{ route('admin.leaveAllowances.update') }}" class="space-y-4">
+          @csrf
+          <input type="hidden" name="month" value="{{ $selectedMonth ?? now()->format('Y-m') }}">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            @foreach (($academyLeaveTypes ?? []) as $leaveType)
+              <label class="rounded-lg border border-gray-200 p-3 block">
+                <span class="text-sm text-gray-700 block mb-2">{{ $leaveType }}</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  name="allowances[{{ $leaveType }}]"
+                  value="{{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }}"
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+            @endforeach
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+              Save Monthly Allocation
+            </button>
+          </div>
+        </form>
+      </div>
 
-<div class="bg-gray-50 min-h-screen p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Leave Used This Month</p>
+          <p class="mt-2 text-3xl font-bold text-slate-800">{{ number_format((int) ($totalLeaveUsedDays ?? 0)) }}</p>
+          <p class="mt-1 text-sm text-gray-500">Total approved leave days</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Sick Leave Used</p>
+          <p class="mt-2 text-3xl font-bold text-blue-700">{{ number_format((int) ($sickLeaveUsedDays ?? 0)) }}</p>
+          <p class="mt-1 text-sm text-gray-500">Approved sick leave days</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Approved Requests</p>
+          <p class="mt-2 text-3xl font-bold text-emerald-700">{{ number_format(($monthRecords ?? collect())->count()) }}</p>
+          <p class="mt-1 text-sm text-gray-500">Approved leave records in month</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Top Leave Type</p>
+          @php
+            $topLeaveEntry = collect($leaveTypeCounts ?? [])->sortDesc()->first();
+            $topLeaveType = collect($leaveTypeCounts ?? [])->sortDesc()->keys()->first() ?? '-';
+          @endphp
+          <p class="mt-2 text-2xl font-bold text-purple-700">{{ $topLeaveType }}</p>
+          <p class="mt-1 text-sm text-gray-500">{{ (int) ($topLeaveEntry ?? 0) }} day(s)</p>
+        </div>
+      </div>
 
-
-    <!-- Leave Balance Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-
-        <!-- Annual -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
-                    🌿
-                </div>
-                <span class="text-sm text-gray-500" style="margin-left: 245px;">Annual</span>
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Academy Staff Leave Types (Per Employee Monthly Limit)</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          @foreach (($academyLeaveTypes ?? []) as $leaveType)
+            <div class="rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+              <div>
+                <span class="text-sm text-gray-700 block">{{ $leaveType }}</span>
+                <span class="text-xs text-gray-500">
+                  Used total: {{ (int) (($leaveTypeCounts[$leaveType] ?? 0)) }} day(s)
+                  •
+                  Limit per employee: {{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }} day(s)
+                </span>
+              </div>
+              @php
+                $overLimitEmployees = (int) (($leaveTypeOverLimitCounts[$leaveType] ?? 0));
+              @endphp
+              <span class="text-sm font-semibold {{ $overLimitEmployees > 0 ? 'text-red-600' : 'text-emerald-600' }}">
+                {{ $overLimitEmployees }} over limit
+              </span>
             </div>
-
-            <p class="text-2xl font-bold">15</p>
-            <p class="text-sm text-gray-500 mb-3">employees on leave</p>
-
+          @endforeach
         </div>
+      </div>
 
-        <!-- Sick -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
-                    💙
-                </div>
-                <span class="text-sm text-gray-500" style="margin-left: 245px;">Sick</span>
-            </div>
-
-            <p class="text-2xl font-bold">8</p>
-            <p class="text-sm text-gray-500 mb-3">employees on leave</p>
-
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-700">Leave History (Approved, {{ $selectedMonth ?? now()->format('Y-m') }})</h3>
         </div>
-
-        <!-- Personal -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600">
-                    🟡
-                </div>
-                <span class="text-sm text-gray-500" style="margin-left: 235px;">Personal</span>
-            </div>
-
-            <p class="text-2xl font-bold">3</p>
-            <p class="text-sm text-gray-500 mb-3">employees on leave</p>
-
-        </div>
-
-        <!-- Study -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
-                    🎓
-                </div>
-                <span class="text-sm text-gray-500" style="margin-left: 245px;">Study</span>
-            </div>
-
-            <p class="text-2xl font-bold">5</p>
-            <p class="text-sm text-gray-500 mb-3">employees on leave</p>
-
-        </div>
-
-    </div>
-
-    <!-- Request Leave -->
-<div class="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-
-    <!-- Employee Info -->
-    <div class="flex items-center gap-4">
-        <!-- Avatar -->
-        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-semibold">
-            JD
-        </div>
-
         <div>
-            <p class="font-medium text-gray-800">John Doe</p>
-            <p class="text-sm text-gray-500">
-                Annual Leave • Feb 10 – Feb 16, 2024
-            </p>
-        </div>
-    </div>
+          @forelse (($monthRecords ?? collect()) as $record)
+            @php
+              $leaveType = (string) ($record['leave_type'] ?? 'Leave');
+              $startDate = $record['start_date_carbon'] ?? null;
+              $endDate = $record['end_date_carbon'] ?? null;
+              $days = (int) ($record['days'] ?? 0);
+              $daysLabel = $days === 1 ? '1 day' : ($days.' days');
+              $dateLabel = '-';
+              if ($startDate && $endDate) {
+                $dateLabel = $startDate->isSameDay($endDate)
+                  ? $startDate->format('M d, Y')
+                  : $startDate->format('M d, Y').' - '.$endDate->format('M d, Y');
+              }
 
-    <!-- Action Buttons -->
-    <div class="flex gap-3">
-        <button
-            class="px-4 py-2 text-sm font-medium rounded-lg bg-green-500 text-white hover:bg-green-600 transition">
-            Approve
-        </button>
-
-        <button
-            class="px-4 py-2 text-sm font-medium rounded-lg bg-red-500 text-white hover:bg-red-600 transition">
-            Decline
-        </button>
-    </div>
-
-</div>
-
-
-<!-- Leave History -->
-<div class="bg-white rounded-xl shadow">
-    <div class="p-4 border-b">
-        <h3 class="font-semibold">Leave History</h3>
-    </div>
-
-    <div class="divide-y">
-
-        <!-- Item - Approved -->
-        <div class="p-4 flex justify-between items-center">
-            <div class="flex gap-3">
-                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    🌴
+              $iconMap = [
+                'Annual Leave' => '🌴',
+                'Sick Leave' => '🩺',
+                'Personal Leave' => '🟡',
+                'Study Leave' => '🎓',
+                'Emergency Leave' => '🚨',
+                'Maternity Leave' => '👶',
+                'Paternity Leave' => '👨',
+                'Bereavement Leave' => '🕊️',
+                'Service Incentive Leave' => '⭐',
+              ];
+              $icon = $iconMap[$leaveType] ?? '📄';
+            @endphp
+            <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center text-base">
+                  {{ $icon }}
                 </div>
                 <div>
-                    <!-- EMPLOYEE NAME -->
-
-
-                    <p class="font-medium">
-                        Annual Leave
-                        <span class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                            Employee
-                        </span>
-                    </p>
-                    <p class="text-sm font-semibold text-gray-700">Kurt Robin</p>
-                    <p class="text-sm text-gray-500">
-                        Feb 10, 2024 - Feb 16, 2024 • 5 days
-                    </p>
-                    <p class="text-sm text-gray-400">Vacation in Hawaii</p>
+                  <p class="font-semibold text-gray-900">
+                    {{ $leaveType }}
+                    <span class="ml-2 inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">Employee</span>
+                  </p>
+                  <p class="text-sm font-semibold text-gray-800">{{ $record['employee_name'] ?? '-' }}</p>
+                  <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $daysLabel }}</p>
+                  <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
+                  <p class="text-xs {{ !empty($record['is_employee_over_limit']) ? 'text-red-600' : 'text-slate-500' }}">
+                    Employee usage this month: {{ (int) ($record['employee_usage_for_type'] ?? 0) }}/{{ (int) ($record['monthly_limit_per_employee'] ?? 0) }} day(s)
+                    @if (!empty($record['is_employee_over_limit']))
+                      (Over limit)
+                    @endif
+                  </p>
                 </div>
+              </div>
+              <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
             </div>
+          @empty
+            <div class="px-4 py-6 text-center text-sm text-gray-500">
+              No approved leave records for this month.
+            </div>
+          @endforelse
+        </div>
+      </div>
 
-            <span class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full">
-                Approved
-            </span>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col md:flex-row gap-6">
+        @php
+          $activeForm = request()->query('form', 'leave');
+          $formQueryBase = array_filter([
+            'month' => $selectedMonth ?? now()->format('Y-m'),
+          ], fn ($value) => !is_null($value) && $value !== '');
+        @endphp
+        <div class="w-full md:w-1/4 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+          <h4 class="font-semibold text-gray-700 mb-4">Select Form</h4>
+          <a
+            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'leave'])) }}"
+            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'leave' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
+          >
+            LEAVE APPLICATION FORM
+          </a>
+          <a
+            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'official'])) }}"
+            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'official' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
+          >
+            APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
+          </a>
         </div>
 
-        <!-- Item - Approved -->
-        <div class="p-4 flex justify-between items-center">
-            <div class="flex gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    🩺
-                </div>
-                <div>
-
-                    <p class="font-medium">
-                        Sick Leave
-                        <span class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                            Employee
-                        </span>
-                    </p>
-                    <p class="text-sm font-semibold text-gray-700">Maria Santos</p>
-                    <p class="text-sm text-gray-500">
-                        Jan 25, 2024 • 1 day
-                    </p>
-                    <p class="text-sm text-gray-400">Doctor appointment and flu</p>
-                </div>
+        <div class="w-full md:w-3/4 space-y-6">
+          @if ($activeForm === 'official')
+            <div id="adminOfficialForm">
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
+              @include('requestForm.applicationOBF')
             </div>
-
-            <span class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full">
-                Approved
-            </span>
+          @else
+            <div id="adminLeaveForm">
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
+              @include('requestForm.leaveApplicationForm')
+            </div>
+          @endif
         </div>
-
-    </div>
-</div>
-
-
-</div>
-
-
-
+      </div>
     </div>
   </main>
 </div>
-
-</body>
 
 <script>
   const sidebar = document.querySelector('aside');
@@ -225,7 +243,5 @@
     });
   }
 </script>
-
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+</body>
 </html>

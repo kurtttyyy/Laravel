@@ -37,6 +37,31 @@
 
 
 <div class="p-4 md:p-8 space-y-8 pt-20">
+    @php
+        $activeEmployeeForm = request()->query('form', 'leave');
+        if (!in_array($activeEmployeeForm, ['leave', 'official'], true)) {
+            $activeEmployeeForm = 'leave';
+        }
+        $employeeFormQueryBase = array_filter([
+            'month' => $selectedMonth ?? now()->format('Y-m'),
+        ], fn ($value) => !is_null($value) && $value !== '');
+    @endphp
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <form method="GET" action="{{ route('employee.employeeLeave') }}" class="flex items-center gap-3">
+            <label class="text-sm font-medium text-gray-700">Month</label>
+            <input
+                type="month"
+                name="month"
+                value="{{ $selectedMonth ?? now()->format('Y-m') }}"
+                class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input type="hidden" name="form" value="{{ $activeEmployeeForm }}">
+            <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
+                Apply
+            </button>
+        </form>
+    </div>
+
     <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="relative bg-white rounded-2xl p-6 border border-gray-200">
@@ -45,9 +70,9 @@
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-calendar fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">18</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0) }}</h3>
             <p class="text-gray-600 text-sm mb-4">Annual Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of 25 days</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($annualLimit ?? 0) }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
         </div>
 
 
@@ -57,9 +82,9 @@
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-bed fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">10</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0) }}</h3>
             <p class="text-gray-600 text-sm mb-1">Sick Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of 10 days</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($sickLimit ?? 0) }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
         </div>
 
 
@@ -69,9 +94,9 @@
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-calendar-o fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">3</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($personalLimit ?? 0) - ($personalUsed ?? 0), 0) }}</h3>
             <p class="text-gray-600 text-sm mb-1">Personal Days</p>
-            <p class="text-gray-500 text-xs mt-4">of 5 days</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($personalLimit ?? 0) }} days (used {{ (int) ($personalUsed ?? 0) }})</p>
         </div>
 
         <!-- Salary Card -->
@@ -80,49 +105,78 @@
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-hourglass-half fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">7</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ (int) ($totalDaysUsed ?? 0) }}</h3>
             <p class="text-gray-600 text-sm mb-1">Days Used</p>
-            <p class="text-gray-500 text-xs mt-4">this years</p>
+            <p class="text-gray-500 text-xs mt-4">this month</p>
         </div>
 
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-200">
+        <h3 class="font-semibold text-gray-700">My Leave History (Approved, {{ $selectedMonth ?? now()->format('Y-m') }})</h3>
+    </div>
+    <div>
+        @forelse (($employeeMonthRecords ?? collect()) as $record)
+            @php
+                $startDate = $record['start_date_carbon'] ?? null;
+                $endDate = $record['end_date_carbon'] ?? null;
+                $days = (int) ($record['days'] ?? 0);
+                $dateLabel = '-';
+                if ($startDate && $endDate) {
+                    $dateLabel = $startDate->isSameDay($endDate)
+                        ? $startDate->format('M d, Y')
+                        : $startDate->format('M d, Y').' - '.$endDate->format('M d, Y');
+                }
+            @endphp
+            <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
+                <div>
+                    <p class="font-semibold text-gray-900">{{ $record['leave_type'] ?? 'Leave' }}</p>
+                    <p class="text-sm text-gray-700">{{ $employeeDisplayName ?? ($record['employee_name'] ?? '-') }}</p>
+                    <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $days }} day(s)</p>
+                    <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
+                </div>
+                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
+            </div>
+        @empty
+            <div class="px-4 py-5 text-sm text-gray-500">No approved leave records for this month.</div>
+        @endforelse
+    </div>
 </div>
 
 <div class="p-8 space-y-6 bg-white rounded-2xl border border-gray-200 flex flex-col md:flex-row gap-6">
 
     <!-- Left Filter Sidebar -->
-<div class="w-full md:w-1/4 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+<div class="w-full md:w-1/4 md:min-w-[280px] bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
     <h4 class="font-semibold text-gray-700 mb-4">Select Form</h4>
     <ul class="space-y-2 text-sm">
         <li>
-            <button type="button"
-                onclick="showForm('leaveForm')"
-                class="w-full text-left px-2 py-1 rounded hover:bg-blue-100">
+            <a
+                href="{{ route('employee.employeeLeave', array_merge($employeeFormQueryBase, ['form' => 'leave'])) }}"
+                class="block w-full text-left px-2 py-1 rounded {{ $activeEmployeeForm === 'leave' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}">
                 LEAVE APPLICATION FORM
-            </button>
+            </a>
         </li>
         <li>
-            <button type="button"
-                onclick="showForm('officialForm')"
-                class="w-full text-left px-2 py-1 rounded hover:bg-blue-100">
+            <a
+                href="{{ route('employee.employeeLeave', array_merge($employeeFormQueryBase, ['form' => 'official'])) }}"
+                class="block w-full text-left px-2 py-1 rounded {{ $activeEmployeeForm === 'official' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}">
                 APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
-            </button>
+            </a>
         </li>
     </ul>
 </div>
 
 
 
-<div class="p-8 space-y-6 bg-white rounded-2xl border border-gray-200">
-    <!-- Leave Application Form -->
-    <div id="officialForm" >
+<div class="w-full md:flex-1 min-w-0 p-8 space-y-6 bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+    @if ($activeEmployeeForm === 'official')
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
         @include('requestForm.applicationOBF')
-    </div>
-
-    <div id="leaveForm" style ="display:none;">
+    @else
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
         @include('requestForm.leaveApplicationForm')
-    </div>
+    @endif
 </div>
 
 
@@ -134,19 +188,6 @@
     </main>
 </div>
 <script>
-    window.showForm = function (tab) {
-        const leave = document.getElementById('leaveForm');
-        const official = document.getElementById('officialForm');
-
-        if (!leave) {
-            console.error('Form elements not found');
-            return;
-        }
-
-        leave.style.display = tab === 'leaveForm' ? 'block' : 'none';
-        official.style.display = tab === 'officialForm' ? 'block' : 'none';
-    }
-    
     // Sidebar responsive adjustment
     const sidebar = document.querySelector('aside');
     const main = document.querySelector('main');

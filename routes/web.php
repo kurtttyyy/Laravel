@@ -59,6 +59,7 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/attendance/tardiness', 'display_attendance_tardiness')->name('admin.attendance.tardiness');
     Route::get('system/attendance/total-employee', 'display_attendance_total_employee')->name('admin.attendance.totalEmployee');
     Route::get('system/leave/management', 'display_leave')->name('admin.adminLeaveManagement');
+    Route::post('system/leave/management/allowances', 'update_leave_allowances')->name('admin.leaveAllowances.update');
     Route::get('system/reports', 'display_reports')->name('admin.adminReports');
     Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');
 

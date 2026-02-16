@@ -1066,6 +1066,9 @@ class AdministratorStoreController extends Controller
             'application_status' => $attrs['status'],
         ]);
 
+        Mail::to($review->email)
+                ->send(new ApplicationUpdatedMail($review));
+
         return redirect()->back()->with('success','Success Update Application Status');
     }
 

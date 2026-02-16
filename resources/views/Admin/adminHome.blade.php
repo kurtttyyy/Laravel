@@ -61,8 +61,8 @@
         <div class="bg-white rounded-xl p-5 flex justify-between items-center">
           <div>
             <p class="text-sm text-slate-500">Present Today</p>
-            <h2 class="text-2xl font-semibold">1,180</h2>
-            <p class="text-sm text-slate-500">94.5% attendance rate</p>
+            <h2 class="text-2xl font-semibold">{{ number_format($presentTodayCount ?? 0) }}</h2>
+            <p class="text-sm text-slate-500">{{ number_format((float) ($presentTodayRate ?? 0), 1) }}% attendance rate</p>
           </div>
           <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-check"></i>
@@ -83,8 +83,8 @@
         <div class="bg-white rounded-xl p-5 flex justify-between items-center">
           <div>
             <p class="text-sm text-slate-500">Open Positions</p>
-            <h2 class="text-2xl font-semibold">24</h2>
-            <p class="text-sm text-purple-500">156 applications</p>
+            <h2 class="text-2xl font-semibold">{{ number_format($openPositionsCount ?? 0) }}</h2>
+            <p class="text-sm text-purple-500">{{ number_format($openPositionApplicationsCount ?? 0) }} applications</p>
           </div>
           <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-briefcase"></i>

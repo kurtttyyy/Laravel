@@ -87,13 +87,58 @@ class AdministratorPageController extends Controller
             $monthlyEmployeePercentChange = 0;
         }
         $monthlyEmployeePercentChange = round($monthlyEmployeePercentChange, 1);
+
+        $todayDate = now()->toDateString();
+        $isTodaySundayNoClass = $this->isSundayDate($todayDate);
+        $isTodayHoliday = $this->isHolidayDate($todayDate);
+
+        $presentTodayCount = 0;
+        if (!$isTodaySundayNoClass) {
+            $todayRecords = AttendanceRecord::query()
+                ->whereDate('attendance_date', $todayDate)
+                ->orderByDesc('id')
+                ->get()
+                ->filter(function ($row) {
+                    return $this->normalizeEmployeeId($row->employee_id) !== '';
+                })
+                ->unique(function ($row) {
+                    return $this->normalizeEmployeeId($row->employee_id);
+                })
+                ->values();
+
+            if ($isTodayHoliday && $todayRecords->isEmpty()) {
+                // On holidays with no uploads, treat approved employees as present for the day.
+                $presentTodayCount = $totalEmployeeCount;
+            } else {
+                $presentTodayCount = $todayRecords
+                    ->filter(function ($row) use ($isTodayHoliday) {
+                        $hasAnyTimeLog = !empty($row->morning_in)
+                            || !empty($row->morning_out)
+                            || !empty($row->afternoon_in)
+                            || !empty($row->afternoon_out);
+                        $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+                        return !(bool) ($row->is_absent ?? false) && ($hasAnyTimeLog || $isHolidayPresent || $isTodayHoliday);
+                    })
+                    ->count();
+            }
+        }
+
+        $presentTodayRate = $totalEmployeeCount > 0
+            ? round(($presentTodayCount / $totalEmployeeCount) * 100, 1)
+            : 0;
+        $openPositionsCount = OpenPosition::query()->count();
+        $openPositionApplicationsCount = Applicant::query()->count();
         
         return view('admin.adminHome', compact(
             'employee',
             'accept',
             'departments',
             'totalEmployeeCount',
-            'monthlyEmployeePercentChange'
+            'monthlyEmployeePercentChange',
+            'presentTodayCount',
+            'presentTodayRate',
+            'openPositionsCount',
+            'openPositionApplicationsCount'
         ));
     }
 

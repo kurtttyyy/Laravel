@@ -48,8 +48,53 @@ class AdministratorPageController extends Controller
                             ];
                         })
                         ->values();
+
+        $totalEmployeeCount = User::query()
+            ->where('role', 'Employee')
+            ->where('status', 'Approved')
+            ->count();
+
+        $today = now();
+        $currentMonthStart = (clone $today)->startOfMonth();
+        $currentRangeEnd = (clone $today)->endOfDay();
+
+        $previousMonthReference = (clone $today)->subMonthNoOverflow();
+        $previousMonthStart = (clone $previousMonthReference)->startOfMonth();
+        $sameDayLastMonth = min(
+            (int) $today->day,
+            (int) $previousMonthReference->daysInMonth
+        );
+        $previousRangeEnd = (clone $previousMonthStart)
+            ->addDays($sameDayLastMonth - 1)
+            ->endOfDay();
+
+        // "Applied" employees are based on account creation date.
+        $employeesThisMonth = User::query()
+            ->where('role', 'Employee')
+            ->whereBetween('created_at', [$currentMonthStart, $currentRangeEnd])
+            ->count();
+
+        $employeesLastMonth = User::query()
+            ->where('role', 'Employee')
+            ->whereBetween('created_at', [$previousMonthStart, $previousRangeEnd])
+            ->count();
+
+        if ($employeesLastMonth > 0) {
+            $monthlyEmployeePercentChange = (($employeesThisMonth - $employeesLastMonth) / $employeesLastMonth) * 100;
+        } elseif ($employeesThisMonth > 0) {
+            $monthlyEmployeePercentChange = 100;
+        } else {
+            $monthlyEmployeePercentChange = 0;
+        }
+        $monthlyEmployeePercentChange = round($monthlyEmployeePercentChange, 1);
         
-        return view('admin.adminHome', compact('employee','accept','departments'));
+        return view('admin.adminHome', compact(
+            'employee',
+            'accept',
+            'departments',
+            'totalEmployeeCount',
+            'monthlyEmployeePercentChange'
+        ));
     }
 
     public function display_employee(){
@@ -103,6 +148,10 @@ class AdministratorPageController extends Controller
         $fromDate = $request->query('from_date');
         $toDate = $request->query('to_date');
         $selectedUploadId = $request->query('upload_id');
+        $searchName = trim((string) $request->query('search_name', ''));
+        if ($searchName === '') {
+            $searchName = null;
+        }
         $normalizedFromDate = $this->normalizeFilterDate($fromDate);
         $normalizedToDate = $this->normalizeFilterDate($toDate);
         $selectedJobType = $this->normalizeJobType($request->query('job_type'));
@@ -204,23 +253,64 @@ class AdministratorPageController extends Controller
 
                 return [$employeeId => $employee->department ? (string) $employee->department : null];
             });
+        $employeeDisplayNameMap = Employee::query()
+            ->with('user:id,first_name,middle_name,last_name')
+            ->select(['employee_id', 'user_id'])
+            ->whereNotNull('employee_id')
+            ->orderBy('employee_id')
+            ->get()
+            ->mapWithKeys(function ($employee) {
+                $employeeId = $this->normalizeEmployeeId($employee->employee_id);
+                if ($employeeId === '') {
+                    return [];
+                }
+
+                return [$employeeId => $this->formatEmployeeDisplayName(
+                    $employee->user?->first_name,
+                    $employee->user?->middle_name,
+                    $employee->user?->last_name
+                )];
+            });
 
         $jobTypeOptions = collect($allowedJobTypes);
 
         $isSundayNoClassDate = $exactDateFilter ? $this->isSundayDate($exactDateFilter) : false;
         $isHolidayDate = $exactDateFilter ? $this->isHolidayDate($exactDateFilter) : false;
-        $shouldAutoPresentHolidayDate = $isHolidayDate && !$isSundayNoClassDate;
+        $isSingleSidedDateFilter = ($normalizedFromDate && !$normalizedToDate)
+            || (!$normalizedFromDate && $normalizedToDate);
+        $shouldAutoPresentHolidayDate = $isHolidayDate
+            && !$isSundayNoClassDate
+            && !$isSingleSidedDateFilter;
 
         // No-class Sundays are excluded from attendance counting.
         if ($isSundayNoClassDate) {
             $records = collect();
         } elseif ($shouldAutoPresentHolidayDate) {
             if ($exactDateFilter) {
-                $this->persistHolidayAttendanceForDate($exactDateFilter, $employeeJobTypeMap);
+                $hasAnyRecordForDate = AttendanceRecord::query()
+                    ->whereDate('attendance_date', $exactDateFilter)
+                    ->exists();
+
+                // Only auto-generate holiday-present rows when there are no records at all for that date.
+                if (!$hasAnyRecordForDate) {
+                    $this->persistHolidayAttendanceForDate($exactDateFilter, $employeeJobTypeMap);
+                }
                 $records = $this->getAttendanceRecordsByDate($exactDateFilter);
             } else {
                 $records = $this->buildHolidayPresentEmployees($fromDate, $selectedJobType, $employeeJobTypeMap);
             }
+        }
+
+        // For date ranges, auto-add present rows on holiday dates (excluding Sundays)
+        // so holidays are represented as present without requiring manual uploads.
+        if ($rangeStartDate && $rangeEndDate && !$isSundayNoClassDate) {
+            $records = $this->appendHolidayPresentRowsForRange(
+                $records,
+                $rangeStartDate,
+                $rangeEndDate,
+                $selectedJobType,
+                $employeeJobTypeMap
+            );
         }
 
         if ($selectedJobType) {
@@ -233,26 +323,49 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
-        $records = $records->map(function ($row) use ($employeeJobTypeMap, $employeeDepartmentMap) {
+        $records = $records->map(function ($row) use ($employeeJobTypeMap, $employeeDepartmentMap, $employeeDisplayNameMap) {
             $employeeId = $this->normalizeEmployeeId($row->employee_id);
             $rowJobType = $this->normalizeJobType($employeeJobTypeMap->get($employeeId));
             $rowDepartment = $employeeDepartmentMap->get($employeeId);
+            $rowName = $employeeDisplayNameMap->get($employeeId) ?: $this->normalizeLooseDisplayName($row->employee_name ?? null);
             $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
             $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
-            $isTardyByRule = !$row->is_absent && !$isWithinPresentWindow && $computedLateMinutes > 0;
+            $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+            $hasAnyTimeLog = !empty($row->morning_in)
+                || !empty($row->morning_out)
+                || !empty($row->afternoon_in)
+                || !empty($row->afternoon_out);
+            // Business rule: if there is no scan log for a class day, mark as absent.
+            // Keep holiday auto-present rows excluded from this rule.
+            $isAbsentByRule = !$isHolidayPresent && !$hasAnyTimeLog;
+            $isAbsent = (bool) ($row->is_absent ?? false) || $isAbsentByRule;
+            $isTardyByRule = !$isAbsent && !$isWithinPresentWindow && $computedLateMinutes > 0;
+            $gateLabel = $row->main_gate;
+            if ($isHolidayPresent && !$isAbsent && (is_null($gateLabel) || trim((string) $gateLabel) === '')) {
+                $gateLabel = 'Holiday - No Class';
+            }
+            if ($isAbsent && trim((string) $gateLabel) === 'Holiday - No Class') {
+                $gateLabel = null;
+            }
 
             if (method_exists($row, 'setAttribute')) {
                 $row->setAttribute('job_type', $rowJobType);
                 $row->setAttribute('department', $row->department ?? $rowDepartment);
+                $row->setAttribute('main_gate', $gateLabel);
+                $row->setAttribute('employee_name', $rowName);
                 $row->setAttribute('computed_late_minutes', $computedLateMinutes);
+                $row->setAttribute('is_absent', $isAbsent);
                 $row->setAttribute('is_tardy_by_rule', $isTardyByRule);
-                $row->setAttribute('is_holiday_present', (bool) ($row->is_holiday_present ?? false));
+                $row->setAttribute('is_holiday_present', $isHolidayPresent);
             } else {
                 $row->job_type = $rowJobType;
                 $row->department = $row->department ?? $rowDepartment;
+                $row->main_gate = $gateLabel;
+                $row->employee_name = $rowName;
                 $row->computed_late_minutes = $computedLateMinutes;
+                $row->is_absent = $isAbsent;
                 $row->is_tardy_by_rule = $isTardyByRule;
-                $row->is_holiday_present = (bool) ($row->is_holiday_present ?? false);
+                $row->is_holiday_present = $isHolidayPresent;
             }
             return $row;
         });
@@ -375,6 +488,13 @@ class AdministratorPageController extends Controller
                 ->values();
         }
 
+        if ($searchName) {
+            $presentEmployees = $this->filterAttendanceRowsByEmployeeName($presentEmployees, $searchName);
+            $absentEmployees = $this->filterAttendanceRowsByEmployeeName($absentEmployees, $searchName);
+            $tardyEmployees = $this->filterAttendanceRowsByEmployeeName($tardyEmployees, $searchName);
+            $allEmployees = $this->filterAttendanceRowsByEmployeeName($allEmployees, $searchName);
+        }
+
         $presentCount = $presentEmployees->count();
         $absentCount = $absentEmployees->count();
         $tardyCount = $tardyEmployees->count();
@@ -386,6 +506,7 @@ class AdministratorPageController extends Controller
             'toDate',
             'selectedUploadId',
             'selectedJobType',
+            'searchName',
             'jobTypeOptions',
             'activeAttendanceTab',
             'presentEmployees',
@@ -522,19 +643,19 @@ class AdministratorPageController extends Controller
         return $employees
             ->map(function ($user) use ($attendanceDate, $employeeJobTypeMap) {
                 $employeeProfile = $user->employee;
-                $name = trim(implode(' ', array_filter([
+                $name = $this->formatEmployeeDisplayName(
                     $user->first_name,
                     $user->middle_name,
-                    $user->last_name,
-                ])));
+                    $user->last_name
+                );
                 $employeeId = $this->normalizeEmployeeId($employeeProfile?->employee_id);
                 $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
 
                 return (object) [
                     'employee_id' => (string) ($employeeProfile?->employee_id ?? ''),
-                    'employee_name' => $name !== '' ? $name : null,
+                    'employee_name' => $name,
                     'job_type' => $jobType,
-                    'main_gate' => null,
+                    'main_gate' => 'Holiday - No Class',
                     'attendance_date' => $attendanceDate,
                     'morning_in' => null,
                     'morning_out' => null,
@@ -608,11 +729,11 @@ class AdministratorPageController extends Controller
                 continue;
             }
 
-            $name = trim(implode(' ', array_filter([
+            $name = $this->formatEmployeeDisplayName(
                 $user->first_name,
                 $user->middle_name,
-                $user->last_name,
-            ])));
+                $user->last_name
+            );
 
             $record = [
                 'attendance_upload_id' => $holidayUpload->id,
@@ -631,7 +752,7 @@ class AdministratorPageController extends Controller
             ];
 
             if ($hasEmployeeNameColumn) {
-                $record['employee_name'] = $name !== '' ? $name : null;
+                $record['employee_name'] = $name;
             }
             if ($hasDepartmentColumn) {
                 $record['department'] = $user->employee?->department ?: null;
@@ -753,17 +874,17 @@ class AdministratorPageController extends Controller
             })
             ->map(function ($employee) use ($attendanceDate, $employeeJobTypeMap) {
                 $user = $employee->user;
-                $name = trim(implode(' ', array_filter([
+                $name = $this->formatEmployeeDisplayName(
                     $user?->first_name,
                     $user?->middle_name,
-                    $user?->last_name,
-                ])));
+                    $user?->last_name
+                );
                 $employeeId = $this->normalizeEmployeeId($employee->employee_id);
                 $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
 
                 return (object) [
                     'employee_id' => (string) $employee->employee_id,
-                    'employee_name' => $name !== '' ? $name : null,
+                    'employee_name' => $name,
                     'job_type' => $jobType,
                     'main_gate' => null,
                     'attendance_date' => $attendanceDate,
@@ -848,16 +969,16 @@ class AdministratorPageController extends Controller
                 }
 
                 $user = $employee->user;
-                $name = trim(implode(' ', array_filter([
+                $name = $this->formatEmployeeDisplayName(
                     $user?->first_name,
                     $user?->middle_name,
-                    $user?->last_name,
-                ])));
+                    $user?->last_name
+                );
                 $jobType = $this->normalizeJobType($employeeJobTypeMap?->get($employeeId));
 
                 $absences->push((object) [
                     'employee_id' => (string) $employee->employee_id,
-                    'employee_name' => $name !== '' ? $name : null,
+                    'employee_name' => $name,
                     'job_type' => $jobType,
                     'main_gate' => null,
                     'attendance_date' => Carbon::parse($date)->startOfDay(),
@@ -963,15 +1084,15 @@ class AdministratorPageController extends Controller
                 }
 
                 $user = $employee->user;
-                $name = trim(implode(' ', array_filter([
+                $name = $this->formatEmployeeDisplayName(
                     $user?->first_name,
                     $user?->middle_name,
-                    $user?->last_name,
-                ])));
+                    $user?->last_name
+                );
 
                 $expanded->push((object) [
                     'employee_id' => (string) $employee->employee_id,
-                    'employee_name' => $name !== '' ? $name : null,
+                    'employee_name' => $name,
                     'department' => $employeeDepartmentMap?->get($employeeId),
                     'job_type' => $this->normalizeJobType($employeeJobTypeMap?->get($employeeId)),
                     'main_gate' => null,
@@ -998,6 +1119,158 @@ class AdministratorPageController extends Controller
                 return $date.'|'.$this->normalizeEmployeeId($row->employee_id);
             })
             ->values();
+    }
+
+    private function appendHolidayPresentRowsForRange(
+        $records,
+        string $startDate,
+        string $endDate,
+        ?string $selectedJobType = null,
+        $employeeJobTypeMap = null
+    ) {
+        $datesWithAnyRecord = collect($records)
+            ->map(function ($row) {
+                try {
+                    return $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : null;
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            })
+            ->filter()
+            ->unique()
+            ->flip();
+
+        $existingKeys = collect($records)
+            ->filter(function ($row) {
+                return !empty($row->employee_id) && !empty($row->attendance_date);
+            })
+            ->map(function ($row) {
+                $employeeId = $this->normalizeEmployeeId($row->employee_id);
+                if ($employeeId === '') {
+                    return null;
+                }
+
+                try {
+                    $date = Carbon::parse($row->attendance_date)->toDateString();
+                } catch (\Throwable $e) {
+                    return null;
+                }
+
+                return $date ? ($employeeId.'|'.$date) : null;
+            })
+            ->filter()
+            ->flip();
+
+        $current = Carbon::parse($startDate)->startOfDay();
+        $last = Carbon::parse($endDate)->startOfDay();
+        $holidayRows = collect();
+
+        while ($current->lte($last)) {
+            $date = $current->toDateString();
+            if (!$this->isSundayDate($date) && $this->isHolidayDate($date)) {
+                // If the date already has any attendance records, do not auto-fill missing
+                // employees as present for that holiday date.
+                if ($datesWithAnyRecord->has($date)) {
+                    $current->addDay();
+                    continue;
+                }
+
+                $dailyHolidayRows = $this->buildHolidayPresentEmployees($date, $selectedJobType, $employeeJobTypeMap)
+                    ->filter(function ($row) use ($existingKeys) {
+                        $employeeId = $this->normalizeEmployeeId($row->employee_id);
+                        if ($employeeId === '' || empty($row->attendance_date)) {
+                            return false;
+                        }
+
+                        try {
+                            $date = Carbon::parse($row->attendance_date)->toDateString();
+                        } catch (\Throwable $e) {
+                            return false;
+                        }
+
+                        $key = $employeeId.'|'.$date;
+                        if ($existingKeys->has($key)) {
+                            return false;
+                        }
+
+                        $existingKeys->put($key, true);
+                        return true;
+                    })
+                    ->values();
+
+                $holidayRows = $holidayRows->concat($dailyHolidayRows);
+                $datesWithAnyRecord->put($date, true);
+            }
+
+            $current->addDay();
+        }
+
+        if ($holidayRows->isEmpty()) {
+            return collect($records);
+        }
+
+        return collect($records)
+            ->concat($holidayRows)
+            ->sortBy(function ($row) {
+                $date = '';
+                try {
+                    $date = $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : '';
+                } catch (\Throwable $e) {
+                    $date = '';
+                }
+
+                return $date.'|'.$this->normalizeEmployeeId($row->employee_id);
+            })
+            ->values();
+    }
+
+    private function filterAttendanceRowsByEmployeeName($rows, string $searchName)
+    {
+        $needle = strtolower(trim($searchName));
+        if ($needle === '') {
+            return collect($rows)->values();
+        }
+
+        return collect($rows)
+            ->filter(function ($row) use ($needle) {
+                $name = strtolower(trim((string) ($row->employee_name ?? '')));
+                return $name !== '' && str_contains($name, $needle);
+            })
+            ->values();
+    }
+
+    private function formatEmployeeDisplayName($firstName, $middleName, $lastName): ?string
+    {
+        $first = trim((string) ($firstName ?? ''));
+        $middle = trim((string) ($middleName ?? ''));
+        $last = trim((string) ($lastName ?? ''));
+
+        $firstMiddle = trim(implode(' ', array_filter([$first, $middle], fn ($part) => $part !== '')));
+
+        if ($last !== '' && $firstMiddle !== '') {
+            return "{$last}, {$firstMiddle}";
+        }
+
+        if ($last !== '') {
+            return $last;
+        }
+
+        if ($firstMiddle !== '') {
+            return $firstMiddle;
+        }
+
+        return null;
+    }
+
+    private function normalizeLooseDisplayName($name): ?string
+    {
+        $value = trim((string) ($name ?? ''));
+        if ($value === '') {
+            return null;
+        }
+
+        // Preserve any existing delimiter style when source parts are unavailable.
+        return preg_replace('/\s+/', ' ', $value);
     }
 
     private function normalizeJobType($value): ?string // Normalizes various user inputs for job type into consistent values used in the system. Returns null for empty or unrecognized inputs.

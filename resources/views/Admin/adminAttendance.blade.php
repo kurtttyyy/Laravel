@@ -37,6 +37,7 @@
           'to_date' => $toDate ?? null,
           'upload_id' => $selectedUploadId,
           'job_type' => $selectedJobType ?? null,
+          'search_name' => $searchName ?? null,
         ], fn ($value) => !is_null($value) && $value !== '');
 
         $baseCardClasses = 'relative bg-white rounded-2xl p-6 border border-gray-200 flex items-center justify-center transition';
@@ -121,6 +122,9 @@
               @endif
               @if (!empty($selectedJobType))
                 <input type="hidden" name="job_type" value="{{ $selectedJobType }}">
+              @endif
+              @if (!empty($searchName))
+                <input type="hidden" name="search_name" value="{{ $searchName }}">
               @endif
               <label class="text-sm text-gray-600">From Date:</label>
               <input
@@ -209,6 +213,9 @@
           <form method="GET" action="{{ route($currentAttendanceRoute) }}" class="flex items-center gap-2">
             @if ($selectedUploadId)
               <input type="hidden" name="upload_id" value="{{ $selectedUploadId }}">
+            @endif
+            @if (!empty($searchName))
+              <input type="hidden" name="search_name" value="{{ $searchName }}">
             @endif
             <label class="text-sm text-gray-600">Job Type:</label>
             <select

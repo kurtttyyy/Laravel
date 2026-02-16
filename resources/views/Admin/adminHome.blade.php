@@ -39,8 +39,19 @@
         <div class="bg-white rounded-xl p-5 flex justify-between items-center">
           <div>
             <p class="text-sm text-slate-500">Total Employees</p>
-            <h2 class="text-2xl font-semibold">1,248</h2>
-            <p class="text-sm text-emerald-500">↑ +12% this month</p>
+            <h2 class="text-2xl font-semibold">{{ number_format($totalEmployeeCount ?? 0) }}</h2>
+            @php
+              $employeeChange = (float) ($monthlyEmployeePercentChange ?? 0);
+              $employeeChangeDirection = $employeeChange > 0 ? 'up' : ($employeeChange < 0 ? 'down' : 'flat');
+              $employeeChangeClass = $employeeChangeDirection === 'up'
+                ? 'text-emerald-500'
+                : ($employeeChangeDirection === 'down' ? 'text-red-500' : 'text-slate-500');
+              $employeeChangeArrow = $employeeChangeDirection === 'up'
+                ? '↑'
+                : ($employeeChangeDirection === 'down' ? '↓' : '→');
+              $employeeChangeSign = $employeeChange > 0 ? '+' : '';
+            @endphp
+            <p class="text-sm {{ $employeeChangeClass }}">{{ $employeeChangeArrow }} {{ $employeeChangeSign }}{{ number_format($employeeChange, 1) }}% this month</p>
           </div>
           <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-users"></i>

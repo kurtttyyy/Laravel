@@ -191,6 +191,7 @@
     const rawSourceRows = Array.from(table.querySelectorAll('tbody tr')).filter((row) => row.querySelectorAll('td').length > 1);
     let isSummaryView = false;
     let isChartView = false;
+    let activeChartMetric = 'tardiness';
 
     function formatDateLabel(dateStr) {
       const dateObj = new Date(`${dateStr}T00:00:00`);
@@ -199,6 +200,27 @@
       const day = dateObj.getDate();
       const year = dateObj.getFullYear();
       return `${weekday}(${month}.${day}.${year})`;
+    }
+
+    function normalizeEmployeeId(value) {
+      const raw = String(value || '').trim();
+      if (!raw) {
+        return '';
+      }
+
+      // Normalize spaces and casing for non-numeric IDs.
+      const compact = raw.replace(/\s+/g, '');
+
+      // Excel often exports numeric IDs like 123.0 / 123.00.
+      const excelStyleMatch = compact.match(/^(\d+)\.0+$/);
+      const normalized = excelStyleMatch ? excelStyleMatch[1] : compact;
+
+      // If purely numeric, collapse leading zeros so 00123 and 123 count as one ID.
+      if (/^\d+$/.test(normalized)) {
+        return String(parseInt(normalized, 10));
+      }
+
+      return normalized.toUpperCase();
     }
 
     function buildDateRange() {
@@ -243,7 +265,7 @@
       const employeeMap = new Map();
 
       sourceRows.forEach((row) => {
-        const employeeId = (row.getAttribute('data-employee-id') || '').trim();
+        const employeeId = normalizeEmployeeId(row.getAttribute('data-employee-id'));
         const employeeName = (row.getAttribute('data-employee-name') || '-').trim();
         const department = (row.getAttribute('data-department') || '-').trim();
         const attendanceDate = (row.getAttribute('data-attendance-date') || '').trim();
@@ -333,13 +355,13 @@
           const dateCells = dateRange.map((date) => {
           const day = emp.byDate[date] || { status: '', lateMinutes: 0, hasMissingLogs: false, missingLogs: [] };
           const status = day.status;
-          const missingLogsText = (day.missingLogs || []).join(', ');
+          const missingLogsText = (day.missingLogs || []).join('/');
           if (status === 'present' && day.hasMissingLogs) return `<td class="px-3 py-2">${missingLogsText || 'Missing Logs'}</td>`;
           if (status === 'present') return `<td class="px-3 py-2">-</td>`;
           if (status === 'tardy') {
             const tardyPercent = ((day.lateMinutes || 0) / 100).toFixed(2);
             if (day.hasMissingLogs) {
-              return `<td class="px-3 py-2">${tardyPercent} ${missingLogsText || 'Missing Logs'}</td>`;
+              return `<td class="px-3 py-2">${tardyPercent}/${missingLogsText || 'Missing Logs'}</td>`;
             }
             return `<td class="px-3 py-2">${tardyPercent}</td>`;
           }
@@ -395,88 +417,285 @@
 
       const tardinessByDepartment = {};
       const employeeCountByDepartment = {};
+      const absencesByDepartment = {};
+      const absentEmployeeCountByDepartment = {};
       employees.forEach((emp) => {
         const department = (emp.department || '-').trim() || '-';
-        const tardiness = Number(((emp.totalLateMinutes || 0) / 100).toFixed(2));
+        const tardiness = Number(emp.totalLateMinutes || 0);
+        const absences = Number(emp.absent || 0);
         tardinessByDepartment[department] = (tardinessByDepartment[department] || 0) + tardiness;
         employeeCountByDepartment[department] = (employeeCountByDepartment[department] || 0) + 1;
+        absencesByDepartment[department] = (absencesByDepartment[department] || 0) + absences;
+        if (absences > 0) {
+          absentEmployeeCountByDepartment[department] = (absentEmployeeCountByDepartment[department] || 0) + 1;
+        }
       });
 
-      const departmentEntries = Object.entries(tardinessByDepartment)
-        .sort((a, b) => b[1] - a[1]);
-
-      if (!departmentEntries.length) {
-        chartContainer.innerHTML = '<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">No tardiness data to chart.</div>';
-        return;
-      }
-
-      const totalTardiness = departmentEntries.reduce((sum, [, value]) => sum + value, 0);
-      const totalEmployees = employees.length;
+      const totalLateMinutes = Object.values(tardinessByDepartment).reduce((sum, value) => sum + Number(value || 0), 0);
+      const totalEmployees = new Set(
+        employees
+          .map((emp) => normalizeEmployeeId(emp.employeeId))
+          .filter(Boolean)
+      ).size;
       const totalAbsences = employees.reduce((sum, emp) => sum + (emp.absent || 0), 0);
+      const totalDaysInRange = Math.max((summaryData?.dateRange || []).length, 1);
+      const totalClassDaysByDepartment = {};
+      const absenceRateByDepartment = {};
+      Object.keys(employeeCountByDepartment).forEach((department) => {
+        const employeeCount = Number(employeeCountByDepartment[department] || 0);
+        const classDays = employeeCount * totalDaysInRange;
+        const absences = Number(absencesByDepartment[department] || 0);
+        totalClassDaysByDepartment[department] = classDays;
+        absenceRateByDepartment[department] = classDays > 0
+          ? Number(((absences / classDays) * 100).toFixed(2))
+          : 0;
+      });
+      const totalPossibleClassDays = Object.values(totalClassDaysByDepartment)
+        .reduce((sum, value) => sum + Number(value || 0), 0);
+      const overallAbsenceRate = totalPossibleClassDays > 0
+        ? Number(((totalAbsences / totalPossibleClassDays) * 100).toFixed(2))
+        : 0;
+      const totalAbsentEmployees = Object.values(absentEmployeeCountByDepartment)
+        .reduce((sum, value) => sum + Number(value || 0), 0);
+      const minutesPerClassDay = 9 * 60;
+      const tardinessRateByDepartment = {};
+      Object.keys(employeeCountByDepartment).forEach((department) => {
+        const lateMinutes = Number(tardinessByDepartment[department] || 0);
+        const classDays = Number(totalClassDaysByDepartment[department] || 0);
+        const possibleMinutes = classDays * minutesPerClassDay;
+        tardinessRateByDepartment[department] = possibleMinutes > 0
+          ? Number(((lateMinutes / possibleMinutes) * 100).toFixed(2))
+          : 0;
+      });
+      const totalPossibleLateMinutes = totalPossibleClassDays * minutesPerClassDay;
+      const overallTardinessRate = totalPossibleLateMinutes > 0
+        ? Number(((totalLateMinutes / totalPossibleLateMinutes) * 100).toFixed(2))
+        : 0;
+      const outstandingScoreByDepartment = {};
+      Object.keys(employeeCountByDepartment).forEach((department) => {
+        const absenceRate = Number(absenceRateByDepartment[department] || 0);
+        const tardinessRate = Number(tardinessRateByDepartment[department] || 0);
+        // Rule: Outstanding % = 100 - (Absence % + Tardiness %)
+        const score = Math.max(0, Math.min(100, 100 - (absenceRate + tardinessRate)));
+        outstandingScoreByDepartment[department] = Number(score.toFixed(2));
+      });
+      const departmentScoreEntries = Object.entries(outstandingScoreByDepartment)
+        .sort((a, b) => b[1] - a[1]);
+      const outstandingDepartmentsEntries = Object.entries(outstandingScoreByDepartment)
+        .filter(([, score]) => Number(score || 0) >= 95)
+        .sort((a, b) => b[1] - a[1]);
+      const totalOutstandingDepartments = outstandingDepartmentsEntries.length;
       const colors = [
         '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
         '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b',
       ];
 
-      let currentDeg = 0;
-      const gradientStops = totalTardiness > 0
-        ? departmentEntries.map(([, value], index) => {
-            const percentage = value / totalTardiness;
-            const start = currentDeg;
-            const end = currentDeg + (percentage * 360);
-            currentDeg = end;
-            const color = colors[index % colors.length];
-            return `${color} ${start.toFixed(2)}deg ${end.toFixed(2)}deg`;
-          })
-        : [];
+      const metricConfig = {
+        absences: {
+          title: 'Pie Chart: Absence Rate per Department',
+          totalLabel: 'Overall Absence Rate',
+          totalValue: totalAbsences,
+          emptyText: 'No absence data to chart.',
+          formatValue: (value) => `${Number(value || 0).toFixed(2)}%`,
+          cardClasses: {
+            base: 'rounded-xl border p-3 cursor-pointer transition',
+            active: 'border-red-400 bg-red-100 ring-1 ring-red-300',
+            inactive: 'border-red-200 bg-red-50 hover:bg-red-100',
+          },
+        },
+        employees: {
+          title: 'Pie Chart: Total Employees per Department',
+          totalLabel: 'Total Employees',
+          totalValue: totalEmployees,
+          emptyText: 'No employee data to chart.',
+          formatValue: (value) => `${Math.round(value)}`,
+          cardClasses: {
+            base: 'rounded-xl border p-3 cursor-pointer transition',
+            active: 'border-blue-400 bg-blue-100 ring-1 ring-blue-300',
+            inactive: 'border-blue-200 bg-blue-50 hover:bg-blue-100',
+          },
+        },
+        outstanding: {
+          title: 'Pie Chart: Outstanding Score by Department (100 - (Absence% + Tardiness%))',
+          totalLabel: 'Outstanding Departments',
+          totalValue: totalOutstandingDepartments,
+          emptyText: 'No department score data to chart.',
+          formatValue: (value) => `${Number(value || 0).toFixed(2)}%`,
+          cardClasses: {
+            base: 'rounded-xl border p-3 cursor-pointer transition',
+            active: 'border-emerald-400 bg-emerald-100 ring-1 ring-emerald-300',
+            inactive: 'border-emerald-200 bg-emerald-50 hover:bg-emerald-100',
+          },
+        },
+        tardiness: {
+          title: 'Pie Chart: Tardiness Rate per Department (Late Minutes vs 9 Hours/Class Day)',
+          totalLabel: 'Overall Tardiness Rate',
+          totalValue: totalLateMinutes,
+          emptyText: 'No tardiness data to chart.',
+          formatValue: (value) => `${Number(value || 0).toFixed(2)}%`,
+          cardClasses: {
+            base: 'rounded-xl border p-3 cursor-pointer transition',
+            active: 'border-amber-400 bg-amber-100 ring-1 ring-amber-300',
+            inactive: 'border-amber-200 bg-amber-50 hover:bg-amber-100',
+          },
+        },
+      };
 
-      const pieStyle = totalTardiness > 0
-        ? `background: conic-gradient(${gradientStops.join(', ')});`
-        : 'background: #e2e8f0;';
-      const legendHtml = departmentEntries.map(([department, value], index) => {
-        const color = colors[index % colors.length];
-        const percentage = totalTardiness > 0 ? ((value / totalTardiness) * 100).toFixed(1) : '0.0';
-        const employeeCount = employeeCountByDepartment[department] || 0;
-        return `
-          <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-xs">
-            <div class="flex items-center gap-2">
-              <span class="h-3 w-3 rounded-sm" style="background:${color}"></span>
-              <span class="font-medium text-slate-700">${department}</span>
+      function getEntriesByMetric(metric) {
+        if (metric === 'absences') {
+          return Object.entries(absenceRateByDepartment).sort((a, b) => b[1] - a[1]);
+        }
+        if (metric === 'employees') {
+          return Object.entries(employeeCountByDepartment).sort((a, b) => b[1] - a[1]);
+        }
+        if (metric === 'outstanding') {
+          return departmentScoreEntries;
+        }
+        return Object.entries(tardinessRateByDepartment).sort((a, b) => b[1] - a[1]);
+      }
+
+      function renderMetricChart(metric) {
+        const selectedMetric = metricConfig[metric] ? metric : 'tardiness';
+        activeChartMetric = selectedMetric;
+        const config = metricConfig[selectedMetric];
+        const departmentEntries = getEntriesByMetric(selectedMetric);
+        const totalValue = departmentEntries.reduce((sum, [, value]) => sum + Number(value || 0), 0);
+
+        if (!departmentEntries.length || (selectedMetric !== 'outstanding' && totalValue <= 0)) {
+          chartContainer.innerHTML = `<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">${config.emptyText}</div>`;
+          return;
+        }
+
+        let currentDeg = 0;
+        const gradientStops = departmentEntries.map(([, value], index) => {
+          const percentage = Number(value || 0) / totalValue;
+          const start = currentDeg;
+          const end = currentDeg + (percentage * 360);
+          currentDeg = end;
+          const color = colors[index % colors.length];
+          return `${color} ${start.toFixed(2)}deg ${end.toFixed(2)}deg`;
+        });
+
+        const pieStyle = `background: conic-gradient(${gradientStops.join(', ')});`;
+        const legendHtml = departmentEntries.map(([department, value], index) => {
+          const color = colors[index % colors.length];
+          const numericValue = Number(value || 0);
+          const percentage = totalValue > 0 ? ((numericValue / totalValue) * 100).toFixed(1) : '0.0';
+          const employeeCount = employeeCountByDepartment[department] || 0;
+          const departmentAbsentEmployees = Number(absentEmployeeCountByDepartment[department] || 0);
+          const departmentClassDays = Number(totalClassDaysByDepartment[department] || 0);
+          const departmentLateMinutes = Number(tardinessByDepartment[department] || 0);
+          const departmentPossibleLateMinutes = departmentClassDays * minutesPerClassDay;
+          const outstandingRemark = numericValue >= 96
+            ? 'Excellent'
+            : numericValue >= 86
+              ? 'Very Good'
+              : numericValue >= 75
+                ? 'Good'
+                : 'Needs Improvement';
+          const outstandingRemarkClass = numericValue >= 96
+            ? 'text-emerald-600'
+            : numericValue >= 86
+              ? 'text-blue-600'
+              : numericValue >= 75
+                ? 'text-amber-600'
+                : 'text-slate-500';
+          const extraLabel = selectedMetric === 'outstanding'
+            ? `<div class="text-[11px] ${outstandingRemarkClass}">${outstandingRemark}</div>`
+            : selectedMetric === 'absences'
+              ? `<div class="text-[11px] text-slate-500">${departmentAbsentEmployees}/${Math.round(employeeCount)} employees</div>`
+              : selectedMetric === 'tardiness'
+                ? `<div class="text-[11px] text-slate-500">${Math.round(departmentLateMinutes)}/${Math.round(departmentPossibleLateMinutes)} late-minutes</div>`
+              : `<div class="text-[11px] text-slate-500">Employees: ${employeeCount}</div>`;
+          const valueLine = selectedMetric === 'absences' || selectedMetric === 'tardiness'
+            ? `${config.formatValue(numericValue)}`
+            : `${config.formatValue(numericValue)} (${percentage}%)`;
+          return `
+            <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="h-3 w-3 rounded-sm" style="background:${color}"></span>
+                <span class="font-medium text-slate-700">${department}</span>
+              </div>
+              <div class="text-right text-slate-600">
+                <div>${valueLine}</div>
+                ${extraLabel}
+              </div>
             </div>
-            <div class="text-right text-slate-600">
-              <div>${value.toFixed(2)} (${percentage}%)</div>
-              <div class="text-[11px] text-slate-500">Employees: ${employeeCount}</div>
+          `;
+        }).join('');
+
+        const absencesCardClass = selectedMetric === 'absences'
+          ? `${metricConfig.absences.cardClasses.base} ${metricConfig.absences.cardClasses.active}`
+          : `${metricConfig.absences.cardClasses.base} ${metricConfig.absences.cardClasses.inactive}`;
+        const employeesCardClass = selectedMetric === 'employees'
+          ? `${metricConfig.employees.cardClasses.base} ${metricConfig.employees.cardClasses.active}`
+          : `${metricConfig.employees.cardClasses.base} ${metricConfig.employees.cardClasses.inactive}`;
+        const tardinessCardClass = selectedMetric === 'tardiness'
+          ? `${metricConfig.tardiness.cardClasses.base} ${metricConfig.tardiness.cardClasses.active}`
+          : `${metricConfig.tardiness.cardClasses.base} ${metricConfig.tardiness.cardClasses.inactive}`;
+        const outstandingCardClass = selectedMetric === 'outstanding'
+          ? `${metricConfig.outstanding.cardClasses.base} ${metricConfig.outstanding.cardClasses.active}`
+          : `${metricConfig.outstanding.cardClasses.base} ${metricConfig.outstanding.cardClasses.inactive}`;
+        const footerLabel = selectedMetric === 'outstanding'
+          ? 'Outstanding Departments (>=95%)'
+          : selectedMetric === 'absences'
+            ? 'Overall Absence Rate'
+            : selectedMetric === 'tardiness'
+              ? 'Overall Tardiness Rate'
+            : config.totalLabel;
+        const footerValue = selectedMetric === 'outstanding'
+          ? `${outstandingDepartmentsEntries.length}`
+          : selectedMetric === 'absences'
+            ? `${overallAbsenceRate.toFixed(2)}% (${Math.round(totalAbsentEmployees)}/${Math.round(totalEmployees)} employees absent)`
+            : selectedMetric === 'tardiness'
+              ? `${overallTardinessRate.toFixed(2)}% (${Math.round(totalLateMinutes)}/${Math.round(totalPossibleLateMinutes)} late-minutes)`
+          : config.formatValue(totalValue);
+
+        chartContainer.innerHTML = `
+          <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-700">
+            ${config.title}
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button type="button" class="${absencesCardClass}" data-chart-metric="absences">
+              <div class="text-[11px] font-semibold tracking-wide text-red-700">TOTAL ABSENCES</div>
+              <div class="mt-1 text-xl font-bold text-red-800">${Math.round(totalAbsences)}</div>
+              <div class="text-[11px] text-red-700">${overallAbsenceRate.toFixed(2)}%</div>
+            </button>
+            <button type="button" class="${employeesCardClass}" data-chart-metric="employees">
+              <div class="text-[11px] font-semibold tracking-wide text-blue-700">TOTAL EMPLOYEES</div>
+              <div class="mt-1 text-xl font-bold text-blue-800">${Math.round(totalEmployees)}</div>
+            </button>
+            <button type="button" class="${outstandingCardClass}" data-chart-metric="outstanding">
+              <div class="text-[11px] font-semibold tracking-wide text-emerald-700">OUTSTANDING ATTENDANCE DEPARTMENTS</div>
+              <div class="mt-1 text-xl font-bold text-emerald-800">${Math.round(totalOutstandingDepartments)}</div>
+            </button>
+            <button type="button" class="${tardinessCardClass}" data-chart-metric="tardiness">
+              <div class="text-[11px] font-semibold tracking-wide text-amber-700">TOTAL TARDINESS</div>
+              <div class="mt-1 text-xl font-bold text-amber-800">${Math.round(totalLateMinutes)}</div>
+              <div class="text-[11px] text-amber-700">${overallTardinessRate.toFixed(2)}%</div>
+            </button>
+          </div>
+          <div class="grid gap-4 md:grid-cols-[260px_1fr]">
+            <div class="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
+              <div class="h-52 w-52 rounded-full border border-slate-200" style="${pieStyle}"></div>
+              <div class="mt-3 text-xs text-slate-500">${footerLabel}: ${footerValue}</div>
             </div>
+            <div class="space-y-2">${legendHtml}</div>
           </div>
         `;
-      }).join('');
 
-      chartContainer.innerHTML = `
-        <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-700">
-          Pie Chart: Total Tardiness per Department
-        </div>
-        <div class="grid gap-3 sm:grid-cols-3">
-          <div class="rounded-xl border border-red-200 bg-red-50 p-3">
-            <div class="text-[11px] font-semibold tracking-wide text-red-700">TOTAL ABSENCES</div>
-            <div class="mt-1 text-xl font-bold text-red-800">${totalAbsences}</div>
-          </div>
-          <div class="rounded-xl border border-blue-200 bg-blue-50 p-3">
-            <div class="text-[11px] font-semibold tracking-wide text-blue-700">TOTAL EMPLOYEE</div>
-            <div class="mt-1 text-xl font-bold text-blue-800">${totalEmployees}</div>
-          </div>
-          <div class="rounded-xl border border-amber-200 bg-amber-50 p-3">
-            <div class="text-[11px] font-semibold tracking-wide text-amber-700">TOTAL TARDINESS</div>
-            <div class="mt-1 text-xl font-bold text-amber-800">${totalTardiness.toFixed(2)}</div>
-          </div>
-        </div>
-        <div class="grid gap-4 md:grid-cols-[260px_1fr]">
-          <div class="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-4">
-            <div class="h-52 w-52 rounded-full border border-slate-200" style="${pieStyle}"></div>
-            <div class="mt-3 text-xs text-slate-500">Total Tardiness: ${totalTardiness.toFixed(2)}</div>
-          </div>
-          <div class="space-y-2">${legendHtml}</div>
-        </div>
-      `;
+        chartContainer.querySelectorAll('[data-chart-metric]').forEach((card) => {
+          card.addEventListener('click', function () {
+            const nextMetric = this.getAttribute('data-chart-metric') || '';
+            if (!metricConfig[nextMetric] || nextMetric === activeChartMetric) {
+              return;
+            }
+            renderMetricChart(nextMetric);
+          });
+        });
+      }
+
+      renderMetricChart(activeChartMetric);
     }
 
     if (summaryBtn) {
@@ -553,7 +772,7 @@
         printWindow.document.write(`
           <html>
             <head>
-              <title>Total Employee Attendance</title>
+              <title>Total Employees Attendance</title>
               <style>
                 body { font-family: Arial, sans-serif; margin: 24px; color: #111827; }
                 h1 { font-size: 18px; margin-bottom: 12px; }
@@ -563,7 +782,7 @@
               </style>
             </head>
             <body>
-              <h1>Total Employee Attendance</h1>
+              <h1>Total Employees Attendance</h1>
               ${tableHtml}
             </body>
           </html>

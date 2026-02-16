@@ -299,9 +299,46 @@ class AdministratorPageController extends Controller
                         ->values();
                 }
             } else {
-                $absentEmployees = $absentEmployees
-                    ->concat($this->buildMissingEmployeeAbsences($records, $fromDate, $selectedJobType, $employeeJobTypeMap))
+                // No explicit date filter: infer the covered dates from current rows and
+                // build absences per employee per day (not just per employee).
+                $recordDates = $records
+                    ->map(function ($row) {
+                        try {
+                            return $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : null;
+                        } catch (\Throwable $e) {
+                            return null;
+                        }
+                    })
+                    ->filter()
+                    ->unique()
+                    ->sort()
                     ->values();
+
+                if ($recordDates->count() >= 2) {
+                    $absentEmployees = $absentEmployees
+                        ->concat($this->buildMissingEmployeeAbsencesForRange(
+                            $records,
+                            (string) $recordDates->first(),
+                            (string) $recordDates->last(),
+                            $selectedJobType,
+                            $employeeJobTypeMap
+                        ))
+                        ->values();
+                } else {
+                    $fallbackDate = $exactDateFilter
+                        ?? $normalizedFromDate
+                        ?? $normalizedToDate
+                        ?? $recordDates->first();
+
+                    $absentEmployees = $absentEmployees
+                        ->concat($this->buildMissingEmployeeAbsences(
+                            $records,
+                            $fallbackDate ? (string) $fallbackDate : null,
+                            $selectedJobType,
+                            $employeeJobTypeMap
+                        ))
+                        ->values();
+                }
             }
         }
         $tardyEmployees = $records

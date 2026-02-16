@@ -71,7 +71,7 @@
            class="{{ $baseCardClasses }} hover:border-blue-400 hover:bg-blue-50 {{ $activeAttendanceTab === 'total_employee' ? 'border-blue-500 bg-blue-50' : '' }}">
           <div class="text-center">
             <div class="text-4xl font-bold text-gray-800">{{ $totalCount }}</div>
-            <div class="text-sm text-gray-500 mt-1">Total Employees</div>
+            <div class="text-sm text-gray-500 mt-1"> Employees</div>
           </div>
         </a>
       </div>

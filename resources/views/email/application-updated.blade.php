@@ -4,6 +4,8 @@
 
 <p>Your application status is now:</p>
 
-<strong>{{ $transaction->status }}</strong>
+<strong>{{ $review->status }}</strong>
+
+<strong>Check the website for more info.</strong>
 
 <p>Thank you.</p>

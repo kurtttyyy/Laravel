@@ -13,14 +13,14 @@ class ApplicationUpdatedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $transaction;
+    public $review;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($transaction)
+    public function __construct($review)
     {
-        $this->transaction = $transaction;
+        $this->review = $review;
     }
 
     /**

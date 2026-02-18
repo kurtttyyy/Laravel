@@ -133,7 +133,12 @@ class EmployeePageController extends Controller
     }
 
     public function display_communication(){
-        return view('employee.employeeCommunication');
+        $admins = User::query()
+            ->whereIn('role', ['admin', 'Admin'])
+            ->orderBy('first_name')
+            ->get();
+
+        return view('employee.employeeCommunication', compact('admins'));
     }
 
     private function formatEmployeeDisplayName($firstName, $middleName, $lastName): ?string

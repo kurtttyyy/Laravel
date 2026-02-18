@@ -188,43 +188,7 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col md:flex-row gap-6">
-        @php
-          $activeForm = request()->query('form', 'leave');
-          $formQueryBase = array_filter([
-            'month' => $selectedMonth ?? now()->format('Y-m'),
-          ], fn ($value) => !is_null($value) && $value !== '');
-        @endphp
-        <div class="w-full md:w-1/4 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-          <h4 class="font-semibold text-gray-700 mb-4">Select Form</h4>
-          <a
-            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'leave'])) }}"
-            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'leave' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
-          >
-            LEAVE APPLICATION FORM
-          </a>
-          <a
-            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'official'])) }}"
-            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'official' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
-          >
-            APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
-          </a>
-        </div>
 
-        <div class="w-full md:w-3/4 space-y-6">
-          @if ($activeForm === 'official')
-            <div id="adminOfficialForm">
-              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
-              @include('requestForm.applicationOBF')
-            </div>
-          @else
-            <div id="adminLeaveForm">
-              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
-              @include('requestForm.leaveApplicationForm')
-            </div>
-          @endif
-        </div>
-      </div>
     </div>
   </main>
 </div>

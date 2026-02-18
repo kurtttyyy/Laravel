@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,7 +70,7 @@
 
                         <div>
                             <p class="font-medium text-gray-800">Birth Certificate</p>
-                            <p class="text-sm text-gray-500">Uploaded · 1.2 MB</p>
+                            <p class="text-sm text-gray-500">Uploaded - 1.2 MB</p>
                         </div>
                     </div>
 
@@ -84,7 +84,7 @@
                     </span>
                     <div>
                         <p class="font-medium">NBI Clearance</p>
-                        <p class="text-sm text-gray-500">Uploaded · 0.8 MB</p>
+                        <p class="text-sm text-gray-500">Uploaded - 0.8 MB</p>
                     </div>
                 </div>
                 </div>
@@ -129,7 +129,7 @@
                     </span>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">Birth Certificate</p>
-                        <p class="text-sm text-gray-500">PDF · 1.2 MB · Jan 15, 2025</p>
+                        <p class="text-sm text-gray-500">PDF - 1.2 MB - Jan 15, 2025</p>
                     </div>
                     <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
                 </div>
@@ -141,7 +141,7 @@
                     </span>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">NBI Clearance</p>
-                        <p class="text-sm text-gray-500">PDF · 0.8 MB · Jan 18, 2025</p>
+                        <p class="text-sm text-gray-500">PDF - 0.8 MB - Jan 18, 2025</p>
                     </div>
                     <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
                 </div>
@@ -152,7 +152,7 @@
                     </span>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">Resume</p>
-                        <p class="text-sm text-gray-500">PDF · 0.5 MB · Jan 10, 2025</p>
+                        <p class="text-sm text-gray-500">PDF - 0.5 MB - Jan 10, 2025</p>
                     </div>
                     <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
                 </div>
@@ -163,7 +163,7 @@
                     </span>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800">Diploma</p>
-                        <p class="text-sm text-gray-500">PDF · 1.8 MB · Jan 8, 2025</p>
+                        <p class="text-sm text-gray-500">PDF - 1.8 MB - Jan 8, 2025</p>
                     </div>
                     <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
                 </div>

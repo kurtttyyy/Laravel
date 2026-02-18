@@ -1,15 +1,64 @@
+<style>
+    @page {
+        size: legal portrait;
+        margin-top: 2mm;
+        margin-bottom: 2mm;
+        margin-left: -70px;
+        margin-right: -70px;
+
+    }
+
+    @media print {
+        .print-row-two {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 1rem !important;
+        }
+
+        .print-row-three {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 1rem !important;
+        }
+
+        .print-details-two {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 2rem !important;
+            align-items: stretch !important;
+        }
+
+        .print-right-divider {
+            border-left: 1px solid #000 !important;
+            padding-left: 1.25rem !important;
+        }
+
+        .print-action-two {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 2rem !important;
+            align-items: stretch !important;
+        }
+
+        .print-signatory-margin {
+            margin-top: 4.5rem !important;
+        }
+
+    }
+</style>
+
         <form method="POST" action="{{ url('/leave/apply') }}" class="space-y-6">
             @csrf
 
             <!-- APPLICATION FORM FOR OFFICIAL BUSINESS AND OFFICIAL TIME -->
-            <div class="border-2 border-black p-6 rounded-lg space-y-4">
+            <div id="application-obf-print-area" class="border-2 border-black p-6 rounded-lg space-y-4 ">
 
                 <h4 class="text-center font-semibold text-gray-800 mb-6 tracking-wide uppercase">
                     APPLICATION FORM FOR OFFICIAL BUSINESS AND OFFICIAL TIME
                 </h4>
 
                 <!-- Top Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="print-row-two grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="text-sm font-medium ">Office / Department</label>
                         <input type="text" class="w-full border rounded px-3 py-2 border-black">
@@ -21,7 +70,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="print-row-three grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-sm font-medium">Date of Filing</label>
                         <input type="date" class="w-full border rounded px-3 py-2 border-black">
@@ -42,7 +91,7 @@
                 <div class="border-t pt-4 border-black">
                     <h5 class="font-semibold mb-8 text-center tracking-wide uppercase">DETAILS OF APPLICATION</h5>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 ">
+                    <div class="print-details-two grid grid-cols-1 md:grid-cols-2 gap-6 ">
 
                         <!-- Left Column -->
                         <div class="space-y-3">
@@ -75,7 +124,7 @@
 
 
                         <!-- Right Column -->
-                        <div class="space-y-3 pl-4 border-l border-black">
+                        <div class="print-right-divider space-y-3 pl-4 border-l border-black">
                             <div>
                                 <label class="text-sm ">
                                     Purpose of Business
@@ -119,7 +168,7 @@
                 <!-- DETAILS ON ACTION OF APPLICATION -->
                 <div class="border-t pt-6 space-y-4 border-black">
                     <h5 class="font-semibold mb-8 text-center tracking-wide uppercase">DETAILS ON ACTION OF APPLICATION</h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="print-action-two grid grid-cols-1 md:grid-cols-2 gap-6">
 
                         <!-- Leave Credits (Left Column) -->
                         <div>
@@ -223,8 +272,9 @@
             <!-- Download Button -->
             <div class="flex justify-end">
                 <button
+                    id="application-obf-download-button"
                     type="button"
-                    onclick="window.print()"
+                    onclick="downloadApplicationOBFForm()"
                     class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                     Download Form
@@ -232,3 +282,70 @@
             </div>
             
         </form>
+
+        <script>
+            function downloadApplicationOBFForm() {
+                const printArea = document.getElementById('application-obf-print-area');
+                if (!printArea) {
+                    return;
+                }
+
+                const printWindow = window.open('', '_blank');
+                if (!printWindow) {
+                    return;
+                }
+
+                const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+                    .map((node) => node.outerHTML)
+                    .join('');
+
+                printWindow.document.open();
+                printWindow.document.write(`
+                    <!doctype html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <title>Application for Official Business / Official Time</title>
+                        ${styles}
+                        <style>
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                background: #fff;
+                            }
+                            #obf-print-fit-wrapper {
+                                width: 100%;
+                            }
+                            #application-obf-print-area {
+                                width: 100% !important;
+                                margin: 0 !important;
+                                box-sizing: border-box !important;
+                                min-height: 100vh !important;
+                                padding-left: 12px !important;
+                                padding-right: 12px !important;
+                                border-radius: 0 !important;
+                                font-size: 1.1rem !important;
+                                line-height: 1.4 !important;
+                            }
+                        </style>
+                    </head>
+                    <body><div id="obf-print-fit-wrapper">${printArea.outerHTML}</div></body>
+                    </html>
+                `);
+                printWindow.document.close();
+
+                printWindow.onload = function () {
+                    const wrapper = printWindow.document.getElementById('obf-print-fit-wrapper');
+                    const content = printWindow.document.getElementById('application-obf-print-area');
+                    if (wrapper && content) {
+                        wrapper.style.transform = 'none';
+                        wrapper.style.width = '100%';
+                    }
+
+                    printWindow.focus();
+                    printWindow.print();
+                    printWindow.close();
+                };
+            }
+        </script>

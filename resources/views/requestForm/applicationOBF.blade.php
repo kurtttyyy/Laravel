@@ -284,6 +284,45 @@
         </form>
 
         <script>
+            function buildApplicationOBFPrintMarkup(printArea) {
+                const clone = printArea.cloneNode(true);
+                const originalFields = printArea.querySelectorAll('input, textarea, select');
+                const clonedFields = clone.querySelectorAll('input, textarea, select');
+
+                originalFields.forEach((field, index) => {
+                    const clonedField = clonedFields[index];
+                    if (!clonedField) {
+                        return;
+                    }
+
+                    if (field.tagName === 'INPUT') {
+                        const type = (field.getAttribute('type') || 'text').toLowerCase();
+                        if (type === 'checkbox' || type === 'radio') {
+                            if (field.checked) {
+                                clonedField.setAttribute('checked', 'checked');
+                            } else {
+                                clonedField.removeAttribute('checked');
+                            }
+                        } else {
+                            clonedField.setAttribute('value', field.value || '');
+                        }
+                    } else if (field.tagName === 'TEXTAREA') {
+                        clonedField.textContent = field.value || '';
+                    } else if (field.tagName === 'SELECT') {
+                        Array.from(clonedField.options).forEach((option, optionIndex) => {
+                            const isSelected = field.options[optionIndex]?.selected;
+                            if (isSelected) {
+                                option.setAttribute('selected', 'selected');
+                            } else {
+                                option.removeAttribute('selected');
+                            }
+                        });
+                    }
+                });
+
+                return clone.outerHTML;
+            }
+
             function downloadApplicationOBFForm() {
                 const printArea = document.getElementById('application-obf-print-area');
                 if (!printArea) {
@@ -330,7 +369,7 @@
                             }
                         </style>
                     </head>
-                    <body><div id="obf-print-fit-wrapper">${printArea.outerHTML}</div></body>
+                    <body><div id="obf-print-fit-wrapper">${buildApplicationOBFPrintMarkup(printArea)}</div></body>
                     </html>
                 `);
                 printWindow.document.close();

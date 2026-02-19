@@ -6,7 +6,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class EmployeePageController extends Controller
 {
@@ -66,9 +65,6 @@ class EmployeePageController extends Controller
             ->values();
 
         $defaultLeaveAllowances = [
-            'Annual Leave' => 15,
-            'Sick Leave' => 10,
-            'Personal Leave' => 5,
             'Study Leave' => 5,
             'Emergency Leave' => 3,
             'Maternity Leave' => 105,
@@ -76,21 +72,35 @@ class EmployeePageController extends Controller
             'Bereavement Leave' => 5,
             'Service Incentive Leave' => 5,
         ];
-        $storedMonthlyAllowances = Cache::get('leave_allowances:'.$selectedMonth, []);
+        $isTeaching = strcasecmp((string) ($user?->employee?->job_type ?? ''), 'Teaching') === 0;
+        $joinDate = null;
+        if ($isTeaching && !empty($user?->applicant?->date_hired)) {
+            $joinDate = Carbon::parse($user->applicant->date_hired);
+        } elseif (!empty($user?->employee?->employement_date)) {
+            $joinDate = Carbon::parse($user->employee->employement_date);
+        } elseif (!empty($user?->applicant?->date_hired)) {
+            $joinDate = Carbon::parse($user->applicant->date_hired);
+        }
+        $resetCycleMonths = $isTeaching ? 10 : 12;
+        $totalEarnedDays = $this->calculateMonthlyEarnedLeaveDays(
+            $joinDate,
+            $monthCursor,
+            $resetCycleMonths
+        );
+        $equalHalfEarnedDays = round($totalEarnedDays / 2, 1);
         $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
-            ->mapWithKeys(function ($defaultValue, $leaveType) use ($storedMonthlyAllowances) {
-                $value = $storedMonthlyAllowances[$leaveType] ?? $defaultValue;
-                return [$leaveType => max(0, (int) $value)];
-            })
+            ->mapWithKeys(fn ($value, $leaveType) => [$leaveType => max(0, (int) $value)])
             ->all();
+        $monthlyLeaveAllowances['Annual Leave'] = $equalHalfEarnedDays;
+        $monthlyLeaveAllowances['Sick Leave'] = $equalHalfEarnedDays;
 
         $employeeLeaveUsageByType = $employeeMonthRecords
             ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
             ->map(fn ($records) => (int) $records->sum('days'));
 
-        $annualLimit = (int) ($monthlyLeaveAllowances['Annual Leave'] ?? 0);
+        $annualLimit = (float) ($monthlyLeaveAllowances['Annual Leave'] ?? 0);
         $annualUsed = (int) ($employeeLeaveUsageByType->get('Annual Leave', 0));
-        $sickLimit = (int) ($monthlyLeaveAllowances['Sick Leave'] ?? 0);
+        $sickLimit = (float) ($monthlyLeaveAllowances['Sick Leave'] ?? 0);
         $sickUsed = (int) ($employeeLeaveUsageByType->get('Sick Leave', 0));
         $personalLimit = (int) ($monthlyLeaveAllowances['Personal Leave'] ?? 0);
         $personalUsed = (int) ($employeeLeaveUsageByType->get('Personal Leave', 0));
@@ -238,4 +248,36 @@ class EmployeePageController extends Controller
             return $record;
         });
     }
+
+    private function calculateMonthlyEarnedLeaveDays(?Carbon $joinDate, Carbon $monthCursor, ?int $resetCycleMonths = null): int
+    {
+        if (!$joinDate) {
+            return 0;
+        }
+
+        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $selectedMonthEnd = $monthCursor->copy()->endOfMonth();
+        $todayEnd = now()->endOfDay();
+        $accrualCutoff = $selectedMonthEnd->lte($todayEnd) ? $selectedMonthEnd : $todayEnd;
+
+        if ($accrualCutoff->lt($joinDate)) {
+            return 0;
+        }
+
+        $months = $joinMonthStart->diffInMonths($accrualCutoff->copy()->startOfMonth());
+
+        if ($accrualCutoff->isSameDay($accrualCutoff->copy()->endOfMonth())) {
+            $months++;
+        }
+
+        $months = max(0, $months);
+
+        if (!is_null($resetCycleMonths) && $resetCycleMonths > 0 && $months > 0) {
+            $months = (($months - 1) % $resetCycleMonths) + 1;
+        }
+
+        return $months;
+    }
+
 }
+

@@ -14,7 +14,7 @@ class EmployeeStoreController extends Controller
         Log::info($request->all());
         $attrs = $request->validate([
             'document_name' => 'required|string|max:255',
-            'uploadFile' => 'required|file|mimes:pdf,doc,docx|max:5120',
+            'uploadFile' => 'required|file|mimes:pdf,xlsx,doc,docx|max:5120',
         ]);
 
         $user = Auth::id();

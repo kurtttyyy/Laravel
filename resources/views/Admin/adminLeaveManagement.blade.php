@@ -43,37 +43,6 @@
         </form>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <div class="mb-3">
-          <h3 class="text-sm font-semibold text-gray-700">Monthly Leave Allocation (Editable)</h3>
-          <p class="text-xs text-gray-500 mt-1">Set monthly leave limit per employee for each leave type (for {{ $selectedMonth ?? now()->format('Y-m') }}).</p>
-        </div>
-        <form method="POST" action="{{ route('admin.leaveAllowances.update') }}" class="space-y-4">
-          @csrf
-          <input type="hidden" name="month" value="{{ $selectedMonth ?? now()->format('Y-m') }}">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            @foreach (($academyLeaveTypes ?? []) as $leaveType)
-              <label class="rounded-lg border border-gray-200 p-3 block">
-                <span class="text-sm text-gray-700 block mb-2">{{ $leaveType }}</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  name="allowances[{{ $leaveType }}]"
-                  value="{{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }}"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </label>
-            @endforeach
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-              Save Monthly Allocation
-            </button>
-          </div>
-        </form>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl border border-gray-200 p-4">
           <p class="text-xs text-gray-500 uppercase tracking-wide">Leave Used This Month</p>
@@ -98,30 +67,6 @@
           @endphp
           <p class="mt-2 text-2xl font-bold text-purple-700">{{ $topLeaveType }}</p>
           <p class="mt-1 text-sm text-gray-500">{{ (int) ($topLeaveEntry ?? 0) }} day(s)</p>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Academy Staff Leave Types (Per Employee Monthly Limit)</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          @foreach (($academyLeaveTypes ?? []) as $leaveType)
-            <div class="rounded-lg border border-gray-200 p-3 flex items-center justify-between">
-              <div>
-                <span class="text-sm text-gray-700 block">{{ $leaveType }}</span>
-                <span class="text-xs text-gray-500">
-                  Used total: {{ (int) (($leaveTypeCounts[$leaveType] ?? 0)) }} day(s)
-                  •
-                  Limit per employee: {{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }} day(s)
-                </span>
-              </div>
-              @php
-                $overLimitEmployees = (int) (($leaveTypeOverLimitCounts[$leaveType] ?? 0));
-              @endphp
-              <span class="text-sm font-semibold {{ $overLimitEmployees > 0 ? 'text-red-600' : 'text-emerald-600' }}">
-                {{ $overLimitEmployees }} over limit
-              </span>
-            </div>
-          @endforeach
         </div>
       </div>
 
@@ -170,12 +115,6 @@
                   <p class="text-sm font-semibold text-gray-800">{{ $record['employee_name'] ?? '-' }}</p>
                   <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $daysLabel }}</p>
                   <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
-                  <p class="text-xs {{ !empty($record['is_employee_over_limit']) ? 'text-red-600' : 'text-slate-500' }}">
-                    Employee usage this month: {{ (int) ($record['employee_usage_for_type'] ?? 0) }}/{{ (int) ($record['monthly_limit_per_employee'] ?? 0) }} day(s)
-                    @if (!empty($record['is_employee_over_limit']))
-                      (Over limit)
-                    @endif
-                  </p>
                 </div>
               </div>
               <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
@@ -209,3 +148,4 @@
 </script>
 </body>
 </html>
+

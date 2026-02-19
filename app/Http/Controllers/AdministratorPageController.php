@@ -12,7 +12,6 @@ use App\Models\OpenPosition;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -1468,118 +1467,17 @@ class AdministratorPageController extends Controller
             ->filter(fn ($record) => strcasecmp((string) $record['leave_type'], 'Sick Leave') === 0)
             ->sum('days');
 
-        $academyLeaveTypes = [
-            'Annual Leave',
-            'Sick Leave',
-            'Personal Leave',
-            'Study Leave',
-            'Emergency Leave',
-            'Maternity Leave',
-            'Paternity Leave',
-            'Bereavement Leave',
-            'Service Incentive Leave',
-        ];
-
-        $defaultLeaveAllowances = [
-            'Annual Leave' => 15,
-            'Sick Leave' => 10,
-            'Personal Leave' => 5,
-            'Study Leave' => 5,
-            'Emergency Leave' => 3,
-            'Maternity Leave' => 105,
-            'Paternity Leave' => 7,
-            'Bereavement Leave' => 5,
-            'Service Incentive Leave' => 5,
-        ];
-        $storedMonthlyAllowances = Cache::get('leave_allowances:'.$selectedMonth, []);
-        $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
-            ->mapWithKeys(function ($defaultValue, $leaveType) use ($storedMonthlyAllowances) {
-                $value = $storedMonthlyAllowances[$leaveType] ?? $defaultValue;
-                return [$leaveType => max(0, (int) $value)];
-            })
-            ->all();
-
-        $leaveTypeCounts = collect($academyLeaveTypes)
-            ->mapWithKeys(function ($type) use ($monthRecords) {
-                return [$type => $monthRecords
-                    ->where('leave_type', $type)
-                    ->sum('days')];
-            });
-
-        $usageByEmployeeByType = $monthRecords
-            ->groupBy(fn ($record) => (string) ($record['employee_name'] ?? '-'))
-            ->map(function ($employeeRecords) {
-                return $employeeRecords
-                    ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
-                    ->map(fn ($typeRecords) => (int) $typeRecords->sum('days'));
-            });
-
-        $leaveTypeOverLimitCounts = collect($academyLeaveTypes)
-            ->mapWithKeys(function ($leaveType) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
-                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
-                $overLimitCount = $usageByEmployeeByType
-                    ->filter(function ($perTypeUsage) use ($leaveType, $monthlyLimitPerEmployee) {
-                        $used = (int) ($perTypeUsage->get($leaveType, 0));
-                        return $used > $monthlyLimitPerEmployee;
-                    })
-                    ->count();
-
-                return [$leaveType => $overLimitCount];
-            });
-
-        $monthRecords = $monthRecords
-            ->map(function ($record) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
-                $employeeName = (string) ($record['employee_name'] ?? '-');
-                $leaveType = (string) ($record['leave_type'] ?? 'Leave');
-                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
-                $employeeUsageForType = (int) (
-                    $usageByEmployeeByType
-                        ->get($employeeName, collect())
-                        ->get($leaveType, 0)
-                );
-                $remainingForEmployee = max(0, $monthlyLimitPerEmployee - $employeeUsageForType);
-
-                $record['monthly_limit_per_employee'] = $monthlyLimitPerEmployee;
-                $record['employee_usage_for_type'] = $employeeUsageForType;
-                $record['employee_remaining_for_type'] = $remainingForEmployee;
-                $record['is_employee_over_limit'] = $employeeUsageForType > $monthlyLimitPerEmployee;
-
-                return $record;
-            })
-            ->values();
+        $leaveTypeCounts = $monthRecords
+            ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
+            ->map(fn ($records) => (int) $records->sum('days'));
 
         return view('admin.adminLeaveManagement', compact(
             'selectedMonth',
             'totalLeaveUsedDays',
             'sickLeaveUsedDays',
             'monthRecords',
-            'leaveTypeCounts',
-            'academyLeaveTypes',
-            'monthlyLeaveAllowances',
-            'leaveTypeOverLimitCounts'
+            'leaveTypeCounts'
         ));
-    }
-
-    public function update_leave_allowances(Request $request)
-    {
-        $validated = $request->validate([
-            'month' => ['required', 'date_format:Y-m'],
-            'allowances' => ['required', 'array'],
-            'allowances.*' => ['nullable', 'integer', 'min:0'],
-        ]);
-
-        $month = (string) $validated['month'];
-        $allowances = collect($validated['allowances'] ?? [])
-            ->mapWithKeys(function ($value, $leaveType) {
-                return [(string) $leaveType => max(0, (int) $value)];
-            })
-            ->all();
-
-        Cache::forever('leave_allowances:'.$month, $allowances);
-
-        return redirect()
-            ->route('admin.adminLeaveManagement', ['month' => $month])
-            ->with('success', 'Monthly leave allowances updated successfully.');
     }
 
     public function display_reports(){
@@ -1872,3 +1770,4 @@ class AdministratorPageController extends Controller
     }
 
 }
+

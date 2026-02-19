@@ -71,8 +71,8 @@
                 <i class="fa fa-calendar fa-2x"></i>
             </div>
             <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0) }}</h3>
-            <p class="text-gray-600 text-sm mb-4">Annual Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($annualLimit ?? 0) }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
+            <p class="text-gray-600 text-sm mb-4">Vacation Leave</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($annualLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
         </div>
 
 
@@ -84,7 +84,7 @@
             </div>
             <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0) }}</h3>
             <p class="text-gray-600 text-sm mb-1">Sick Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($sickLimit ?? 0) }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($sickLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
         </div>
 
 
@@ -95,7 +95,7 @@
                 <i class="fa fa-calendar-o fa-2x"></i>
             </div>
             <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($personalLimit ?? 0) - ($personalUsed ?? 0), 0) }}</h3>
-            <p class="text-gray-600 text-sm mb-1">Personal Days</p>
+            <p class="text-gray-600 text-sm mb-1">Others</p>
             <p class="text-gray-500 text-xs mt-4">of {{ (int) ($personalLimit ?? 0) }} days (used {{ (int) ($personalUsed ?? 0) }})</p>
         </div>
 
@@ -207,4 +207,3 @@
 
 </body>
 </html>
-

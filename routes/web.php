@@ -47,6 +47,7 @@ Route::controller(EmployeePageController::class)->group(function () {
 Route::controller(EmployeeStoreController::class)->group(function () {
     //POST
     Route::post('upload/documents', 'upload_store')->name('employee.upload_documents');
+    Route::post('employee/leave/application', 'leave_application_store')->name('employee.leaveApplication.store');
 
 });
 

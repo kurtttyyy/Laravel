@@ -64,14 +64,6 @@ class EmployeePageController extends Controller
             })
             ->values();
 
-        $defaultLeaveAllowances = [
-            'Study Leave' => 5,
-            'Emergency Leave' => 3,
-            'Maternity Leave' => 105,
-            'Paternity Leave' => 7,
-            'Bereavement Leave' => 5,
-            'Service Incentive Leave' => 5,
-        ];
         $isTeaching = strcasecmp((string) ($user?->employee?->job_type ?? ''), 'Teaching') === 0;
         $joinDate = null;
         if ($isTeaching && !empty($user?->applicant?->date_hired)) {
@@ -82,11 +74,24 @@ class EmployeePageController extends Controller
             $joinDate = Carbon::parse($user->applicant->date_hired);
         }
         $resetCycleMonths = $isTeaching ? 10 : 12;
+
+        $defaultLeaveAllowances = [
+            'Study Leave' => 5,
+            'Emergency Leave' => 3,
+            'Maternity Leave' => 105,
+            'Paternity Leave' => 7,
+            'Bereavement Leave' => 5,
+            'Service Incentive Leave' => 5,
+        ];
+
+        $beginningVacationBalance = 0.0;
+        $beginningSickBalance = 0.0;
         $totalEarnedDays = $this->calculateMonthlyEarnedLeaveDays(
             $joinDate,
             $monthCursor,
             $resetCycleMonths
         );
+        $earnedRangeLabel = $this->buildEarnedRangeLabel($joinDate, $monthCursor, $resetCycleMonths);
         $equalHalfEarnedDays = round($totalEarnedDays / 2, 1);
         $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
             ->mapWithKeys(fn ($value, $leaveType) => [$leaveType => max(0, (int) $value)])
@@ -116,7 +121,11 @@ class EmployeePageController extends Controller
             'sickUsed',
             'personalLimit',
             'personalUsed',
-            'totalDaysUsed'
+            'totalDaysUsed',
+            'beginningVacationBalance',
+            'beginningSickBalance',
+            'earnedRangeLabel',
+            'totalEarnedDays'
         ));
     }
 
@@ -277,6 +286,58 @@ class EmployeePageController extends Controller
         }
 
         return $months;
+    }
+
+    private function calculateCompletedMonthsUntilCutoff(?Carbon $joinDate, Carbon $monthCursor): int
+    {
+        if (!$joinDate) {
+            return 0;
+        }
+
+        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $selectedMonthEnd = $monthCursor->copy()->endOfMonth();
+        $todayEnd = now()->endOfDay();
+        $accrualCutoff = $selectedMonthEnd->lte($todayEnd) ? $selectedMonthEnd : $todayEnd;
+
+        if ($accrualCutoff->lt($joinDate)) {
+            return 0;
+        }
+
+        $months = $joinMonthStart->diffInMonths($accrualCutoff->copy()->startOfMonth());
+        if ($accrualCutoff->isSameDay($accrualCutoff->copy()->endOfMonth())) {
+            $months++;
+        }
+
+        return max(0, $months);
+    }
+
+    private function buildEarnedRangeLabel(?Carbon $joinDate, Carbon $monthCursor, int $resetCycleMonths): string
+    {
+        if (!$joinDate || $resetCycleMonths <= 0) {
+            return '-';
+        }
+
+        $completedMonths = $this->calculateCompletedMonthsUntilCutoff($joinDate, $monthCursor);
+        if ($completedMonths <= 0) {
+            return '-';
+        }
+
+        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $monthsInCurrentCycle = (($completedMonths - 1) % $resetCycleMonths) + 1;
+        $completedCycleMonths = $completedMonths - $monthsInCurrentCycle;
+
+        $rangeStart = $joinMonthStart->copy()->addMonths($completedCycleMonths)->startOfMonth();
+        $rangeEnd = $rangeStart->copy()->addMonths($monthsInCurrentCycle - 1)->startOfMonth();
+
+        if ($rangeStart->year === $rangeEnd->year) {
+            if ($rangeStart->format('M') === $rangeEnd->format('M')) {
+                return $rangeStart->format('M').', '.$rangeStart->year;
+            }
+
+            return $rangeStart->format('M').'-'.$rangeEnd->format('M').', '.$rangeStart->year;
+        }
+
+        return $rangeStart->format('M Y').' - '.$rangeEnd->format('M Y');
     }
 
 }

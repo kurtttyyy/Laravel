@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Applicant;
 use App\Models\ApplicantDocument;
 use App\Models\User;
 use App\Models\LeaveApplication;
@@ -199,7 +200,9 @@ class EmployeePageController extends Controller
 
     public function display_document(){
         $user_id = Auth::id();
-        $documents = ApplicantDocument::where('user_id', $user_id)->get();
+        $applicant = Applicant::where('user_id', $user_id)
+                                ->where('application_status','Hired')->first();
+        $documents = ApplicantDocument::where('applicant_id', $applicant->id)->get();
         return view('employee.employeeDocument', compact('documents'));
     }
 

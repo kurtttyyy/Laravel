@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApplicantDocument;
 use App\Models\User;
 use App\Models\LeaveApplication;
 use Carbon\Carbon;
@@ -197,7 +198,9 @@ class EmployeePageController extends Controller
     }
 
     public function display_document(){
-        return view('employee.employeeDocument');
+        $user_id = Auth::id();
+        $documents = ApplicantDocument::where('user_id', $user_id)->get();
+        return view('employee.employeeDocument', compact('documents'));
     }
 
     public function display_communication(){

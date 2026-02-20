@@ -59,6 +59,7 @@
                     </div>
                 </form>
 
+                @foreach($documents as $document)
                 <!-- Container -->
                 <div class="bg-green-100 border border-green-500 rounded-xl p-4 max-w mb-4">
 
@@ -69,13 +70,13 @@
                         </span>
 
                         <div>
-                            <p class="font-medium text-gray-800">Birth Certificate</p>
-                            <p class="text-sm text-gray-500">Uploaded - 1.2 MB</p>
+                            <p class="font-medium text-gray-800">{{ $document->filename}}</p>
+                            <p class="text-sm text-gray-500">Uploaded - {{ $document->size }}</p>
                         </div>
                     </div>
 
                 </div>
-
+                @endforeach
 
                 <div class="bg-green-100 border border-green-500 rounded-xl p-4 shadow-sm max-w mb-4">
                 <div class="status uploaded flex items-center gap-4">

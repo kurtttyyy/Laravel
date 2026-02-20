@@ -37,6 +37,7 @@ class LeaveApplication extends Model
         'days_with_pay',
         'days_without_pay',
         'commutation',
+        'status',
     ];
 
     protected $casts = [
@@ -58,4 +59,3 @@ class LeaveApplication extends Model
         'days_without_pay' => 'decimal:1',
     ];
 }
-

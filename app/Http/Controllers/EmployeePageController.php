@@ -32,40 +32,6 @@ class EmployeePageController extends Controller
             $user?->last_name
         );
 
-        $leaveRecords = $this->getSharedLeaveRecords();
-        $approvedRecords = $leaveRecords
-            ->filter(fn ($record) => strtolower((string) ($record['status'] ?? '')) === 'approved')
-            ->values();
-
-        $employeeApprovedRecords = $approvedRecords
-            ->filter(function ($record) use ($employeeDisplayName, $user) {
-                $recordName = strtolower(trim((string) ($record['employee_name'] ?? '')));
-                $targetName = strtolower(trim((string) ($employeeDisplayName ?? '')));
-
-                if ($recordName !== '' && $targetName !== '' && $recordName === $targetName) {
-                    return true;
-                }
-
-                $rawName = strtolower(trim(implode(' ', array_filter([
-                    $user?->first_name,
-                    $user?->middle_name,
-                    $user?->last_name,
-                ]))));
-
-                return $rawName !== '' && $recordName !== '' && str_contains($recordName, $rawName);
-            })
-            ->values();
-
-        $employeeMonthRecords = $employeeApprovedRecords
-            ->filter(function ($record) use ($monthCursor) {
-                $start = $record['start_date_carbon'];
-                $end = $record['end_date_carbon'];
-                return $start->format('Y-m') === $monthCursor->format('Y-m')
-                    || $end->format('Y-m') === $monthCursor->format('Y-m')
-                    || ($start->lt($monthCursor->copy()->startOfMonth()) && $end->gt($monthCursor->copy()->endOfMonth()));
-            })
-            ->values();
-
         $isTeaching = strcasecmp((string) ($user?->employee?->job_type ?? ''), 'Teaching') === 0;
         $joinDate = null;
         if ($isTeaching && !empty($user?->applicant?->date_hired)) {
@@ -96,6 +62,85 @@ class EmployeePageController extends Controller
         $earnedRangeLabel = $this->buildEarnedRangeLabel($joinDate, $monthCursor, $resetCycleMonths);
         $monthStart = $monthCursor->copy()->startOfMonth();
         $monthEnd = $monthCursor->copy()->endOfMonth();
+        $monthApplications = LeaveApplication::query()
+            ->where('user_id', $user?->id)
+            ->where(function ($query) use ($monthCursor) {
+                $query
+                    ->where(function ($filingDateQuery) use ($monthCursor) {
+                        $filingDateQuery
+                            ->whereNotNull('filing_date')
+                            ->whereYear('filing_date', $monthCursor->year)
+                            ->whereMonth('filing_date', $monthCursor->month);
+                    })
+                    ->orWhere(function ($createdAtQuery) use ($monthCursor) {
+                        $createdAtQuery
+                            ->whereNull('filing_date')
+                            ->whereYear('created_at', $monthCursor->year)
+                            ->whereMonth('created_at', $monthCursor->month);
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        $approvedMonthApplications = $monthApplications
+            ->filter(function ($application) {
+                return strcasecmp((string) ($application->status ?? ''), 'Approved') === 0;
+            })
+            ->values();
+        $pendingMonthApplications = $monthApplications
+            ->filter(function ($application) {
+                $status = trim((string) ($application->status ?? ''));
+                return $status === '' || strcasecmp($status, 'Pending') === 0;
+            })
+            ->values();
+
+        $mapApplicationToRecord = function ($application) use ($employeeDisplayName) {
+            $leaveType = (string) ($application->leave_type ?: 'Leave');
+            $leaveTypeNormalized = strtolower(trim($leaveType));
+            $baseDate = $application->filing_date
+                ? Carbon::parse($application->filing_date)->startOfDay()
+                : Carbon::parse($application->created_at)->startOfDay();
+            $days = (float) ($application->number_of_working_days ?? 0);
+            if ($days <= 0) {
+                $days = max(
+                    (float) ($application->days_with_pay ?? 0),
+                    (float) ($application->applied_total ?? 0)
+                );
+            }
+            $rangeDays = max((int) ceil($days), 1);
+
+            $reasonText = $application->inclusive_dates ?: '-';
+            if (str_contains($leaveTypeNormalized, 'official business')) {
+                $reasonText = 'Business Trip';
+            } elseif (str_contains($leaveTypeNormalized, 'annual leave')) {
+                $reasonText = 'Personal vacation';
+            } elseif (str_contains($leaveTypeNormalized, 'sick leave')) {
+                $reasonText = 'Not fit for work due to health reasons';
+            }
+
+            $statusText = trim((string) ($application->status ?? ''));
+            if ($statusText === '') {
+                $statusText = 'Pending';
+            }
+
+            return [
+                'employee_name' => $application->employee_name ?: $employeeDisplayName,
+                'leave_type' => $leaveType,
+                'start_date_carbon' => $baseDate->copy(),
+                'end_date_carbon' => $baseDate->copy()->addDays($rangeDays - 1),
+                'days' => $days,
+                'reason' => $reasonText,
+                'status' => $statusText,
+            ];
+        };
+
+        $monthRequestRecords = $monthApplications
+            ->map($mapApplicationToRecord)
+            ->values();
+
+        $employeeMonthRecords = $approvedMonthApplications
+            ->map($mapApplicationToRecord)
+            ->values();
 
         $latestLeaveApplication = LeaveApplication::query()
             ->where('user_id', $user?->id)
@@ -140,10 +185,20 @@ class EmployeePageController extends Controller
         $sickCardAvailable = max($sickLimit - $sickUsed, 0);
         $totalDaysUsedCard = $totalDaysUsed;
 
-        $monthAppliedTotal = (float) LeaveApplication::query()
-            ->where('user_id', $user?->id)
-            ->whereBetween('created_at', [$monthStart->toDateTimeString(), $monthEnd->toDateTimeString()])
-            ->sum('applied_total');
+        $monthAppliedTotal = round((float) $approvedMonthApplications->sum('applied_total'), 1);
+        $monthOfficialWithPayTotal = round((float) $approvedMonthApplications
+            ->filter(function ($application) {
+                $leaveType = strtolower(trim((string) ($application->leave_type ?? '')));
+
+                return str_contains($leaveType, 'official business')
+                    || str_contains($leaveType, 'official time')
+                    || str_starts_with($leaveType, 'others');
+            })
+            ->sum('days_with_pay'), 1);
+        $monthUsageTotal = round($monthAppliedTotal + $monthOfficialWithPayTotal, 1);
+        $pendingLeaveDays = round((float) $pendingMonthApplications->sum(function ($application) {
+            return (float) ($application->number_of_working_days ?? 0);
+        }), 1);
 
         if ($latestLeaveApplication) {
             $annualLimit = round((float) ($latestLeaveApplication->beginning_vacation ?? 0) + (float) ($latestLeaveApplication->earned_vacation ?? 0), 1);
@@ -152,13 +207,17 @@ class EmployeePageController extends Controller
             $sickUsed = round((float) ($latestLeaveApplication->applied_sick ?? 0), 1);
             $vacationCardAvailable = round((float) ($latestLeaveApplication->ending_vacation ?? 0), 1);
             $sickCardAvailable = round((float) ($latestLeaveApplication->ending_sick ?? 0), 1);
-            $totalDaysUsedCard = round($monthAppliedTotal > 0 ? $monthAppliedTotal : (float) ($latestLeaveApplication->applied_total ?? $totalDaysUsed), 1);
+            $fallbackUsedDays = (float) ($latestLeaveApplication->applied_total ?? $totalDaysUsed);
+            $totalDaysUsedCard = round($monthUsageTotal > 0 ? $monthUsageTotal : $fallbackUsedDays, 1);
         }
 
         return view('employee.employeeLeave', compact(
             'selectedMonth',
             'employeeDisplayName',
+            'monthRequestRecords',
             'employeeMonthRecords',
+            'pendingMonthApplications',
+            'pendingLeaveDays',
             'annualLimit',
             'annualUsed',
             'sickLimit',
@@ -393,4 +452,3 @@ class EmployeePageController extends Controller
     }
 
 }
-

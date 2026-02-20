@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -124,32 +124,40 @@
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="px-4 py-3 border-b border-gray-200">
-        <h3 class="font-semibold text-gray-700">My Leave History (Approved, {{ $selectedMonth ?? now()->format('Y-m') }})</h3>
+        <h3 class="font-semibold text-gray-700">My Leave History ({{ now()->format('M d, Y') }})</h3>
     </div>
-    <div>
-        @forelse (($employeeMonthRecords ?? collect()) as $record)
+    <div class="max-h-96 overflow-y-auto">
+        @forelse (($monthRequestRecords ?? collect()) as $record)
             @php
                 $startDate = $record['start_date_carbon'] ?? null;
                 $endDate = $record['end_date_carbon'] ?? null;
-                $days = (int) ($record['days'] ?? 0);
+                $days = (float) ($record['days'] ?? 0);
+                $daysLabel = rtrim(rtrim(number_format($days, 1, '.', ''), '0'), '.');
                 $dateLabel = '-';
+                $statusLabel = ucfirst(strtolower((string) ($record['status'] ?? 'Pending')));
+                $statusClass = 'bg-amber-100 text-amber-700';
+                if (strcasecmp($statusLabel, 'Approved') === 0) {
+                    $statusClass = 'bg-green-100 text-green-700';
+                } elseif (strcasecmp($statusLabel, 'Rejected') === 0) {
+                    $statusClass = 'bg-rose-100 text-rose-700';
+                }
                 if ($startDate && $endDate) {
                     $dateLabel = $startDate->isSameDay($endDate)
                         ? $startDate->format('M d, Y')
-                        : $startDate->format('M d, Y').' - '.$endDate->format('M d, Y');
+                        : $startDate->format('M d, Y').' - '. $endDate->format('M d, Y');
                 }
             @endphp
             <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
                 <div>
                     <p class="font-semibold text-gray-900">{{ $record['leave_type'] ?? 'Leave' }}</p>
                     <p class="text-sm text-gray-700">{{ $employeeDisplayName ?? ($record['employee_name'] ?? '-') }}</p>
-                    <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $days }} day(s)</p>
+                    <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $daysLabel }} day(s)</p>
                     <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
                 </div>
-                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-medium {{ $statusClass }}">{{ $statusLabel }}</span>
             </div>
         @empty
-            <div class="px-4 py-5 text-sm text-gray-500">No approved leave records for this month.</div>
+            <div class="px-4 py-5 text-sm text-gray-500">No leave records for this month.</div>
         @endforelse
     </div>
 </div>
@@ -217,3 +225,4 @@
 
 </body>
 </html>
+

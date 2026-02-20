@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\Government;
 use App\Models\Interviewer;
 use App\Models\License;
+use App\Models\LeaveApplication;
 use App\Models\OpenPosition;
 use App\Models\Salary;
 use App\Models\User;
@@ -1220,6 +1221,28 @@ class AdministratorStoreController extends Controller
         );
 
         return redirect()->back()->with('success', 'Profile updated successfully');
+    }
+
+    public function update_leave_request_status($id, Request $request)
+    {
+        $attrs = $request->validate([
+            'status' => 'required|string|in:Approved,Rejected',
+            'month' => 'nullable|string',
+        ]);
+
+        $leaveApplication = LeaveApplication::findOrFail($id);
+        $leaveApplication->update([
+            'status' => $attrs['status'],
+        ]);
+
+        $month = trim((string) ($attrs['month'] ?? ''));
+        $query = [];
+        if ($month !== '') {
+            $query['month'] = $month;
+        }
+
+        return redirect()->route('admin.adminLeaveManagement', $query)
+            ->with('success', 'Leave request status updated.');
     }
 
     public function update_bio(Request $request){

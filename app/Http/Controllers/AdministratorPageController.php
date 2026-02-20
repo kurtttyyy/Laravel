@@ -1374,105 +1374,7 @@ class AdministratorPageController extends Controller
             $selectedMonth = $monthCursor->format('Y-m');
         }
 
-        // Temporary in-controller dataset until leave records are persisted in DB.
-        $leaveRecords = collect([
-            [
-                'employee_name' => 'Santos, Maria L.',
-                'department' => 'Faculty',
-                'leave_type' => 'Sick Leave',
-                'start_date' => '2026-02-12',
-                'end_date' => '2026-02-12',
-                'status' => 'Approved',
-                'reason' => 'Flu and medical check-up',
-            ],
-            [
-                'employee_name' => 'Reyes, John Paulo A.',
-                'department' => 'Admin',
-                'leave_type' => 'Annual Leave',
-                'start_date' => '2026-02-10',
-                'end_date' => '2026-02-14',
-                'status' => 'Approved',
-                'reason' => 'Family vacation',
-            ],
-            [
-                'employee_name' => 'Dela Cruz, Anna P.',
-                'department' => 'Faculty',
-                'leave_type' => 'Study Leave',
-                'start_date' => '2026-02-17',
-                'end_date' => '2026-02-18',
-                'status' => 'Pending',
-                'reason' => 'Graduate exam preparation',
-            ],
-            [
-                'employee_name' => 'Garcia, Miguel R.',
-                'department' => 'Registrar',
-                'leave_type' => 'Emergency Leave',
-                'start_date' => '2026-02-08',
-                'end_date' => '2026-02-08',
-                'status' => 'Approved',
-                'reason' => 'Immediate family concern',
-            ],
-            [
-                'employee_name' => 'Lopez, Carla M.',
-                'department' => 'Faculty',
-                'leave_type' => 'Maternity Leave',
-                'start_date' => '2026-01-20',
-                'end_date' => '2026-02-20',
-                'status' => 'Approved',
-                'reason' => 'Maternity recovery',
-            ],
-            [
-                'employee_name' => 'Torres, Noel B.',
-                'department' => 'Guidance',
-                'leave_type' => 'Paternity Leave',
-                'start_date' => '2026-02-05',
-                'end_date' => '2026-02-11',
-                'status' => 'Approved',
-                'reason' => 'Child birth support',
-            ],
-            [
-                'employee_name' => 'Nolasco, Irene T.',
-                'department' => 'HR',
-                'leave_type' => 'Personal Leave',
-                'start_date' => '2026-02-22',
-                'end_date' => '2026-02-22',
-                'status' => 'Declined',
-                'reason' => 'Personal errand',
-            ],
-        ])->map(function ($record) {
-            $start = Carbon::parse($record['start_date'])->startOfDay();
-            $end = Carbon::parse($record['end_date'])->startOfDay();
-            $days = $end->gte($start) ? ($start->diffInDays($end) + 1) : 1;
-            $record['days'] = $days;
-            $record['start_date_carbon'] = $start;
-            $record['end_date_carbon'] = $end;
-            return $record;
-        });
-
-        $approvedRecords = $leaveRecords
-            ->filter(fn ($record) => strtolower((string) $record['status']) === 'approved')
-            ->values();
-
-        $monthRecords = $approvedRecords
-            ->filter(function ($record) use ($monthCursor) {
-                $start = $record['start_date_carbon'];
-                $end = $record['end_date_carbon'];
-                return $start->format('Y-m') === $monthCursor->format('Y-m')
-                    || $end->format('Y-m') === $monthCursor->format('Y-m')
-                    || ($start->lt($monthCursor->copy()->startOfMonth()) && $end->gt($monthCursor->copy()->endOfMonth()));
-            })
-            ->values();
-
-        $totalLeaveUsedDays = (int) $monthRecords->sum('days');
-        $sickLeaveUsedDays = (int) $monthRecords
-            ->filter(fn ($record) => strcasecmp((string) $record['leave_type'], 'Sick Leave') === 0)
-            ->sum('days');
-
-        $leaveTypeCounts = $monthRecords
-            ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
-            ->map(fn ($records) => (int) $records->sum('days'));
-
-        $pendingLeaveRequests = LeaveApplication::query()
+        $monthApplications = LeaveApplication::query()
             ->where(function ($query) use ($monthCursor) {
                 $query
                     ->where(function ($filingDateQuery) use ($monthCursor) {
@@ -1490,6 +1392,54 @@ class AdministratorPageController extends Controller
             })
             ->orderByDesc('created_at')
             ->get();
+
+        $approvedMonthApplications = $monthApplications
+            ->filter(function ($application) {
+                return strcasecmp((string) ($application->status ?? ''), 'Approved') === 0;
+            })
+            ->values();
+
+        $monthRecords = $approvedMonthApplications
+            ->map(function ($application) {
+                $baseDate = $application->filing_date
+                    ? Carbon::parse($application->filing_date)->startOfDay()
+                    : Carbon::parse($application->created_at)->startOfDay();
+                $days = (float) ($application->number_of_working_days ?? 0);
+                if ($days <= 0) {
+                    $days = max(
+                        (float) ($application->days_with_pay ?? 0),
+                        (float) ($application->applied_total ?? 0)
+                    );
+                }
+                $rangeDays = max((int) ceil($days), 1);
+
+                return [
+                    'employee_name' => $application->employee_name ?? '-',
+                    'leave_type' => $application->leave_type ?: 'Leave',
+                    'start_date_carbon' => $baseDate->copy(),
+                    'end_date_carbon' => $baseDate->copy()->addDays($rangeDays - 1),
+                    'days' => $days,
+                    'reason' => $application->inclusive_dates ?: '-',
+                ];
+            })
+            ->values();
+
+        $totalLeaveUsedDays = (int) $monthRecords->sum('days');
+        $sickLeaveUsedDays = (int) $monthRecords
+            ->filter(fn ($record) => strcasecmp((string) $record['leave_type'], 'Sick Leave') === 0)
+            ->sum('days');
+
+        $leaveTypeCounts = $monthRecords
+            ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
+            ->map(fn ($records) => (int) $records->sum('days'));
+
+        $pendingLeaveRequests = $monthApplications
+            ->filter(function ($application) {
+                $status = trim((string) ($application->status ?? ''));
+                return $status === '' || strcasecmp($status, 'Pending') === 0;
+            })
+            ->sortByDesc('created_at')
+            ->values();
 
         $pendingLeaveDays = (float) $pendingLeaveRequests->sum(function ($row) {
             return (float) ($row->number_of_working_days ?? 0);

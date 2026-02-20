@@ -98,6 +98,7 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/update/application/status', 'update_application_status')->name('admin.updateStatus');
     Route::post('system/update/interview', 'updated_interview')->name('admin.storeUpdatedInterview');
     Route::post('system/update/employee/{id}', 'update_employee')->name('admin.updateEmployee');
+    Route::post('system/leave/request/{id}/status', 'update_leave_request_status')->name('admin.updateLeaveRequestStatus');
     Route::post('system/employee/update/biometric', 'update_bio')->name('admin.updateBio');
     Route::post('system/employee/update/profile', 'update_general_profile')->name('admin.updateGeneralProfile');
     Route::post('admin/attendance/update-status/{id}', 'update_attendance_status')->name('admin.updateAttendanceStatus');

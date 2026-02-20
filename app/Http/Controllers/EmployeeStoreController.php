@@ -140,6 +140,7 @@ class EmployeeStoreController extends Controller
             'days_with_pay' => round((float) ($attrs['days_with_pay'] ?? 0), 1),
             'days_without_pay' => round((float) ($attrs['days_without_pay'] ?? 0), 1),
             'commutation' => $attrs['commutation'] ?? null,
+            'status' => 'Pending',
         ]);
 
         return response()->json([

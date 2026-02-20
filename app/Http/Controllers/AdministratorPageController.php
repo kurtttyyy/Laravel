@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
+use App\Models\LeaveApplication;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -1471,12 +1472,37 @@ class AdministratorPageController extends Controller
             ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
             ->map(fn ($records) => (int) $records->sum('days'));
 
+        $pendingLeaveRequests = LeaveApplication::query()
+            ->where(function ($query) use ($monthCursor) {
+                $query
+                    ->where(function ($filingDateQuery) use ($monthCursor) {
+                        $filingDateQuery
+                            ->whereNotNull('filing_date')
+                            ->whereYear('filing_date', $monthCursor->year)
+                            ->whereMonth('filing_date', $monthCursor->month);
+                    })
+                    ->orWhere(function ($createdAtQuery) use ($monthCursor) {
+                        $createdAtQuery
+                            ->whereNull('filing_date')
+                            ->whereYear('created_at', $monthCursor->year)
+                            ->whereMonth('created_at', $monthCursor->month);
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        $pendingLeaveDays = (float) $pendingLeaveRequests->sum(function ($row) {
+            return (float) ($row->number_of_working_days ?? 0);
+        });
+
         return view('admin.adminLeaveManagement', compact(
             'selectedMonth',
             'totalLeaveUsedDays',
             'sickLeaveUsedDays',
             'monthRecords',
-            'leaveTypeCounts'
+            'leaveTypeCounts',
+            'pendingLeaveRequests',
+            'pendingLeaveDays'
         ));
     }
 

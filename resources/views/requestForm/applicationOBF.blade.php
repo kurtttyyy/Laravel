@@ -66,7 +66,11 @@
 
                     <div>
                         <label class="text-sm font-medium">Name (Last, First, Middle)</label>
-                        <input type="text" class="w-full border rounded px-3 py-2 border-black">
+                        <input
+                            type="text"
+                            value="{{ $employeeFormName ?? $employeeDisplayName ?? '' }}"
+                            class="w-full border rounded px-3 py-2 border-black"
+                        >
                     </div>
                 </div>
 
@@ -78,7 +82,11 @@
 
                     <div>
                         <label class="text-sm font-medium">Position</label>
-                        <input type="text" class="w-full border rounded px-3 py-2 border-black">
+                        <input
+                            type="text"
+                            value="{{ $employeeFormPosition ?? '' }}"
+                            class="w-full border rounded px-3 py-2 border-black"
+                        >
                     </div>
 
                     <div>

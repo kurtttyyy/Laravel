@@ -91,6 +91,27 @@ class EmployeeStoreController extends Controller
 
         $authUser->loadMissing('employee');
 
+        $latestLeaveApplication = LeaveApplication::query()
+            ->where('user_id', $authUser->id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $beginningVacation = round((float) ($latestLeaveApplication?->ending_vacation ?? $attrs['beginning_vacation'] ?? 0), 1);
+        $beginningSick = round((float) ($latestLeaveApplication?->ending_sick ?? $attrs['beginning_sick'] ?? 0), 1);
+        $beginningTotal = round($beginningVacation + $beginningSick, 1);
+
+        $earnedVacation = round((float) ($attrs['earned_vacation'] ?? 0), 1);
+        $earnedSick = round((float) ($attrs['earned_sick'] ?? 0), 1);
+        $earnedTotal = round($earnedVacation + $earnedSick, 1);
+
+        $appliedVacation = round((float) ($attrs['applied_vacation'] ?? 0), 1);
+        $appliedSick = round((float) ($attrs['applied_sick'] ?? 0), 1);
+        $appliedTotal = round($appliedVacation + $appliedSick, 1);
+
+        $endingVacation = round(max(($beginningVacation + $earnedVacation) - $appliedVacation, 0), 1);
+        $endingSick = round(max(($beginningSick + $earnedSick) - $appliedSick, 0), 1);
+        $endingTotal = round($endingVacation + $endingSick, 1);
+
         $record = LeaveApplication::create([
             'user_id' => $authUser->id,
             'employee_id' => (string) ($authUser->employee?->employee_id ?? ''),
@@ -104,18 +125,18 @@ class EmployeeStoreController extends Controller
             'inclusive_dates' => $attrs['inclusive_dates'] ?? null,
             'as_of_label' => $attrs['as_of_label'] ?? null,
             'earned_date_label' => $attrs['earned_date_label'] ?? null,
-            'beginning_vacation' => round((float) ($attrs['beginning_vacation'] ?? 0), 1),
-            'beginning_sick' => round((float) ($attrs['beginning_sick'] ?? 0), 1),
-            'beginning_total' => round((float) ($attrs['beginning_total'] ?? 0), 1),
-            'earned_vacation' => round((float) ($attrs['earned_vacation'] ?? 0), 1),
-            'earned_sick' => round((float) ($attrs['earned_sick'] ?? 0), 1),
-            'earned_total' => round((float) ($attrs['earned_total'] ?? 0), 1),
-            'applied_vacation' => round((float) ($attrs['applied_vacation'] ?? 0), 1),
-            'applied_sick' => round((float) ($attrs['applied_sick'] ?? 0), 1),
-            'applied_total' => round((float) ($attrs['applied_total'] ?? 0), 1),
-            'ending_vacation' => round((float) ($attrs['ending_vacation'] ?? 0), 1),
-            'ending_sick' => round((float) ($attrs['ending_sick'] ?? 0), 1),
-            'ending_total' => round((float) ($attrs['ending_total'] ?? 0), 1),
+            'beginning_vacation' => $beginningVacation,
+            'beginning_sick' => $beginningSick,
+            'beginning_total' => $beginningTotal,
+            'earned_vacation' => $earnedVacation,
+            'earned_sick' => $earnedSick,
+            'earned_total' => $earnedTotal,
+            'applied_vacation' => $appliedVacation,
+            'applied_sick' => $appliedSick,
+            'applied_total' => $appliedTotal,
+            'ending_vacation' => $endingVacation,
+            'ending_sick' => $endingSick,
+            'ending_total' => $endingTotal,
             'days_with_pay' => round((float) ($attrs['days_with_pay'] ?? 0), 1),
             'days_without_pay' => round((float) ($attrs['days_without_pay'] ?? 0), 1),
             'commutation' => $attrs['commutation'] ?? null,

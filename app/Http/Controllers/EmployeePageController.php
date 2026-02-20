@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\LeaveApplication;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,7 +93,30 @@ class EmployeePageController extends Controller
             $resetCycleMonths
         );
         $earnedRangeLabel = $this->buildEarnedRangeLabel($joinDate, $monthCursor, $resetCycleMonths);
+        $monthStart = $monthCursor->copy()->startOfMonth();
+        $monthEnd = $monthCursor->copy()->endOfMonth();
+
+        $latestLeaveApplication = LeaveApplication::query()
+            ->where('user_id', $user?->id)
+            ->whereDate('created_at', '<=', $monthEnd->toDateString())
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($latestLeaveApplication) {
+            $beginningVacationBalance = (float) ($latestLeaveApplication->ending_vacation ?? 0);
+            $beginningSickBalance = (float) ($latestLeaveApplication->ending_sick ?? 0);
+        }
+
+        $hasExistingMonthApplication = LeaveApplication::query()
+            ->where('user_id', $user?->id)
+            ->whereBetween('created_at', [$monthStart->toDateTimeString(), $monthEnd->toDateTimeString()])
+            ->exists();
+
         $equalHalfEarnedDays = round($totalEarnedDays / 2, 1);
+        $formEarnedVacation = $hasExistingMonthApplication ? 0.0 : $equalHalfEarnedDays;
+        $formEarnedSick = $hasExistingMonthApplication ? 0.0 : $equalHalfEarnedDays;
+        $formEarnedTotal = round($formEarnedVacation + $formEarnedSick, 1);
+
         $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
             ->mapWithKeys(fn ($value, $leaveType) => [$leaveType => max(0, (int) $value)])
             ->all();
@@ -104,12 +128,31 @@ class EmployeePageController extends Controller
             ->map(fn ($records) => (int) $records->sum('days'));
 
         $annualLimit = (float) ($monthlyLeaveAllowances['Annual Leave'] ?? 0);
-        $annualUsed = (int) ($employeeLeaveUsageByType->get('Annual Leave', 0));
+        $annualUsed = (float) ($employeeLeaveUsageByType->get('Annual Leave', 0));
         $sickLimit = (float) ($monthlyLeaveAllowances['Sick Leave'] ?? 0);
-        $sickUsed = (int) ($employeeLeaveUsageByType->get('Sick Leave', 0));
+        $sickUsed = (float) ($employeeLeaveUsageByType->get('Sick Leave', 0));
         $personalLimit = (int) ($monthlyLeaveAllowances['Personal Leave'] ?? 0);
         $personalUsed = (int) ($employeeLeaveUsageByType->get('Personal Leave', 0));
-        $totalDaysUsed = (int) $employeeMonthRecords->sum('days');
+        $totalDaysUsed = (float) $employeeMonthRecords->sum('days');
+
+        $vacationCardAvailable = max($annualLimit - $annualUsed, 0);
+        $sickCardAvailable = max($sickLimit - $sickUsed, 0);
+        $totalDaysUsedCard = $totalDaysUsed;
+
+        $monthAppliedTotal = (float) LeaveApplication::query()
+            ->where('user_id', $user?->id)
+            ->whereBetween('created_at', [$monthStart->toDateTimeString(), $monthEnd->toDateTimeString()])
+            ->sum('applied_total');
+
+        if ($latestLeaveApplication) {
+            $annualLimit = round((float) ($latestLeaveApplication->beginning_vacation ?? 0) + (float) ($latestLeaveApplication->earned_vacation ?? 0), 1);
+            $annualUsed = round((float) ($latestLeaveApplication->applied_vacation ?? 0), 1);
+            $sickLimit = round((float) ($latestLeaveApplication->beginning_sick ?? 0) + (float) ($latestLeaveApplication->earned_sick ?? 0), 1);
+            $sickUsed = round((float) ($latestLeaveApplication->applied_sick ?? 0), 1);
+            $vacationCardAvailable = round((float) ($latestLeaveApplication->ending_vacation ?? 0), 1);
+            $sickCardAvailable = round((float) ($latestLeaveApplication->ending_sick ?? 0), 1);
+            $totalDaysUsedCard = round($monthAppliedTotal > 0 ? $monthAppliedTotal : (float) ($latestLeaveApplication->applied_total ?? $totalDaysUsed), 1);
+        }
 
         return view('employee.employeeLeave', compact(
             'selectedMonth',
@@ -122,10 +165,16 @@ class EmployeePageController extends Controller
             'personalLimit',
             'personalUsed',
             'totalDaysUsed',
+            'vacationCardAvailable',
+            'sickCardAvailable',
+            'totalDaysUsedCard',
             'beginningVacationBalance',
             'beginningSickBalance',
             'earnedRangeLabel',
-            'totalEarnedDays'
+            'totalEarnedDays',
+            'formEarnedVacation',
+            'formEarnedSick',
+            'formEarnedTotal'
         ));
     }
 

@@ -38,10 +38,20 @@
 
 <div class="p-4 md:p-8 space-y-8 pt-20">
     @php
+        $authUser = auth()->user();
         $activeEmployeeForm = request()->query('form', 'leave');
         if (!in_array($activeEmployeeForm, ['leave', 'official'], true)) {
             $activeEmployeeForm = 'leave';
         }
+        $employeeFormName = $employeeDisplayName
+            ?? trim(implode(' ', array_filter([
+                $authUser?->first_name ?? null,
+                $authUser?->middle_name ?? null,
+                $authUser?->last_name ?? null,
+            ])));
+        $employeeFormPosition = $authUser?->employee?->position
+            ?? data_get($authUser, 'applicant.position.title')
+            ?? '';
         $employeeFormQueryBase = array_filter([
             'month' => $selectedMonth ?? now()->format('Y-m'),
         ], fn ($value) => !is_null($value) && $value !== '');
@@ -70,7 +80,7 @@
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-calendar fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0) }}</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($vacationCardAvailable ?? max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0)), 1, '.', ''), '0'), '.') }}</h3>
             <p class="text-gray-600 text-sm mb-4">Vacation Leave</p>
             <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($annualLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
         </div>
@@ -82,7 +92,7 @@
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-bed fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0) }}</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($sickCardAvailable ?? max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0)), 1, '.', ''), '0'), '.') }}</h3>
             <p class="text-gray-600 text-sm mb-1">Sick Leave</p>
             <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($sickLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
         </div>
@@ -105,7 +115,7 @@
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-hourglass-half fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ (int) ($totalDaysUsed ?? 0) }}</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($totalDaysUsedCard ?? $totalDaysUsed ?? 0), 1, '.', ''), '0'), '.') }}</h3>
             <p class="text-gray-600 text-sm mb-1">Days Used</p>
             <p class="text-gray-500 text-xs mt-4">this month</p>
         </div>
@@ -169,7 +179,7 @@
 
 
 
-<div class="w-full md:flex-1 min-w-0 p-8 space-y-6 bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+<div class="w-full md:flex-1 min-w-0 p-8 space-y-6 bg-white rounded-2xl border border-gray-200 overflow-x-auto text-base">
     @if ($activeEmployeeForm === 'official')
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
         @include('requestForm.applicationOBF')

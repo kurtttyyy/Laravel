@@ -72,6 +72,41 @@
 
       <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-amber-700">Pending Leave Requests ({{ $selectedMonth ?? now()->format('Y-m') }})</h3>
+          <div class="text-xs text-gray-500">
+            {{ ($pendingLeaveRequests ?? collect())->count() }} request(s) •
+            {{ rtrim(rtrim(number_format((float) ($pendingLeaveDays ?? 0), 1, '.', ''), '0'), '.') }} day(s)
+          </div>
+        </div>
+        <div>
+          @forelse (($pendingLeaveRequests ?? collect()) as $request)
+            @php
+              $requestFilingDate = $request->filing_date ? \Carbon\Carbon::parse($request->filing_date)->format('M d, Y') : optional($request->created_at)->format('M d, Y');
+              $requestDays = rtrim(rtrim(number_format((float) ($request->number_of_working_days ?? 0), 1, '.', ''), '0'), '.');
+              $requestLeaveType = $request->leave_type ?: 'Leave Request';
+              $requestDates = $request->inclusive_dates ?: '-';
+            @endphp
+            <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
+              <div>
+                <p class="font-semibold text-gray-900">
+                  {{ $requestLeaveType }}
+                  <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Pending</span>
+                </p>
+                <p class="text-sm font-semibold text-gray-800">{{ $request->employee_name ?? '-' }}</p>
+                <p class="text-sm text-gray-500">Filed: {{ $requestFilingDate }} • {{ $requestDays }} day(s)</p>
+                <p class="text-sm text-gray-400">Dates: {{ $requestDates }}</p>
+              </div>
+            </div>
+          @empty
+            <div class="px-4 py-6 text-center text-sm text-gray-500">
+              No pending leave requests for this month.
+            </div>
+          @endforelse
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <h3 class="text-sm font-semibold text-gray-700">Leave History (Approved, {{ $selectedMonth ?? now()->format('Y-m') }})</h3>
         </div>
         <div>

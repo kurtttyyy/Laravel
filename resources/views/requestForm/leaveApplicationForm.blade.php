@@ -48,14 +48,17 @@
 </style>
 
 @php
-    $availableVacationDays = max((float) ($annualLimit ?? 0) - (float) ($annualUsed ?? 0), 0);
-    $availableSickDays = max((float) ($sickLimit ?? 0) - (float) ($sickUsed ?? 0), 0);
+    $formEarnedVacationValue = (float) ($formEarnedVacation ?? $annualLimit ?? 0);
+    $formEarnedSickValue = (float) ($formEarnedSick ?? $sickLimit ?? 0);
+    $formEarnedTotalValue = (float) ($formEarnedTotal ?? $totalEarnedDays ?? 0);
+    $availableVacationDays = max((float) ($beginningVacationBalance ?? 0) + $formEarnedVacationValue, 0);
+    $availableSickDays = max((float) ($beginningSickBalance ?? 0) + $formEarnedSickValue, 0);
 @endphp
 
 <form id="leave-application-form" method="POST" action="{{ route('employee.leaveApplication.store') }}" class="space-y-6">
     @csrf
 
-    <div id="leave-application-print-area" class="space-y-5 rounded-lg border-2 border-black bg-white p-6 text-[11px] text-black">
+    <div id="leave-application-print-area" class="space-y-5 rounded-lg border-2 border-black bg-white p-6 text-sm text-black">
         <h4 class="text-center text-base font-bold tracking-wide uppercase">Leave Application Form</h4>
 
         <div class="print-row-two grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -65,7 +68,12 @@
             </div>
             <div>
                 <label class="mb-1 block font-medium">Name (Last, First, Middle)</label>
-                <input name="employee_name" type="text" class="w-full rounded border border-black px-3 py-2">
+                <input
+                    name="employee_name"
+                    type="text"
+                    value="{{ old('employee_name', $employeeFormName ?? $employeeDisplayName ?? '') }}"
+                    class="w-full rounded border border-black px-3 py-2"
+                >
             </div>
         </div>
 
@@ -76,7 +84,12 @@
             </div>
             <div>
                 <label class="mb-1 block font-medium">Position</label>
-                <input name="position" type="text" class="w-full rounded border border-black px-3 py-2">
+                <input
+                    name="position"
+                    type="text"
+                    value="{{ old('position', $employeeFormPosition ?? '') }}"
+                    class="w-full rounded border border-black px-3 py-2"
+                >
             </div>
             <div>
                 <label class="mb-1 block font-medium">Salary</label>
@@ -179,9 +192,9 @@
                                     <span class="block">Add: Earned Leave/s</span>
                                     <span class="block">Date: {{ $earnedRangeLabel ?? '-' }}</span>
                                 </td>
-                                <td id="earned-vacation-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) ($annualLimit ?? 0), 1, '.', ''), '0'), '.') }}</td>
-                                <td id="earned-sick-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) ($sickLimit ?? 0), 1, '.', ''), '0'), '.') }}</td>
-                                <td id="earned-total-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) ($totalEarnedDays ?? 0), 1, '.', ''), '0'), '.') }}</td>
+                                <td id="earned-vacation-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format($formEarnedVacationValue, 1, '.', ''), '0'), '.') }}</td>
+                                <td id="earned-sick-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format($formEarnedSickValue, 1, '.', ''), '0'), '.') }}</td>
+                                <td id="earned-total-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format($formEarnedTotalValue, 1, '.', ''), '0'), '.') }}</td>
                             </tr>
                             <tr>
                                 <td class="border border-black px-2 py-1">Less: Applied Leave/s</td>
@@ -191,9 +204,9 @@
                             </tr>
                             <tr>
                                 <td class="border border-black px-2 py-1">Ending Balance</td>
-                                <td id="ending-vacation-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) (($beginningVacationBalance ?? 0) + ($annualLimit ?? 0)), 1, '.', ''), '0'), '.') }}</td>
-                                <td id="ending-sick-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) (($beginningSickBalance ?? 0) + ($sickLimit ?? 0)), 1, '.', ''), '0'), '.') }}</td>
-                                <td id="ending-total-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) ((($beginningVacationBalance ?? 0) + ($annualLimit ?? 0)) + (($beginningSickBalance ?? 0) + ($sickLimit ?? 0))), 1, '.', ''), '0'), '.') }}</td>
+                                <td id="ending-vacation-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) (($beginningVacationBalance ?? 0) + $formEarnedVacationValue), 1, '.', ''), '0'), '.') }}</td>
+                                <td id="ending-sick-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) (($beginningSickBalance ?? 0) + $formEarnedSickValue), 1, '.', ''), '0'), '.') }}</td>
+                                <td id="ending-total-balance" class="border border-black px-2 py-1">{{ rtrim(rtrim(number_format((float) ((($beginningVacationBalance ?? 0) + $formEarnedVacationValue) + (($beginningSickBalance ?? 0) + $formEarnedSickValue)), 1, '.', ''), '0'), '.') }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -261,15 +274,15 @@
     <input type="hidden" name="beginning_vacation" id="beginning-vacation-hidden" value="{{ (float) ($beginningVacationBalance ?? 0) }}">
     <input type="hidden" name="beginning_sick" id="beginning-sick-hidden" value="{{ (float) ($beginningSickBalance ?? 0) }}">
     <input type="hidden" name="beginning_total" id="beginning-total-hidden" value="{{ (float) (($beginningVacationBalance ?? 0) + ($beginningSickBalance ?? 0)) }}">
-    <input type="hidden" name="earned_vacation" id="earned-vacation-hidden" value="{{ (float) ($annualLimit ?? 0) }}">
-    <input type="hidden" name="earned_sick" id="earned-sick-hidden" value="{{ (float) ($sickLimit ?? 0) }}">
-    <input type="hidden" name="earned_total" id="earned-total-hidden" value="{{ (float) ($totalEarnedDays ?? 0) }}">
+    <input type="hidden" name="earned_vacation" id="earned-vacation-hidden" value="{{ $formEarnedVacationValue }}">
+    <input type="hidden" name="earned_sick" id="earned-sick-hidden" value="{{ $formEarnedSickValue }}">
+    <input type="hidden" name="earned_total" id="earned-total-hidden" value="{{ $formEarnedTotalValue }}">
     <input type="hidden" name="applied_vacation" id="applied-vacation-hidden" value="0">
     <input type="hidden" name="applied_sick" id="applied-sick-hidden" value="0">
     <input type="hidden" name="applied_total" id="applied-total-hidden" value="0">
-    <input type="hidden" name="ending_vacation" id="ending-vacation-hidden" value="{{ (float) (($beginningVacationBalance ?? 0) + ($annualLimit ?? 0)) }}">
-    <input type="hidden" name="ending_sick" id="ending-sick-hidden" value="{{ (float) (($beginningSickBalance ?? 0) + ($sickLimit ?? 0)) }}">
-    <input type="hidden" name="ending_total" id="ending-total-hidden" value="{{ (float) ((($beginningVacationBalance ?? 0) + ($annualLimit ?? 0)) + (($beginningSickBalance ?? 0) + ($sickLimit ?? 0))) }}">
+    <input type="hidden" name="ending_vacation" id="ending-vacation-hidden" value="{{ (float) (($beginningVacationBalance ?? 0) + $formEarnedVacationValue) }}">
+    <input type="hidden" name="ending_sick" id="ending-sick-hidden" value="{{ (float) (($beginningSickBalance ?? 0) + $formEarnedSickValue) }}">
+    <input type="hidden" name="ending_total" id="ending-total-hidden" value="{{ (float) ((($beginningVacationBalance ?? 0) + $formEarnedVacationValue) + (($beginningSickBalance ?? 0) + $formEarnedSickValue)) }}">
     <input type="hidden" name="days_with_pay" id="days-with-pay-hidden" value="0">
     <input type="hidden" name="days_without_pay" id="days-without-pay-hidden" value="0">
 
@@ -291,8 +304,8 @@
         availableSick: {{ json_encode((float) $availableSickDays) }},
         beginningVacation: {{ json_encode((float) ($beginningVacationBalance ?? 0)) }},
         beginningSick: {{ json_encode((float) ($beginningSickBalance ?? 0)) }},
-        earnedVacation: {{ json_encode((float) ($annualLimit ?? 0)) }},
-        earnedSick: {{ json_encode((float) ($sickLimit ?? 0)) }},
+        earnedVacation: {{ json_encode($formEarnedVacationValue) }},
+        earnedSick: {{ json_encode($formEarnedSickValue) }},
     };
 
     function formatDayValue(value) {
@@ -575,6 +588,7 @@
             printWindow.focus();
             printWindow.print();
             printWindow.close();
+            window.location.reload();
         };
     }
 </script>

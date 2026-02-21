@@ -205,8 +205,106 @@
         ></span>
       </div>
     </div>
-  </div>
+    <!-- Department -->
+    <div class="flex items-start gap-3 mb-5">
+      <svg
+        class="w-5 h-5 text-gray-400 mt-0.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4.75A1.75 1.75 0 0 1 11 7.75V18a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 18V7.5zM13 6h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6V6z"
+        />
+      </svg>
 
+      <div>
+        <span class="block font-semibold text-xs uppercase text-gray-400">
+          Department
+        </span>
+        <span
+          class="text-gray-700"
+          x-text="selectedEmployee?.applicant?.position?.department ?? selectedEmployee?.employee?.department ?? '—'"
+        ></span>
+      </div>
+    </div>
+
+    <!-- Classification -->
+    <div class="flex items-start gap-3 mb-5">
+      <svg
+        class="w-5 h-5 text-gray-400 mt-0.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+      </svg>
+
+      <div>
+        <span class="block font-semibold text-xs uppercase text-gray-400">
+          Classification
+        </span>
+        <span
+          class="text-gray-700"
+          x-text="selectedEmployee?.employee?.classification ?? selectedEmployee?.applicant?.position?.employment ?? '—'"
+        ></span>
+      </div>
+    </div>
+    <!-- Contract Type -->
+    <div class="flex items-start gap-3 mb-5">
+      <svg
+        class="w-5 h-5 text-gray-400 mt-0.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M16.5 9.4V6.75A2.25 2.25 0 0 0 14.25 4.5h-7.5A2.25 2.25 0 0 0 4.5 6.75v10.5A2.25 2.25 0 0 0 6.75 19.5h7.5a2.25 2.25 0 0 0 2.25-2.25V14.6M9 12h12m0 0-3-3m3 3-3 3"
+        />
+      </svg>
+
+      <div>
+        <span class="block font-semibold text-xs uppercase text-gray-400">
+          Contract Type
+        </span>
+        <span
+          class="text-gray-700"
+          x-text="(() => {
+            const jobTypeRaw = selectedEmployee?.employee?.job_type ?? selectedEmployee?.applicant?.position?.job_type ?? '';
+            const jobType = jobTypeRaw.toString().trim().toLowerCase();
+            const rawJoinDate = selectedEmployee?.applicant?.date_hired ?? selectedEmployee?.employee?.employement_date;
+            if (jobType !== 'non-teaching' && jobType !== 'teaching') return 'N/A';
+            if (!rawJoinDate) return 'Probationary';
+
+            const joinDate = new Date(rawJoinDate);
+            if (Number.isNaN(joinDate.getTime())) return 'Probationary';
+
+            const today = new Date();
+            if (jobType === 'non-teaching') {
+              const sixMonthsAfterJoin = new Date(joinDate);
+              sixMonthsAfterJoin.setMonth(sixMonthsAfterJoin.getMonth() + 6);
+              return today < sixMonthsAfterJoin ? 'Probationary' : 'Permanent';
+            }
+
+            const threeYearsAfterJoin = new Date(joinDate);
+            threeYearsAfterJoin.setFullYear(threeYearsAfterJoin.getFullYear() + 3);
+            return today < threeYearsAfterJoin ? 'Probationary' : 'Permanent';
+          })()"
+        ></span>
+      </div>
+    </div>
+  </div>
   <!-- Skills -->
 <div class="bg-slate-50 p-4 rounded-xl text-sm">
   <h3 class="font-semibold mb-5">Skills</h3>
@@ -249,3 +347,6 @@
     </ul>
   </div>
 </div>
+
+
+

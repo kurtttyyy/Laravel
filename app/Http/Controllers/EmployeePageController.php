@@ -388,20 +388,17 @@ class EmployeePageController extends Controller
             return 0;
         }
 
-        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $accrualStartDate = $joinDate->copy()->addYear()->startOfDay();
+        $accrualStartMonth = $accrualStartDate->copy()->startOfMonth();
         $selectedMonthEnd = $monthCursor->copy()->endOfMonth();
         $todayEnd = now()->endOfDay();
         $accrualCutoff = $selectedMonthEnd->lte($todayEnd) ? $selectedMonthEnd : $todayEnd;
 
-        if ($accrualCutoff->lt($joinDate)) {
+        if ($accrualCutoff->lt($accrualStartDate)) {
             return 0;
         }
 
-        $months = $joinMonthStart->diffInMonths($accrualCutoff->copy()->startOfMonth());
-
-        if ($accrualCutoff->isSameDay($accrualCutoff->copy()->endOfMonth())) {
-            $months++;
-        }
+        $months = $accrualStartMonth->diffInMonths($accrualCutoff->copy()->startOfMonth()) + 1;
 
         $months = max(0, $months);
 
@@ -418,19 +415,17 @@ class EmployeePageController extends Controller
             return 0;
         }
 
-        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $accrualStartDate = $joinDate->copy()->addYear()->startOfDay();
+        $accrualStartMonth = $accrualStartDate->copy()->startOfMonth();
         $selectedMonthEnd = $monthCursor->copy()->endOfMonth();
         $todayEnd = now()->endOfDay();
         $accrualCutoff = $selectedMonthEnd->lte($todayEnd) ? $selectedMonthEnd : $todayEnd;
 
-        if ($accrualCutoff->lt($joinDate)) {
+        if ($accrualCutoff->lt($accrualStartDate)) {
             return 0;
         }
 
-        $months = $joinMonthStart->diffInMonths($accrualCutoff->copy()->startOfMonth());
-        if ($accrualCutoff->isSameDay($accrualCutoff->copy()->endOfMonth())) {
-            $months++;
-        }
+        $months = $accrualStartMonth->diffInMonths($accrualCutoff->copy()->startOfMonth()) + 1;
 
         return max(0, $months);
     }
@@ -446,11 +441,11 @@ class EmployeePageController extends Controller
             return '-';
         }
 
-        $joinMonthStart = $joinDate->copy()->startOfMonth();
+        $accrualStartMonth = $joinDate->copy()->addYear()->startOfMonth();
         $monthsInCurrentCycle = (($completedMonths - 1) % $resetCycleMonths) + 1;
         $completedCycleMonths = $completedMonths - $monthsInCurrentCycle;
 
-        $rangeStart = $joinMonthStart->copy()->addMonths($completedCycleMonths)->startOfMonth();
+        $rangeStart = $accrualStartMonth->copy()->addMonths($completedCycleMonths)->startOfMonth();
         $rangeEnd = $rangeStart->copy()->addMonths($monthsInCurrentCycle - 1)->startOfMonth();
 
         if ($rangeStart->year === $rangeEnd->year) {

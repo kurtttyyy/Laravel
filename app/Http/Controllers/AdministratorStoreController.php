@@ -1319,6 +1319,7 @@ class AdministratorStoreController extends Controller
         $attrs = $request->validate([
             'status' => 'required|string|in:Approved,Rejected',
             'month' => 'nullable|string',
+            'redirect_back' => 'nullable|boolean',
         ]);
 
         $leaveApplication = LeaveApplication::findOrFail($id);
@@ -1330,6 +1331,10 @@ class AdministratorStoreController extends Controller
         $query = [];
         if ($month !== '') {
             $query['month'] = $month;
+        }
+
+        if ((bool) ($attrs['redirect_back'] ?? false)) {
+            return redirect()->back()->with('success', 'Leave request status updated.');
         }
 
         return redirect()->route('admin.adminLeaveManagement', $query)

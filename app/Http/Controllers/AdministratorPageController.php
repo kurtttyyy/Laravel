@@ -25,23 +25,24 @@ class AdministratorPageController extends Controller
     private array $holidayDateCheckCache = [];
 
     public function display_home(){
-        $employee = User::where('role', 'Employee')
-                        ->where('status', 'Pending')
+        $employee = User::query()
+                        ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['pending'])
                         ->latest()
                         ->get();
         $accept = User::with([
             'employee',
             'applicant',
             'applicant.position:id,department',
-        ])->where('role', 'Employee')
-                        ->where('status','Approved')
+        ])->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
                         ->latest()
                         ->get();
         
         // Get department overview
         $departments = User::with('employee')
-                        ->where('role', 'Employee')
-                        ->where('status', 'Approved')
+                        ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
                         ->get()
                         ->groupBy(function($user) {
                             return $user->employee->department ?? 'Unassigned';
@@ -55,8 +56,8 @@ class AdministratorPageController extends Controller
                         ->values();
 
         $totalEmployeeCount = User::query()
-            ->where('role', 'Employee')
-            ->where('status', 'Approved')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+            ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
             ->count();
 
         $today = now();
@@ -75,12 +76,12 @@ class AdministratorPageController extends Controller
 
         // "Applied" employees are based on account creation date.
         $employeesThisMonth = User::query()
-            ->where('role', 'Employee')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
             ->whereBetween('created_at', [$currentMonthStart, $currentRangeEnd])
             ->count();
 
         $employeesLastMonth = User::query()
-            ->where('role', 'Employee')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
             ->whereBetween('created_at', [$previousMonthStart, $previousRangeEnd])
             ->count();
 
@@ -131,6 +132,56 @@ class AdministratorPageController extends Controller
         $presentTodayRate = $totalEmployeeCount > 0
             ? round(($presentTodayCount / $totalEmployeeCount) * 100, 1)
             : 0;
+
+        $approvedLeaveToday = LeaveApplication::query()
+            ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->filter(function ($application) use ($todayDate) {
+                $startDate = $application->filing_date
+                    ? Carbon::parse($application->filing_date)->startOfDay()
+                    : Carbon::parse($application->created_at)->startOfDay();
+                $days = (float) ($application->number_of_working_days ?? 0);
+                if ($days <= 0) {
+                    $days = max(
+                        (float) ($application->days_with_pay ?? 0),
+                        (float) ($application->applied_total ?? 0)
+                    );
+                }
+
+                $rangeDays = max((int) ceil($days), 1);
+                $endDate = $startDate->copy()->addDays($rangeDays - 1);
+
+                return $todayDate >= $startDate->toDateString() && $todayDate <= $endDate->toDateString();
+            })
+            ->unique(function ($application) {
+                $userId = $application->user_id ?? null;
+                if (!is_null($userId)) {
+                    return 'user:'.$userId;
+                }
+
+                return 'name:'.strtolower(trim((string) ($application->employee_name ?? '')));
+            })
+            ->values();
+
+        $onLeaveTodayCount = (int) $approvedLeaveToday->count();
+        $pendingLeaveRequestCount = (int) LeaveApplication::query()
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhereRaw("TRIM(status) = ''")
+                    ->orWhereRaw("LOWER(TRIM(status)) = ?", ['pending']);
+            })
+            ->count();
+        $pendingLeaveRequestsForHome = LeaveApplication::query()
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhereRaw("TRIM(status) = ''")
+                    ->orWhereRaw("LOWER(TRIM(status)) = ?", ['pending']);
+            })
+            ->orderByDesc('created_at')
+            ->take(3)
+            ->get();
+
         $openPositionsCount = OpenPosition::query()->count();
         $openPositionApplicationsCount = Applicant::query()->count();
         
@@ -142,6 +193,9 @@ class AdministratorPageController extends Controller
             'monthlyEmployeePercentChange',
             'presentTodayCount',
             'presentTodayRate',
+            'onLeaveTodayCount',
+            'pendingLeaveRequestCount',
+            'pendingLeaveRequestsForHome',
             'openPositionsCount',
             'openPositionApplicationsCount'
         ));

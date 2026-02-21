@@ -143,7 +143,17 @@
     <div class="border border-gray-500">
       <div class="row">
         <span class="label">Employment Date:</span>
-        <span class="value" x-text="selectedEmployee?.employee?.employement_date ?? '-'"></span>
+        <span
+          class="value"
+          x-text="(() => {
+            const raw = selectedEmployee?.employee?.employement_date;
+            if (!raw) return '-';
+            const parsed = new Date(raw);
+            return Number.isNaN(parsed.getTime())
+              ? raw
+              : parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          })()"
+        ></span>
       </div>
       <div class="row">
         <span class="label">Position:</span>
@@ -338,7 +348,16 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
       <label class="block text-xs text-gray-600">Employment Date</label>
-        <input type="date" name="employment_date" class="w-full border px-2 py-1" :value="selectedEmployee?.employee?.employement_date ?? ''">
+        <input
+          type="date"
+          name="employment_date"
+          class="w-full border px-2 py-1"
+          :value="selectedEmployee?.employee?.employement_date
+            ? selectedEmployee.employee.employement_date.split('T')[0]
+            : (selectedEmployee?.applicant?.date_hired
+              ? selectedEmployee.applicant.date_hired.split('T')[0]
+              : '')"
+        >
       </div>
       <input class="border px-2 py-1" name = "position" placeholder="Position" x-model="selectedEmployee.employee.position">
       <input class="border px-2 py-1" name = "department" placeholder="Department" x-model="selectedEmployee.employee.department">

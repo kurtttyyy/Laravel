@@ -260,9 +260,19 @@ class EmployeePageController extends Controller
     public function display_document(){
         $user_id = Auth::id();
         $applicant = Applicant::where('user_id', $user_id)
-                                ->where('application_status','Hired')->first();
-        $documents = ApplicantDocument::where('applicant_id', $applicant->id)->get();
-        return view('employee.employeeDocument', compact('documents'));
+                                ->where('application_status','Hired')
+                                ->first();
+
+        $documents = collect();
+        $latestDocument = null;
+        if ($applicant) {
+            $documents = ApplicantDocument::where('applicant_id', $applicant->id)
+                ->latest('created_at')
+                ->get();
+            $latestDocument = $documents->first();
+        }
+
+        return view('employee.employeeDocument', compact('documents', 'latestDocument'));
     }
 
     public function display_communication(){

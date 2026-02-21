@@ -16,9 +16,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class AdministratorPageController extends Controller
 {
+    private ?array $hiddenOfficialHolidayDatesCache = null;
+    private ?array $calendarHolidayConfigCache = null;
+    private array $holidayDateCheckCache = [];
 
     public function display_home(){
         $employee = User::where('role', 'Employee')
@@ -269,6 +273,31 @@ class AdministratorPageController extends Controller
                 ->get();
         }
 
+        // If an official holiday was hidden from the Admin Calendar,
+        // do not keep previously generated holiday-present rows for that date.
+        $records = collect($records)
+            ->filter(function ($row) {
+                $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+                if (!$isHolidayPresent) {
+                    return true;
+                }
+
+                try {
+                    $date = $row->attendance_date
+                        ? Carbon::parse($row->attendance_date)->toDateString()
+                        : null;
+                } catch (\Throwable $e) {
+                    $date = null;
+                }
+
+                if (!$date) {
+                    return true;
+                }
+
+                return !$this->isHiddenOfficialHolidayDate($date);
+            })
+            ->values();
+
         $employeesWithJobType = Employee::query()
             ->select(['employee_id', 'job_type'])
             ->whereNotNull('employee_id')
@@ -376,7 +405,16 @@ class AdministratorPageController extends Controller
             $rowName = $employeeDisplayNameMap->get($employeeId) ?: $this->normalizeLooseDisplayName($row->employee_name ?? null);
             $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
             $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
+            $rowDate = null;
+            try {
+                $rowDate = $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : null;
+            } catch (\Throwable $e) {
+                $rowDate = null;
+            }
             $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+            if ($isHolidayPresent && $rowDate && !$this->isHolidayDate($rowDate)) {
+                $isHolidayPresent = false;
+            }
             $hasAnyTimeLog = !empty($row->morning_in)
                 || !empty($row->morning_out)
                 || !empty($row->afternoon_in)
@@ -587,21 +625,151 @@ class AdministratorPageController extends Controller
             return false;
         }
 
+        if (array_key_exists($fromDate, $this->holidayDateCheckCache)) {
+            return $this->holidayDateCheckCache[$fromDate];
+        }
+
         try {
             $date = Carbon::parse($fromDate)->startOfDay();
         } catch (\Throwable $e) {
+            $this->holidayDateCheckCache[$fromDate] = false;
             return false;
         }
 
-        if ($this->isUsPublicHoliday($date)) {
+        $dateString = $date->toDateString();
+
+        if ($this->isCustomHolidayDate($dateString)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
+            return true;
+        }
+
+        if (!$this->isHiddenOfficialHolidayDate($dateString) && $this->isUsPublicHoliday($date)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
             return true;
         }
 
         if ($this->isChineseNewYearDate($date)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
             return true;
         }
 
+        $this->holidayDateCheckCache[$fromDate] = false;
         return false;
+    }
+
+    private function isHiddenOfficialHolidayDate(string $date): bool
+    {
+        $hiddenDates = $this->getHiddenOfficialHolidayDates();
+        return in_array($date, $hiddenDates, true);
+    }
+
+    private function isCustomHolidayDate(string $date): bool
+    {
+        $config = $this->getCalendarHolidayConfig();
+        $customHolidays = $config['custom_holidays'] ?? [];
+        if (array_key_exists($date, $customHolidays) && !empty($customHolidays[$date])) {
+            return true;
+        }
+
+        $monthDay = substr($date, 5);
+        $recurringHolidays = $config['recurring_holidays'] ?? [];
+        return array_key_exists($monthDay, $recurringHolidays) && !empty($recurringHolidays[$monthDay]);
+    }
+
+    private function getCalendarHolidayConfig(): array
+    {
+        if (!is_null($this->calendarHolidayConfigCache)) {
+            return $this->calendarHolidayConfigCache;
+        }
+
+        $default = [
+            'hidden_official_holidays' => [],
+            'custom_holidays' => [],
+            'recurring_holidays' => [],
+        ];
+
+        try {
+            if (!Storage::disk('local')->exists('calendar_holiday_config.json')) {
+                $this->calendarHolidayConfigCache = $default;
+                return $this->calendarHolidayConfigCache;
+            }
+
+            $raw = Storage::disk('local')->get('calendar_holiday_config.json');
+            $payload = json_decode($raw, true);
+            if (!is_array($payload)) {
+                $this->calendarHolidayConfigCache = $default;
+                return $this->calendarHolidayConfigCache;
+            }
+
+            $customHolidays = collect($payload['custom_holidays'] ?? [])
+                ->filter(fn ($names, $date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && is_array($names))
+                ->map(fn ($names) => array_values(array_filter(array_map(fn ($name) => is_string($name) ? trim($name) : '', $names), fn ($name) => $name !== '')))
+                ->filter(fn ($names) => !empty($names))
+                ->all();
+
+            $recurringHolidays = collect($payload['recurring_holidays'] ?? [])
+                ->filter(fn ($names, $monthDay) => is_string($monthDay) && preg_match('/^\d{2}-\d{2}$/', $monthDay) && is_array($names))
+                ->map(fn ($names) => array_values(array_filter(array_map(fn ($name) => is_string($name) ? trim($name) : '', $names), fn ($name) => $name !== '')))
+                ->filter(fn ($names) => !empty($names))
+                ->all();
+
+            $hiddenOfficialHolidays = collect($payload['hidden_official_holidays'] ?? [])
+                ->filter(fn ($names, $date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && is_array($names) && !empty($names))
+                ->all();
+
+            $this->calendarHolidayConfigCache = [
+                'hidden_official_holidays' => $hiddenOfficialHolidays,
+                'custom_holidays' => $customHolidays,
+                'recurring_holidays' => $recurringHolidays,
+            ];
+
+            return $this->calendarHolidayConfigCache;
+        } catch (\Throwable $e) {
+            $this->calendarHolidayConfigCache = $default;
+            return $this->calendarHolidayConfigCache;
+        }
+    }
+
+    private function getHiddenOfficialHolidayDates(): array
+    {
+        if (!is_null($this->hiddenOfficialHolidayDatesCache)) {
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
+
+        $config = $this->getCalendarHolidayConfig();
+        $fromConfig = collect($config['hidden_official_holidays'] ?? [])
+            ->keys()
+            ->filter(fn ($date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date))
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($fromConfig)) {
+            $this->hiddenOfficialHolidayDatesCache = $fromConfig;
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
+
+        try {
+            if (!Storage::disk('local')->exists('calendar_hidden_holidays.json')) {
+                $this->hiddenOfficialHolidayDatesCache = [];
+                return $this->hiddenOfficialHolidayDatesCache;
+            }
+
+            $raw = Storage::disk('local')->get('calendar_hidden_holidays.json');
+            $payload = json_decode($raw, true);
+            $dates = is_array($payload['dates'] ?? null) ? $payload['dates'] : [];
+            $normalized = collect($dates)
+                ->filter(fn ($value) => is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value))
+                ->unique()
+                ->values()
+                ->all();
+
+            $this->hiddenOfficialHolidayDatesCache = $normalized;
+            return $this->hiddenOfficialHolidayDatesCache;
+        } catch (\Throwable $e) {
+            $this->hiddenOfficialHolidayDatesCache = [];
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
     }
 
     private function isUsPublicHoliday(Carbon $date): bool

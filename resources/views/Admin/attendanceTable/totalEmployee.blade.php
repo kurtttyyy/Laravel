@@ -405,14 +405,15 @@
 
     function renderSummaryChart() {
       if (!chartContainer) {
-        return;
+        return false;
       }
 
       const summaryData = renderSummaryTable();
       const employees = (summaryData?.employees || []);
       if (!employees.length) {
-        chartContainer.innerHTML = '<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">No summary data to chart.</div>';
-        return;
+        chartContainer.classList.add('hidden');
+        chartContainer.innerHTML = '';
+        return false;
       }
 
       const tardinessByDepartment = {};
@@ -554,6 +555,17 @@
         return Object.entries(tardinessRateByDepartment).sort((a, b) => b[1] - a[1]);
       }
 
+      function metricHasData(metric) {
+        const selectedMetric = metricConfig[metric] ? metric : 'tardiness';
+        const departmentEntries = getEntriesByMetric(selectedMetric);
+        const totalValue = departmentEntries.reduce((sum, [, value]) => sum + Number(value || 0), 0);
+        if (!departmentEntries.length) {
+          return false;
+        }
+
+        return selectedMetric === 'outstanding' || totalValue > 0;
+      }
+
       function renderMetricChart(metric) {
         const selectedMetric = metricConfig[metric] ? metric : 'tardiness';
         activeChartMetric = selectedMetric;
@@ -561,7 +573,7 @@
         const departmentEntries = getEntriesByMetric(selectedMetric);
         const totalValue = departmentEntries.reduce((sum, [, value]) => sum + Number(value || 0), 0);
 
-        if (!departmentEntries.length || (selectedMetric !== 'outstanding' && totalValue <= 0)) {
+        if (!metricHasData(selectedMetric)) {
           chartContainer.innerHTML = `<div class="rounded-lg border border-gray-200 p-4 text-sm text-gray-500">${config.emptyText}</div>`;
           return;
         }
@@ -690,12 +702,30 @@
             if (!metricConfig[nextMetric] || nextMetric === activeChartMetric) {
               return;
             }
+
+            if (!metricHasData(nextMetric)) {
+              alert(metricConfig[nextMetric].emptyText);
+              return;
+            }
+
             renderMetricChart(nextMetric);
           });
         });
       }
 
+      if (!metricHasData(activeChartMetric)) {
+        const fallbackMetric = ['employees', 'outstanding', 'absences', 'tardiness']
+          .find((metric) => metricHasData(metric));
+        if (!fallbackMetric) {
+          chartContainer.classList.add('hidden');
+          chartContainer.innerHTML = '';
+          return false;
+        }
+        activeChartMetric = fallbackMetric;
+      }
+
       renderMetricChart(activeChartMetric);
+      return true;
     }
 
     if (summaryBtn) {
@@ -738,7 +768,11 @@
         }
 
         if (!isChartView) {
-          renderSummaryChart();
+          const canRenderChart = renderSummaryChart();
+          if (!canRenderChart) {
+            alert('No summary data to chart.');
+            return;
+          }
           if (tableWrapper) {
             tableWrapper.classList.add('hidden');
           }

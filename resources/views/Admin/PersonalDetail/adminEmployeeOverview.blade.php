@@ -157,7 +157,19 @@
         </span>
         <span
           class="text-gray-700"
-          x-text="selectedEmployee?.applicant?.formatted_date_hired || selectedEmployee?.employee?.formatted_employement_date || selectedEmployee?.employee?.employement_date || '—'"
+          x-text="(() => {
+            const formatted = selectedEmployee?.applicant?.formatted_date_hired
+              || selectedEmployee?.employee?.formatted_employement_date;
+            if (formatted) return formatted;
+
+            const raw = selectedEmployee?.employee?.employement_date;
+            if (!raw) return '—';
+
+            const parsed = new Date(raw);
+            return Number.isNaN(parsed.getTime())
+              ? raw
+              : parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          })()"
         ></span>
       </div>
     </div>

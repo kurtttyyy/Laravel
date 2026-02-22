@@ -39,7 +39,7 @@
 <div class="p-4 md:p-8 space-y-8 pt-20">
     @php
         $activeEmployeeForm = request()->query('form', 'leave');
-        if (!in_array($activeEmployeeForm, ['leave', 'official'], true)) {
+        if (!in_array($activeEmployeeForm, ['leave', 'leave-download', 'official'], true)) {
             $activeEmployeeForm = 'leave';
         }
         $employeeFormQueryBase = array_filter([
@@ -164,6 +164,13 @@
                 APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
             </a>
         </li>
+        <li>
+            <a
+                href="{{ route('employee.employeeLeave', array_merge($employeeFormQueryBase, ['form' => 'leave-download'])) }}"
+                class="block w-full text-left px-2 py-1 rounded {{ $activeEmployeeForm === 'leave-download' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}">
+                LEAVE APPLICATION FORM (DOWNLOADABLE)
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -173,6 +180,9 @@
     @if ($activeEmployeeForm === 'official')
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
         @include('requestForm.applicationOBF')
+    @elseif ($activeEmployeeForm === 'leave-download')
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Leave Application (Downloadable)</h3>
+        @include('requestForm.leaveApplicationFormDownload')
     @else
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
         @include('requestForm.leaveApplicationForm')
@@ -207,4 +217,3 @@
 
 </body>
 </html>
-

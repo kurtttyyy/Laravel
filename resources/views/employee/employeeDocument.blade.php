@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -41,78 +41,79 @@
             <div class="bg-white border border-gray-200 rounded-2xl p-6">
                 <h2 class="text-lg font-bold text-gray-900">201 File Submission</h2>
                 <p class="text-gray-500 text-sm mt-1 mb-6">
-                    Upload your required documents for your 201 file
+                    Upload one document at a time for your employee 201 file.
                 </p>
 
-                <!-- Upload Box -->
-                <form action="{{ route('employee.upload_documents')}}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="text" name="document_name" placeholder="Document Type" required>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl py-10 text-center mb-6">
-                        <div class="w-14 h-14 mx-auto bg-indigo-100 rounded-xl flex items-center justify-center mb-3">
-                            <i class="fa-solid fa-cloud-arrow-up text-indigo-600 text-xl"></i>
-                        </div>
-                        <p class="font-medium text-gray-900">Click to upload documents</p>
-                        <p class="text-sm text-gray-500">PDF, JPG, PNG up to 10MB</p>
-                        <input type="file" name="uploadFile">
-                        <button type="submit">Save</button>
+                @if (session('success'))
+                    <div class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                        {{ session('success') }}
                     </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form action="{{ route('employee.upload_documents') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+
+                    <div>
+                        <label for="document_name" class="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
+                        <input
+                            id="document_name"
+                            type="text"
+                            name="document_name"
+                            placeholder="e.g. NBI Clearance"
+                            value="{{ old('document_name') }}"
+                            required
+                            class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                    </div>
+
+                    <div class="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-5">
+                        <label for="uploadFile" class="block text-sm font-medium text-gray-700 mb-2">Attach File</label>
+                        <input
+                            id="uploadFile"
+                            type="file"
+                            name="uploadFile"
+                            required
+                            class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-200"
+                        >
+                        <p class="mt-2 text-xs text-gray-500">Accepted: PDF, XLSX, DOC, DOCX (max 5MB)</p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Document
+                    </button>
                 </form>
 
-                <!-- Container -->
-                <div class="bg-green-100 border border-green-500 rounded-xl p-4 max-w mb-4">
-
-                    <!-- Uploaded -->
-                    <div class="status uploaded flex items-center gap-4 bg-green-100">
-                        <span class="icon bg-green-200 text-green-600 w-10 h-10 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-circle-check text-2xl"></i>
-                        </span>
-
-                        <div>
-                            <p class="font-medium text-gray-800">Birth Certificate</p>
-                            <p class="text-sm text-gray-500">Uploaded · 1.2 MB</p>
+                <div class="mt-6">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Latest Upload</h3>
+                    @if($latestDocument)
+                        <div class="rounded-xl border border-green-300 bg-green-50 p-4">
+                            <div class="flex items-center gap-3">
+                                <span class="icon bg-green-200 text-green-600 w-10 h-10 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-check text-xl"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="font-medium text-gray-800 truncate">{{ $latestDocument->type ?: ($latestDocument->filename ?? 'Document') }}</p>
+                                    <p class="text-sm text-gray-600 truncate">{{ $latestDocument->filename }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">Uploaded - {{ $latestDocument->formatted_size }} - {{ $latestDocument->formatted_created_at }}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
+                    @else
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                            No uploaded document yet.
+                        </div>
+                    @endif
                 </div>
-
-
-                <div class="bg-green-100 border border-green-500 rounded-xl p-4 shadow-sm max-w mb-4">
-                <div class="status uploaded flex items-center gap-4">
-                    <span class="icon  bg-green-200 text-green-600 w-10 h-10 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-circle-check text-2xl"></i>
-                    </span>
-                    <div>
-                        <p class="font-medium">NBI Clearance</p>
-                        <p class="text-sm text-gray-500">Uploaded · 0.8 MB</p>
-                    </div>
-                </div>
-                </div>
-
-                <!-- Pending -->
-                 <div class="bg-yellow-100 border border-yellow-600 rounded-xl p-4 shadow-sm max-w mb-4">
-                <div class="status pending flex items-center gap-4">
-                    <span class="icon bg-yellow-200 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-clock text-2xl"></i>
-                    </span>
-                    <div>
-                        <p class="font-medium">Medical Certificate</p>
-                        <p class="text-sm text-gray-500">Pending upload</p>
-                    </div>
-                </div>
-                </div>
-
-                <div class="bg-yellow-100 border border-yellow-600 rounded-xl p-4 shadow-sm max-w mb-4">
-                <div class="status pending flex items-center gap-4">
-                    <span class="icon bg-yellow-200 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center">
-                        <i class="fa-solid fa-clock text-2xl"></i>
-                    </span>
-                    <div>
-                        <p class="font-medium">TIN ID</p>
-                        <p class="text-sm text-gray-500">Pending upload</p>
-                    </div>
-                </div>
-            </div>
             </div>
 
             <!-- PERSONAL DOCUMENTS -->
@@ -122,51 +123,28 @@
                     Access your uploaded documents
                 </p>
 
-
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
-                    <span class="doc-icon bg-blue-100 text-blue-600 w-10 h-10 rounded flex items-center justify-center">
-                        <i class="fa-solid fa-file"></i>
-                    </span>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800">Birth Certificate</p>
-                        <p class="text-sm text-gray-500">PDF · 1.2 MB · Jan 15, 2025</p>
+                @forelse($documents as $document)
+                    @php
+                        $fileType = strtoupper(pathinfo((string) ($document->filename ?? ''), PATHINFO_EXTENSION));
+                        if ($fileType === '') {
+                            $fileType = strtoupper(str_replace('application/', '', (string) ($document->mime_type ?? 'FILE')));
+                        }
+                    @endphp
+                    <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
+                        <span class="doc-icon bg-blue-100 text-blue-600 w-10 h-10 rounded flex items-center justify-center">
+                            <i class="fa-solid fa-file"></i>
+                        </span>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">{{ $document->type ?: ($document->filename ?? 'Document') }}</p>
+                            <p class="text-sm text-gray-500">{{ $fileType }} - {{ $document->formatted_size }} - {{ $document->formatted_created_at }}</p>
+                        </div>
+                        <a href="{{ asset('storage/' . ltrim((string) ($document->filepath ?? ''), '/')) }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-medium hover:underline">View</a>
                     </div>
-                    <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
-                </div>
-
-
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
-                    <span class="doc-icon bg-green-100 text-green-600 w-10 h-10 rounded flex items-center justify-center">
-                        <i class="fa-solid fa-file"></i>
-                    </span>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800">NBI Clearance</p>
-                        <p class="text-sm text-gray-500">PDF · 0.8 MB · Jan 18, 2025</p>
+                @empty
+                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                        No uploaded personal documents yet.
                     </div>
-                    <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
-                </div>
-
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
-                    <span class="doc-icon bg-purple-100 text-purple-600 w-10 h-10 rounded flex items-center justify-center">
-                        <i class="fa-solid fa-file"></i>
-                    </span>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800">Resume</p>
-                        <p class="text-sm text-gray-500">PDF · 0.5 MB · Jan 10, 2025</p>
-                    </div>
-                    <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
-                </div>
-
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-4 max-w mb-4 flex items-center gap-4">
-                    <span class="doc-icon bg-red-100 text-red-600 w-10 h-10 rounded flex items-center justify-center">
-                        <i class="fa-solid fa-file"></i>
-                    </span>
-                    <div class="flex-1">
-                        <p class="font-medium text-gray-800">Diploma</p>
-                        <p class="text-sm text-gray-500">PDF · 1.8 MB · Jan 8, 2025</p>
-                    </div>
-                    <a href="#" class="text-blue-600 font-medium hover:underline">View</a>
-                </div>
+                @endforelse
             </div>
 
         </div>

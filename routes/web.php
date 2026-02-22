@@ -47,6 +47,7 @@ Route::controller(EmployeePageController::class)->group(function () {
 Route::controller(EmployeeStoreController::class)->group(function () {
     //POST
     Route::post('upload/documents', 'upload_store')->name('employee.upload_documents');
+    Route::post('employee/leave/application', 'leave_application_store')->name('employee.leaveApplication.store');
 
 });
 
@@ -59,7 +60,6 @@ Route::controller(AdministratorPageController::class)->group(function () {
     Route::get('system/attendance/tardiness', 'display_attendance_tardiness')->name('admin.attendance.tardiness');
     Route::get('system/attendance/total-employee', 'display_attendance_total_employee')->name('admin.attendance.totalEmployee');
     Route::get('system/leave/management', 'display_leave')->name('admin.adminLeaveManagement');
-    Route::post('system/leave/management/allowances', 'update_leave_allowances')->name('admin.leaveAllowances.update');
     Route::get('system/reports', 'display_reports')->name('admin.adminReports');
     Route::get('system/compare/code', 'display_compare')->name('admin.compareCode');
 
@@ -98,8 +98,10 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/update/application/status', 'update_application_status')->name('admin.updateStatus');
     Route::post('system/update/interview', 'updated_interview')->name('admin.storeUpdatedInterview');
     Route::post('system/update/employee/{id}', 'update_employee')->name('admin.updateEmployee');
+    Route::post('system/leave/request/{id}/status', 'update_leave_request_status')->name('admin.updateLeaveRequestStatus');
     Route::post('system/employee/update/biometric', 'update_bio')->name('admin.updateBio');
     Route::post('system/employee/update/profile', 'update_general_profile')->name('admin.updateGeneralProfile');
+    Route::post('system/calendar/hidden-official-holidays/sync', 'sync_hidden_official_holidays')->name('admin.syncHiddenOfficialHolidays');
     Route::post('admin/attendance/update-status/{id}', 'update_attendance_status')->name('admin.updateAttendanceStatus');
     Route::post('admin/attendance/delete/{id}', 'delete_attendance_file')->name('admin.deleteAttendanceFile');
 
@@ -109,3 +111,4 @@ Route::controller(AdministratorStoreController::class)->group(function () {
     Route::post('system/delete/interview/{id}', 'destroy_interview')->name('admin.interviewCancel');
     Route::post('system/delete/employee/{id}', 'destroy_employee')->name('admin.destroyEmployee');
 });
+

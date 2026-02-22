@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -43,37 +43,6 @@
         </form>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <div class="mb-3">
-          <h3 class="text-sm font-semibold text-gray-700">Monthly Leave Allocation (Editable)</h3>
-          <p class="text-xs text-gray-500 mt-1">Set monthly leave limit per employee for each leave type (for {{ $selectedMonth ?? now()->format('Y-m') }}).</p>
-        </div>
-        <form method="POST" action="{{ route('admin.leaveAllowances.update') }}" class="space-y-4">
-          @csrf
-          <input type="hidden" name="month" value="{{ $selectedMonth ?? now()->format('Y-m') }}">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            @foreach (($academyLeaveTypes ?? []) as $leaveType)
-              <label class="rounded-lg border border-gray-200 p-3 block">
-                <span class="text-sm text-gray-700 block mb-2">{{ $leaveType }}</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  name="allowances[{{ $leaveType }}]"
-                  value="{{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }}"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </label>
-            @endforeach
-          </div>
-          <div class="flex justify-end">
-            <button type="submit" class="rounded-lg bg-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-              Save Monthly Allocation
-            </button>
-          </div>
-        </form>
-      </div>
-
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl border border-gray-200 p-4">
           <p class="text-xs text-gray-500 uppercase tracking-wide">Leave Used This Month</p>
@@ -101,27 +70,59 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Academy Staff Leave Types (Per Employee Monthly Limit)</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          @foreach (($academyLeaveTypes ?? []) as $leaveType)
-            <div class="rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-amber-700">Pending Leave Requests ({{ $selectedMonth ?? now()->format('Y-m') }})</h3>
+          <div class="text-xs text-gray-500">
+            {{ ($pendingLeaveRequests ?? collect())->count() }} request(s) â€¢
+            {{ rtrim(rtrim(number_format((float) ($pendingLeaveDays ?? 0), 1, '.', ''), '0'), '.') }} day(s)
+          </div>
+        </div>
+        <div>
+          @forelse (($pendingLeaveRequests ?? collect()) as $request)
+            @php
+              $requestFilingDate = $request->filing_date ? \Carbon\Carbon::parse($request->filing_date)->format('M d, Y') : optional($request->created_at)->format('M d, Y');
+              $requestDays = rtrim(rtrim(number_format((float) ($request->number_of_working_days ?? 0), 1, '.', ''), '0'), '.');
+              $requestLeaveType = $request->leave_type ?: 'Leave Request';
+              $requestDates = $request->inclusive_dates ?: '-';
+              $requestReason = str_contains(strtolower((string) $requestLeaveType), 'official business')
+                ? 'Business Trip'
+                : (str_contains(strtolower((string) $requestLeaveType), 'annual leave') ? 'Personal vacation' : (str_contains(strtolower((string) $requestLeaveType), 'sick leave') ? 'Not fit for work due to health reasons' : $requestDates));
+            @endphp
+            <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
               <div>
-                <span class="text-sm text-gray-700 block">{{ $leaveType }}</span>
-                <span class="text-xs text-gray-500">
-                  Used total: {{ (int) (($leaveTypeCounts[$leaveType] ?? 0)) }} day(s)
-                  •
-                  Limit per employee: {{ (int) (($monthlyLeaveAllowances[$leaveType] ?? 0)) }} day(s)
-                </span>
+                <p class="font-semibold text-gray-900">
+                  {{ $requestLeaveType }}
+                  <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Pending</span>
+                </p>
+                <p class="text-sm font-semibold text-gray-800">{{ $request->employee_name ?? '-' }}</p>
+                <p class="text-sm text-gray-500">Filed: {{ $requestFilingDate }} • {{ $requestDays }} day(s)</p>
+                <p class="text-sm text-gray-400">{{ $requestReason }}</p>
               </div>
-              @php
-                $overLimitEmployees = (int) (($leaveTypeOverLimitCounts[$leaveType] ?? 0));
-              @endphp
-              <span class="text-sm font-semibold {{ $overLimitEmployees > 0 ? 'text-red-600' : 'text-emerald-600' }}">
-                {{ $overLimitEmployees }} over limit
-              </span>
+              <div class="flex items-center gap-2 shrink-0">
+                <form method="POST" action="{{ route('admin.updateLeaveRequestStatus', $request->id) }}">
+                  @csrf
+                  <input type="hidden" name="status" value="Approved">
+                  <input type="hidden" name="month" value="{{ $selectedMonth ?? now()->format('Y-m') }}">
+                  <button type="submit" class="inline-flex rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+                    Approve
+                  </button>
+                </form>
+                <form method="POST" action="{{ route('admin.updateLeaveRequestStatus', $request->id) }}">
+                  @csrf
+                  <input type="hidden" name="status" value="Rejected">
+                  <input type="hidden" name="month" value="{{ $selectedMonth ?? now()->format('Y-m') }}">
+                  <button type="submit" class="inline-flex rounded-md bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700">
+                    Reject
+                  </button>
+                </form>
+              </div>
             </div>
-          @endforeach
+          @empty
+            <div class="px-4 py-6 text-center text-sm text-gray-500">
+              No pending leave requests for this month.
+            </div>
+          @endforelse
         </div>
       </div>
 
@@ -145,17 +146,20 @@
               }
 
               $iconMap = [
-                'Annual Leave' => '🌴',
-                'Sick Leave' => '🩺',
-                'Personal Leave' => '🟡',
-                'Study Leave' => '🎓',
-                'Emergency Leave' => '🚨',
-                'Maternity Leave' => '👶',
-                'Paternity Leave' => '👨',
-                'Bereavement Leave' => '🕊️',
-                'Service Incentive Leave' => '⭐',
+                'Annual Leave' => "\u{1F334}",
+                'Sick Leave' => "\u{1FA7A}",
+                'Personal Leave' => "\u{1F7E1}",
+                'Study Leave' => "\u{1F393}",
+                'Emergency Leave' => "\u{1F6A8}",
+                'Maternity Leave' => "\u{1F476}",
+                'Paternity Leave' => "\u{1F468}",
+                'Bereavement Leave' => "\u{1F5CA}\u{FE0F}",
+                'Service Incentive Leave' => "\u{2B50}",
               ];
-              $icon = $iconMap[$leaveType] ?? '📄';
+              $icon = $iconMap[$leaveType] ?? "\u{1F4C4}";
+              $reasonLabel = str_contains(strtolower($leaveType), 'official business')
+                ? 'Business Trip'
+                : (str_contains(strtolower($leaveType), 'annual leave') ? 'Personal vacation' : (str_contains(strtolower($leaveType), 'sick leave') ? 'Not fit for work due to health reasons' : ($record['reason'] ?? '-')));
             @endphp
             <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
               <div class="flex items-start gap-3">
@@ -168,14 +172,8 @@
                     <span class="ml-2 inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">Employee</span>
                   </p>
                   <p class="text-sm font-semibold text-gray-800">{{ $record['employee_name'] ?? '-' }}</p>
-                  <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $daysLabel }}</p>
-                  <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
-                  <p class="text-xs {{ !empty($record['is_employee_over_limit']) ? 'text-red-600' : 'text-slate-500' }}">
-                    Employee usage this month: {{ (int) ($record['employee_usage_for_type'] ?? 0) }}/{{ (int) ($record['monthly_limit_per_employee'] ?? 0) }} day(s)
-                    @if (!empty($record['is_employee_over_limit']))
-                      (Over limit)
-                    @endif
-                  </p>
+                  <p class="text-sm text-gray-500">{{ $dateLabel }} â€¢ {{ $daysLabel }}</p>
+                  <p class="text-sm text-gray-400">{{ $reasonLabel }}</p>
                 </div>
               </div>
               <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
@@ -188,43 +186,7 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-200 p-6 flex flex-col md:flex-row gap-6">
-        @php
-          $activeForm = request()->query('form', 'leave');
-          $formQueryBase = array_filter([
-            'month' => $selectedMonth ?? now()->format('Y-m'),
-          ], fn ($value) => !is_null($value) && $value !== '');
-        @endphp
-        <div class="w-full md:w-1/4 bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
-          <h4 class="font-semibold text-gray-700 mb-4">Select Form</h4>
-          <a
-            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'leave'])) }}"
-            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'leave' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
-          >
-            LEAVE APPLICATION FORM
-          </a>
-          <a
-            href="{{ route('admin.adminLeaveManagement', array_merge($formQueryBase, ['form' => 'official'])) }}"
-            class="block w-full text-left px-3 py-2 rounded text-sm {{ $activeForm === 'official' ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-blue-100 text-gray-800' }}"
-          >
-            APPLICATION FOR OFFICIAL BUSINESS / OFFICIAL TIME
-          </a>
-        </div>
 
-        <div class="w-full md:w-3/4 space-y-6">
-          @if ($activeForm === 'official')
-            <div id="adminOfficialForm">
-              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
-              @include('requestForm.applicationOBF')
-            </div>
-          @else
-            <div id="adminLeaveForm">
-              <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Leave</h3>
-              @include('requestForm.leaveApplicationForm')
-            </div>
-          @endif
-        </div>
-      </div>
     </div>
   </main>
 </div>
@@ -245,3 +207,9 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+

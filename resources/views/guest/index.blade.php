@@ -193,7 +193,16 @@
                 <div class="card p-3 rounded shadow-sm mb-4 animated-card delay-5 hover-card border-1">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="fw-bold mb-1">{{ $position->title }}</h5>
-                        <span class="badge bg-success">New</span>
+                        @php
+                            $postedDays = $position->created_at
+                                ? now()->diffInDays($position->created_at)
+                                : null;
+                        @endphp
+                        @if (!is_null($postedDays) && $postedDays <= 3)
+                            <span class="badge bg-success">New</span>
+                        @elseif (!is_null($postedDays))
+                            <span class="badge bg-secondary">{{ $postedDays }} {{ $postedDays === 1 ? 'day' : 'days' }} ago</span>
+                        @endif
                     </div>
 
                     <small class="text-muted">{{ $position->department }}</small>

@@ -9,35 +9,40 @@ use App\Models\Employee;
 use App\Models\GuestLog;
 use App\Models\Interviewer;
 use App\Models\OpenPosition;
+use App\Models\LeaveApplication;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class AdministratorPageController extends Controller
 {
+    private ?array $hiddenOfficialHolidayDatesCache = null;
+    private ?array $calendarHolidayConfigCache = null;
+    private array $holidayDateCheckCache = [];
 
     public function display_home(){
-        $employee = User::where('role', 'Employee')
-                        ->where('status', 'Pending')
+        $employee = User::query()
+                        ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['pending'])
                         ->latest()
                         ->get();
         $accept = User::with([
             'employee',
             'applicant',
             'applicant.position:id,department',
-        ])->where('role', 'Employee')
-                        ->where('status','Approved')
+        ])->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
                         ->latest()
                         ->get();
         
         // Get department overview
         $departments = User::with('employee')
-                        ->where('role', 'Employee')
-                        ->where('status', 'Approved')
+                        ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+                        ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
                         ->get()
                         ->groupBy(function($user) {
                             return $user->employee->department ?? 'Unassigned';
@@ -51,8 +56,8 @@ class AdministratorPageController extends Controller
                         ->values();
 
         $totalEmployeeCount = User::query()
-            ->where('role', 'Employee')
-            ->where('status', 'Approved')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
+            ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
             ->count();
 
         $today = now();
@@ -71,12 +76,12 @@ class AdministratorPageController extends Controller
 
         // "Applied" employees are based on account creation date.
         $employeesThisMonth = User::query()
-            ->where('role', 'Employee')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
             ->whereBetween('created_at', [$currentMonthStart, $currentRangeEnd])
             ->count();
 
         $employeesLastMonth = User::query()
-            ->where('role', 'Employee')
+            ->whereRaw("LOWER(TRIM(COALESCE(role, ''))) = ?", ['employee'])
             ->whereBetween('created_at', [$previousMonthStart, $previousRangeEnd])
             ->count();
 
@@ -127,6 +132,56 @@ class AdministratorPageController extends Controller
         $presentTodayRate = $totalEmployeeCount > 0
             ? round(($presentTodayCount / $totalEmployeeCount) * 100, 1)
             : 0;
+
+        $approvedLeaveToday = LeaveApplication::query()
+            ->whereRaw("LOWER(TRIM(COALESCE(status, ''))) = ?", ['approved'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->filter(function ($application) use ($todayDate) {
+                $startDate = $application->filing_date
+                    ? Carbon::parse($application->filing_date)->startOfDay()
+                    : Carbon::parse($application->created_at)->startOfDay();
+                $days = (float) ($application->number_of_working_days ?? 0);
+                if ($days <= 0) {
+                    $days = max(
+                        (float) ($application->days_with_pay ?? 0),
+                        (float) ($application->applied_total ?? 0)
+                    );
+                }
+
+                $rangeDays = max((int) ceil($days), 1);
+                $endDate = $startDate->copy()->addDays($rangeDays - 1);
+
+                return $todayDate >= $startDate->toDateString() && $todayDate <= $endDate->toDateString();
+            })
+            ->unique(function ($application) {
+                $userId = $application->user_id ?? null;
+                if (!is_null($userId)) {
+                    return 'user:'.$userId;
+                }
+
+                return 'name:'.strtolower(trim((string) ($application->employee_name ?? '')));
+            })
+            ->values();
+
+        $onLeaveTodayCount = (int) $approvedLeaveToday->count();
+        $pendingLeaveRequestCount = (int) LeaveApplication::query()
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhereRaw("TRIM(status) = ''")
+                    ->orWhereRaw("LOWER(TRIM(status)) = ?", ['pending']);
+            })
+            ->count();
+        $pendingLeaveRequestsForHome = LeaveApplication::query()
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhereRaw("TRIM(status) = ''")
+                    ->orWhereRaw("LOWER(TRIM(status)) = ?", ['pending']);
+            })
+            ->orderByDesc('created_at')
+            ->take(3)
+            ->get();
+
         $openPositionsCount = OpenPosition::query()->count();
         $openPositionApplicationsCount = Applicant::query()->count();
         
@@ -138,6 +193,9 @@ class AdministratorPageController extends Controller
             'monthlyEmployeePercentChange',
             'presentTodayCount',
             'presentTodayRate',
+            'onLeaveTodayCount',
+            'pendingLeaveRequestCount',
+            'pendingLeaveRequestsForHome',
             'openPositionsCount',
             'openPositionApplicationsCount'
         ));
@@ -269,6 +327,31 @@ class AdministratorPageController extends Controller
                 ->get();
         }
 
+        // If an official holiday was hidden from the Admin Calendar,
+        // do not keep previously generated holiday-present rows for that date.
+        $records = collect($records)
+            ->filter(function ($row) {
+                $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+                if (!$isHolidayPresent) {
+                    return true;
+                }
+
+                try {
+                    $date = $row->attendance_date
+                        ? Carbon::parse($row->attendance_date)->toDateString()
+                        : null;
+                } catch (\Throwable $e) {
+                    $date = null;
+                }
+
+                if (!$date) {
+                    return true;
+                }
+
+                return !$this->isHiddenOfficialHolidayDate($date);
+            })
+            ->values();
+
         $employeesWithJobType = Employee::query()
             ->select(['employee_id', 'job_type'])
             ->whereNotNull('employee_id')
@@ -376,7 +459,16 @@ class AdministratorPageController extends Controller
             $rowName = $employeeDisplayNameMap->get($employeeId) ?: $this->normalizeLooseDisplayName($row->employee_name ?? null);
             $computedLateMinutes = $this->calculateLateMinutesFromInTimes($row);
             $isWithinPresentWindow = $this->isPresentByTimeWindow($row);
+            $rowDate = null;
+            try {
+                $rowDate = $row->attendance_date ? Carbon::parse($row->attendance_date)->toDateString() : null;
+            } catch (\Throwable $e) {
+                $rowDate = null;
+            }
             $isHolidayPresent = (bool) ($row->is_holiday_present ?? false);
+            if ($isHolidayPresent && $rowDate && !$this->isHolidayDate($rowDate)) {
+                $isHolidayPresent = false;
+            }
             $hasAnyTimeLog = !empty($row->morning_in)
                 || !empty($row->morning_out)
                 || !empty($row->afternoon_in)
@@ -587,21 +679,151 @@ class AdministratorPageController extends Controller
             return false;
         }
 
+        if (array_key_exists($fromDate, $this->holidayDateCheckCache)) {
+            return $this->holidayDateCheckCache[$fromDate];
+        }
+
         try {
             $date = Carbon::parse($fromDate)->startOfDay();
         } catch (\Throwable $e) {
+            $this->holidayDateCheckCache[$fromDate] = false;
             return false;
         }
 
-        if ($this->isUsPublicHoliday($date)) {
+        $dateString = $date->toDateString();
+
+        if ($this->isCustomHolidayDate($dateString)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
+            return true;
+        }
+
+        if (!$this->isHiddenOfficialHolidayDate($dateString) && $this->isUsPublicHoliday($date)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
             return true;
         }
 
         if ($this->isChineseNewYearDate($date)) {
+            $this->holidayDateCheckCache[$fromDate] = true;
             return true;
         }
 
+        $this->holidayDateCheckCache[$fromDate] = false;
         return false;
+    }
+
+    private function isHiddenOfficialHolidayDate(string $date): bool
+    {
+        $hiddenDates = $this->getHiddenOfficialHolidayDates();
+        return in_array($date, $hiddenDates, true);
+    }
+
+    private function isCustomHolidayDate(string $date): bool
+    {
+        $config = $this->getCalendarHolidayConfig();
+        $customHolidays = $config['custom_holidays'] ?? [];
+        if (array_key_exists($date, $customHolidays) && !empty($customHolidays[$date])) {
+            return true;
+        }
+
+        $monthDay = substr($date, 5);
+        $recurringHolidays = $config['recurring_holidays'] ?? [];
+        return array_key_exists($monthDay, $recurringHolidays) && !empty($recurringHolidays[$monthDay]);
+    }
+
+    private function getCalendarHolidayConfig(): array
+    {
+        if (!is_null($this->calendarHolidayConfigCache)) {
+            return $this->calendarHolidayConfigCache;
+        }
+
+        $default = [
+            'hidden_official_holidays' => [],
+            'custom_holidays' => [],
+            'recurring_holidays' => [],
+        ];
+
+        try {
+            if (!Storage::disk('local')->exists('calendar_holiday_config.json')) {
+                $this->calendarHolidayConfigCache = $default;
+                return $this->calendarHolidayConfigCache;
+            }
+
+            $raw = Storage::disk('local')->get('calendar_holiday_config.json');
+            $payload = json_decode($raw, true);
+            if (!is_array($payload)) {
+                $this->calendarHolidayConfigCache = $default;
+                return $this->calendarHolidayConfigCache;
+            }
+
+            $customHolidays = collect($payload['custom_holidays'] ?? [])
+                ->filter(fn ($names, $date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && is_array($names))
+                ->map(fn ($names) => array_values(array_filter(array_map(fn ($name) => is_string($name) ? trim($name) : '', $names), fn ($name) => $name !== '')))
+                ->filter(fn ($names) => !empty($names))
+                ->all();
+
+            $recurringHolidays = collect($payload['recurring_holidays'] ?? [])
+                ->filter(fn ($names, $monthDay) => is_string($monthDay) && preg_match('/^\d{2}-\d{2}$/', $monthDay) && is_array($names))
+                ->map(fn ($names) => array_values(array_filter(array_map(fn ($name) => is_string($name) ? trim($name) : '', $names), fn ($name) => $name !== '')))
+                ->filter(fn ($names) => !empty($names))
+                ->all();
+
+            $hiddenOfficialHolidays = collect($payload['hidden_official_holidays'] ?? [])
+                ->filter(fn ($names, $date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && is_array($names) && !empty($names))
+                ->all();
+
+            $this->calendarHolidayConfigCache = [
+                'hidden_official_holidays' => $hiddenOfficialHolidays,
+                'custom_holidays' => $customHolidays,
+                'recurring_holidays' => $recurringHolidays,
+            ];
+
+            return $this->calendarHolidayConfigCache;
+        } catch (\Throwable $e) {
+            $this->calendarHolidayConfigCache = $default;
+            return $this->calendarHolidayConfigCache;
+        }
+    }
+
+    private function getHiddenOfficialHolidayDates(): array
+    {
+        if (!is_null($this->hiddenOfficialHolidayDatesCache)) {
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
+
+        $config = $this->getCalendarHolidayConfig();
+        $fromConfig = collect($config['hidden_official_holidays'] ?? [])
+            ->keys()
+            ->filter(fn ($date) => is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date))
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($fromConfig)) {
+            $this->hiddenOfficialHolidayDatesCache = $fromConfig;
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
+
+        try {
+            if (!Storage::disk('local')->exists('calendar_hidden_holidays.json')) {
+                $this->hiddenOfficialHolidayDatesCache = [];
+                return $this->hiddenOfficialHolidayDatesCache;
+            }
+
+            $raw = Storage::disk('local')->get('calendar_hidden_holidays.json');
+            $payload = json_decode($raw, true);
+            $dates = is_array($payload['dates'] ?? null) ? $payload['dates'] : [];
+            $normalized = collect($dates)
+                ->filter(fn ($value) => is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value))
+                ->unique()
+                ->values()
+                ->all();
+
+            $this->hiddenOfficialHolidayDatesCache = $normalized;
+            return $this->hiddenOfficialHolidayDatesCache;
+        } catch (\Throwable $e) {
+            $this->hiddenOfficialHolidayDatesCache = [];
+            return $this->hiddenOfficialHolidayDatesCache;
+        }
     }
 
     private function isUsPublicHoliday(Carbon $date): bool
@@ -1374,92 +1596,53 @@ class AdministratorPageController extends Controller
             $selectedMonth = $monthCursor->format('Y-m');
         }
 
-        // Temporary in-controller dataset until leave records are persisted in DB.
-        $leaveRecords = collect([
-            [
-                'employee_name' => 'Santos, Maria L.',
-                'department' => 'Faculty',
-                'leave_type' => 'Sick Leave',
-                'start_date' => '2026-02-12',
-                'end_date' => '2026-02-12',
-                'status' => 'Approved',
-                'reason' => 'Flu and medical check-up',
-            ],
-            [
-                'employee_name' => 'Reyes, John Paulo A.',
-                'department' => 'Admin',
-                'leave_type' => 'Annual Leave',
-                'start_date' => '2026-02-10',
-                'end_date' => '2026-02-14',
-                'status' => 'Approved',
-                'reason' => 'Family vacation',
-            ],
-            [
-                'employee_name' => 'Dela Cruz, Anna P.',
-                'department' => 'Faculty',
-                'leave_type' => 'Study Leave',
-                'start_date' => '2026-02-17',
-                'end_date' => '2026-02-18',
-                'status' => 'Pending',
-                'reason' => 'Graduate exam preparation',
-            ],
-            [
-                'employee_name' => 'Garcia, Miguel R.',
-                'department' => 'Registrar',
-                'leave_type' => 'Emergency Leave',
-                'start_date' => '2026-02-08',
-                'end_date' => '2026-02-08',
-                'status' => 'Approved',
-                'reason' => 'Immediate family concern',
-            ],
-            [
-                'employee_name' => 'Lopez, Carla M.',
-                'department' => 'Faculty',
-                'leave_type' => 'Maternity Leave',
-                'start_date' => '2026-01-20',
-                'end_date' => '2026-02-20',
-                'status' => 'Approved',
-                'reason' => 'Maternity recovery',
-            ],
-            [
-                'employee_name' => 'Torres, Noel B.',
-                'department' => 'Guidance',
-                'leave_type' => 'Paternity Leave',
-                'start_date' => '2026-02-05',
-                'end_date' => '2026-02-11',
-                'status' => 'Approved',
-                'reason' => 'Child birth support',
-            ],
-            [
-                'employee_name' => 'Nolasco, Irene T.',
-                'department' => 'HR',
-                'leave_type' => 'Personal Leave',
-                'start_date' => '2026-02-22',
-                'end_date' => '2026-02-22',
-                'status' => 'Declined',
-                'reason' => 'Personal errand',
-            ],
-        ])->map(function ($record) {
-            $start = Carbon::parse($record['start_date'])->startOfDay();
-            $end = Carbon::parse($record['end_date'])->startOfDay();
-            $days = $end->gte($start) ? ($start->diffInDays($end) + 1) : 1;
-            $record['days'] = $days;
-            $record['start_date_carbon'] = $start;
-            $record['end_date_carbon'] = $end;
-            return $record;
-        });
+        $monthApplications = LeaveApplication::query()
+            ->where(function ($query) use ($monthCursor) {
+                $query
+                    ->where(function ($filingDateQuery) use ($monthCursor) {
+                        $filingDateQuery
+                            ->whereNotNull('filing_date')
+                            ->whereYear('filing_date', $monthCursor->year)
+                            ->whereMonth('filing_date', $monthCursor->month);
+                    })
+                    ->orWhere(function ($createdAtQuery) use ($monthCursor) {
+                        $createdAtQuery
+                            ->whereNull('filing_date')
+                            ->whereYear('created_at', $monthCursor->year)
+                            ->whereMonth('created_at', $monthCursor->month);
+                    });
+            })
+            ->orderByDesc('created_at')
+            ->get();
 
-        $approvedRecords = $leaveRecords
-            ->filter(fn ($record) => strtolower((string) $record['status']) === 'approved')
+        $approvedMonthApplications = $monthApplications
+            ->filter(function ($application) {
+                return strcasecmp((string) ($application->status ?? ''), 'Approved') === 0;
+            })
             ->values();
 
-        $monthRecords = $approvedRecords
-            ->filter(function ($record) use ($monthCursor) {
-                $start = $record['start_date_carbon'];
-                $end = $record['end_date_carbon'];
-                return $start->format('Y-m') === $monthCursor->format('Y-m')
-                    || $end->format('Y-m') === $monthCursor->format('Y-m')
-                    || ($start->lt($monthCursor->copy()->startOfMonth()) && $end->gt($monthCursor->copy()->endOfMonth()));
+        $monthRecords = $approvedMonthApplications
+            ->map(function ($application) {
+                $baseDate = $application->filing_date
+                    ? Carbon::parse($application->filing_date)->startOfDay()
+                    : Carbon::parse($application->created_at)->startOfDay();
+                $days = (float) ($application->number_of_working_days ?? 0);
+                if ($days <= 0) {
+                    $days = max(
+                        (float) ($application->days_with_pay ?? 0),
+                        (float) ($application->applied_total ?? 0)
+                    );
+                }
+                $rangeDays = max((int) ceil($days), 1);
+
+                return [
+                    'employee_name' => $application->employee_name ?? '-',
+                    'leave_type' => $application->leave_type ?: 'Leave',
+                    'start_date_carbon' => $baseDate->copy(),
+                    'end_date_carbon' => $baseDate->copy()->addDays($rangeDays - 1),
+                    'days' => $days,
+                    'reason' => $application->inclusive_dates ?: '-',
+                ];
             })
             ->values();
 
@@ -1468,85 +1651,21 @@ class AdministratorPageController extends Controller
             ->filter(fn ($record) => strcasecmp((string) $record['leave_type'], 'Sick Leave') === 0)
             ->sum('days');
 
-        $academyLeaveTypes = [
-            'Annual Leave',
-            'Sick Leave',
-            'Personal Leave',
-            'Study Leave',
-            'Emergency Leave',
-            'Maternity Leave',
-            'Paternity Leave',
-            'Bereavement Leave',
-            'Service Incentive Leave',
-        ];
+        $leaveTypeCounts = $monthRecords
+            ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
+            ->map(fn ($records) => (int) $records->sum('days'));
 
-        $defaultLeaveAllowances = [
-            'Annual Leave' => 15,
-            'Sick Leave' => 10,
-            'Personal Leave' => 5,
-            'Study Leave' => 5,
-            'Emergency Leave' => 3,
-            'Maternity Leave' => 105,
-            'Paternity Leave' => 7,
-            'Bereavement Leave' => 5,
-            'Service Incentive Leave' => 5,
-        ];
-        $storedMonthlyAllowances = Cache::get('leave_allowances:'.$selectedMonth, []);
-        $monthlyLeaveAllowances = collect($defaultLeaveAllowances)
-            ->mapWithKeys(function ($defaultValue, $leaveType) use ($storedMonthlyAllowances) {
-                $value = $storedMonthlyAllowances[$leaveType] ?? $defaultValue;
-                return [$leaveType => max(0, (int) $value)];
+        $pendingLeaveRequests = $monthApplications
+            ->filter(function ($application) {
+                $status = trim((string) ($application->status ?? ''));
+                return $status === '' || strcasecmp($status, 'Pending') === 0;
             })
-            ->all();
-
-        $leaveTypeCounts = collect($academyLeaveTypes)
-            ->mapWithKeys(function ($type) use ($monthRecords) {
-                return [$type => $monthRecords
-                    ->where('leave_type', $type)
-                    ->sum('days')];
-            });
-
-        $usageByEmployeeByType = $monthRecords
-            ->groupBy(fn ($record) => (string) ($record['employee_name'] ?? '-'))
-            ->map(function ($employeeRecords) {
-                return $employeeRecords
-                    ->groupBy(fn ($record) => (string) ($record['leave_type'] ?? 'Leave'))
-                    ->map(fn ($typeRecords) => (int) $typeRecords->sum('days'));
-            });
-
-        $leaveTypeOverLimitCounts = collect($academyLeaveTypes)
-            ->mapWithKeys(function ($leaveType) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
-                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
-                $overLimitCount = $usageByEmployeeByType
-                    ->filter(function ($perTypeUsage) use ($leaveType, $monthlyLimitPerEmployee) {
-                        $used = (int) ($perTypeUsage->get($leaveType, 0));
-                        return $used > $monthlyLimitPerEmployee;
-                    })
-                    ->count();
-
-                return [$leaveType => $overLimitCount];
-            });
-
-        $monthRecords = $monthRecords
-            ->map(function ($record) use ($usageByEmployeeByType, $monthlyLeaveAllowances) {
-                $employeeName = (string) ($record['employee_name'] ?? '-');
-                $leaveType = (string) ($record['leave_type'] ?? 'Leave');
-                $monthlyLimitPerEmployee = (int) ($monthlyLeaveAllowances[$leaveType] ?? 0);
-                $employeeUsageForType = (int) (
-                    $usageByEmployeeByType
-                        ->get($employeeName, collect())
-                        ->get($leaveType, 0)
-                );
-                $remainingForEmployee = max(0, $monthlyLimitPerEmployee - $employeeUsageForType);
-
-                $record['monthly_limit_per_employee'] = $monthlyLimitPerEmployee;
-                $record['employee_usage_for_type'] = $employeeUsageForType;
-                $record['employee_remaining_for_type'] = $remainingForEmployee;
-                $record['is_employee_over_limit'] = $employeeUsageForType > $monthlyLimitPerEmployee;
-
-                return $record;
-            })
+            ->sortByDesc('created_at')
             ->values();
+
+        $pendingLeaveDays = (float) $pendingLeaveRequests->sum(function ($row) {
+            return (float) ($row->number_of_working_days ?? 0);
+        });
 
         return view('admin.adminLeaveManagement', compact(
             'selectedMonth',
@@ -1554,32 +1673,9 @@ class AdministratorPageController extends Controller
             'sickLeaveUsedDays',
             'monthRecords',
             'leaveTypeCounts',
-            'academyLeaveTypes',
-            'monthlyLeaveAllowances',
-            'leaveTypeOverLimitCounts'
+            'pendingLeaveRequests',
+            'pendingLeaveDays'
         ));
-    }
-
-    public function update_leave_allowances(Request $request)
-    {
-        $validated = $request->validate([
-            'month' => ['required', 'date_format:Y-m'],
-            'allowances' => ['required', 'array'],
-            'allowances.*' => ['nullable', 'integer', 'min:0'],
-        ]);
-
-        $month = (string) $validated['month'];
-        $allowances = collect($validated['allowances'] ?? [])
-            ->mapWithKeys(function ($value, $leaveType) {
-                return [(string) $leaveType => max(0, (int) $value)];
-            })
-            ->all();
-
-        Cache::forever('leave_allowances:'.$month, $allowances);
-
-        return redirect()
-            ->route('admin.adminLeaveManagement', ['month' => $month])
-            ->with('success', 'Monthly leave allowances updated successfully.');
     }
 
     public function display_reports(){
@@ -1872,3 +1968,4 @@ class AdministratorPageController extends Controller
     }
 
 }
+

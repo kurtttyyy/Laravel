@@ -170,6 +170,8 @@
   const RECURRING_HOLIDAY_STORAGE_KEY = 'school_recurring_holidays_v1';
   const HIDDEN_OFFICIAL_HOLIDAY_STORAGE_KEY = 'hidden_official_holidays_v1';
   const HIDDEN_SPECIAL_EVENT_STORAGE_KEY = 'hidden_special_events_v1';
+  const calendarHolidaySyncUrl = @json(route('admin.syncHiddenOfficialHolidays'));
+  const csrfToken = @json(csrf_token());
   const holidayCache = {};
   const specialEventCache = {};
   let customEvents = loadCustomEvents();
@@ -243,6 +245,7 @@
 
   function saveCustomHolidays() {
     localStorage.setItem(CUSTOM_HOLIDAY_STORAGE_KEY, JSON.stringify(customHolidays));
+    syncCalendarHolidaysWithServer();
   }
 
   function loadRecurringHolidays() {
@@ -258,6 +261,7 @@
 
   function saveRecurringHolidays() {
     localStorage.setItem(RECURRING_HOLIDAY_STORAGE_KEY, JSON.stringify(recurringHolidays));
+    syncCalendarHolidaysWithServer();
   }
 
   function loadHiddenOfficialHolidays() {
@@ -273,6 +277,7 @@
 
   function saveHiddenOfficialHolidays() {
     localStorage.setItem(HIDDEN_OFFICIAL_HOLIDAY_STORAGE_KEY, JSON.stringify(hiddenOfficialHolidays));
+    syncCalendarHolidaysWithServer();
   }
 
   function loadHiddenSpecialEvents() {
@@ -288,6 +293,26 @@
 
   function saveHiddenSpecialEvents() {
     localStorage.setItem(HIDDEN_SPECIAL_EVENT_STORAGE_KEY, JSON.stringify(hiddenSpecialEvents));
+  }
+
+  function syncCalendarHolidaysWithServer() {
+    if (!calendarHolidaySyncUrl) return;
+
+    fetch(calendarHolidaySyncUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({
+        hidden_official_holidays: hiddenOfficialHolidays,
+        custom_holidays: customHolidays,
+        recurring_holidays: recurringHolidays,
+      }),
+    }).catch((error) => {
+      console.error('Unable to sync calendar holidays.', error);
+    });
   }
 
   function getCustomEventNamesForDate(isoDate) {
@@ -738,6 +763,7 @@
     return events;
   }
 
+  syncCalendarHolidaysWithServer();
   renderCalendar();
 </script>
 

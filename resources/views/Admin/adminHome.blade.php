@@ -72,8 +72,8 @@
         <div class="bg-white rounded-xl p-5 flex justify-between items-center">
           <div>
             <p class="text-sm text-slate-500">On Leave</p>
-            <h2 class="text-2xl font-semibold">68</h2>
-            <p class="text-sm text-orange-500">12 pending requests</p>
+            <h2 class="text-2xl font-semibold">{{ number_format($onLeaveTodayCount ?? 0) }}</h2>
+            <p class="text-sm text-orange-500">{{ number_format($pendingLeaveRequestCount ?? 0) }} pending requests</p>
           </div>
           <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center">
             <i class="fa-solid fa-calendar"></i>
@@ -196,43 +196,70 @@
           <div class="bg-white rounded-xl p-6">
             <div class="flex justify-between items-center mb-4">
               <h3 class="font-semibold">Leave Requests</h3>
-              <span class="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+              <span class="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{{ (int) ($pendingLeaveRequestCount ?? 0) }}</span>
             </div>
 
             <div class="space-y-4">
-              <div class="border rounded-lg p-4">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">RL</div>
-                    <div>
-                      <p class="font-medium">Robert Lee</p>
-                      <p class="text-xs text-slate-500">Sick Leave · Jan 20–22</p>
+              @forelse (($pendingLeaveRequestsForHome ?? collect()) as $request)
+                @php
+                  $requestName = trim((string) ($request->employee_name ?? ''));
+                  if ($requestName === '') {
+                    $requestName = 'Unknown Employee';
+                  }
+                  $nameParts = preg_split('/\s+/', $requestName) ?: [];
+                  $initials = '';
+                  foreach (array_slice($nameParts, 0, 2) as $part) {
+                    $initials .= strtoupper(substr($part, 0, 1));
+                  }
+                  $initials = $initials !== '' ? $initials : 'NA';
+                  $leaveType = (string) ($request->leave_type ?: 'Leave Request');
+                  $startDate = $request->filing_date
+                    ? \Carbon\Carbon::parse($request->filing_date)->startOfDay()
+                    : \Carbon\Carbon::parse($request->created_at)->startOfDay();
+                  $days = (float) ($request->number_of_working_days ?? 0);
+                  if ($days <= 0) {
+                    $days = max(
+                      (float) ($request->days_with_pay ?? 0),
+                      (float) ($request->applied_total ?? 0)
+                    );
+                  }
+                  $rangeDays = max((int) ceil($days), 1);
+                  $endDate = $startDate->copy()->addDays($rangeDays - 1);
+                  $dateLabel = $startDate->isSameDay($endDate)
+                    ? $startDate->format('M d, Y')
+                    : $startDate->format('M d').' - '.$endDate->format('M d, Y');
+                @endphp
+                <div class="border rounded-lg p-4">
+                  <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 bg-blue-500 rounded-full text-white flex items-center justify-center">{{ $initials }}</div>
+                      <div>
+                        <p class="font-medium">{{ $requestName }}</p>
+                        <p class="text-xs text-slate-500">{{ $leaveType }} - {{ $dateLabel }}</p>
+                      </div>
                     </div>
+                    <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">Pending</span>
                   </div>
-                  <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">Pending</span>
-                </div>
-                <div class="flex gap-2 mt-3">
-                  <button class="flex-1 bg-emerald-500 text-white py-1.5 rounded">Approve</button>
-                  <button class="flex-1 bg-slate-100 py-1.5 rounded">Decline</button>
-                </div>
-              </div>
-
-              <div class="border rounded-lg p-4">
-                <div class="flex justify-between items-center">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-pink-500 rounded-full text-white flex items-center justify-center">AP</div>
-                    <div>
-                      <p class="font-medium">Anna Park</p>
-                      <p class="text-xs text-slate-500">Vacation · Jan 25–30</p>
-                    </div>
+                  <div class="flex gap-2 mt-3">
+                    <form class="flex-1" method="POST" action="{{ route('admin.updateLeaveRequestStatus', $request->id) }}">
+                      @csrf
+                      <input type="hidden" name="status" value="Approved">
+                      <input type="hidden" name="redirect_back" value="1">
+                      <button type="submit" class="w-full bg-emerald-500 text-white py-1.5 rounded hover:bg-emerald-600">Approve</button>
+                    </form>
+                    <form class="flex-1" method="POST" action="{{ route('admin.updateLeaveRequestStatus', $request->id) }}">
+                      @csrf
+                      <input type="hidden" name="status" value="Rejected">
+                      <input type="hidden" name="redirect_back" value="1">
+                      <button type="submit" class="w-full bg-slate-100 py-1.5 rounded hover:bg-slate-200">Decline</button>
+                    </form>
                   </div>
-                  <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">Pending</span>
                 </div>
-                <div class="flex gap-2 mt-3">
-                  <button class="flex-1 bg-emerald-500 text-white py-1.5 rounded">Approve</button>
-                  <button class="flex-1 bg-slate-100 py-1.5 rounded">Decline</button>
+              @empty
+                <div class="border rounded-lg p-4 text-sm text-slate-500">
+                  No pending leave requests.
                 </div>
-              </div>
+              @endforelse
             </div>
           </div>
 

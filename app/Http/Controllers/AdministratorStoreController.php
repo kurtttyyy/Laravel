@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\Government;
 use App\Models\Interviewer;
 use App\Models\License;
+use App\Models\LeaveApplication;
 use App\Models\OpenPosition;
 use App\Models\Salary;
 use App\Models\User;
@@ -27,6 +28,97 @@ use Illuminate\Support\Facades\Mail;
 
 class AdministratorStoreController extends Controller
 {
+    public function sync_hidden_official_holidays(Request $request)
+    {
+        $attrs = $request->validate([
+            'hidden_official_holidays' => 'nullable|array',
+            'custom_holidays' => 'nullable|array',
+            'recurring_holidays' => 'nullable|array',
+        ]);
+
+        $hiddenMap = $attrs['hidden_official_holidays'] ?? [];
+        $customHolidayMap = $attrs['custom_holidays'] ?? [];
+        $recurringHolidayMap = $attrs['recurring_holidays'] ?? [];
+        $hiddenDates = collect($hiddenMap)
+            ->filter(function ($names, $date) {
+                return is_string($date)
+                    && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+                    && is_array($names)
+                    && !empty($names);
+            })
+            ->keys()
+            ->values()
+            ->all();
+
+        $normalizedCustomHolidays = collect($customHolidayMap)
+            ->filter(function ($names, $date) {
+                return is_string($date)
+                    && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)
+                    && is_array($names)
+                    && !empty($names);
+            })
+            ->map(function ($names) {
+                return array_values(array_filter(array_map(function ($name) {
+                    return is_string($name) ? trim($name) : '';
+                }, $names), fn ($name) => $name !== ''));
+            })
+            ->filter(fn ($names) => !empty($names))
+            ->all();
+
+        $normalizedRecurringHolidays = collect($recurringHolidayMap)
+            ->filter(function ($names, $monthDay) {
+                return is_string($monthDay)
+                    && preg_match('/^\d{2}-\d{2}$/', $monthDay)
+                    && is_array($names)
+                    && !empty($names);
+            })
+            ->map(function ($names) {
+                return array_values(array_filter(array_map(function ($name) {
+                    return is_string($name) ? trim($name) : '';
+                }, $names), fn ($name) => $name !== ''));
+            })
+            ->filter(fn ($names) => !empty($names))
+            ->all();
+
+        Storage::disk('local')->put('calendar_hidden_holidays.json', json_encode([
+            'dates' => $hiddenDates,
+            'updated_at' => now()->toIso8601String(),
+        ], JSON_PRETTY_PRINT));
+
+        Storage::disk('local')->put('calendar_holiday_config.json', json_encode([
+            'hidden_official_holidays' => $hiddenMap,
+            'custom_holidays' => $normalizedCustomHolidays,
+            'recurring_holidays' => $normalizedRecurringHolidays,
+            'updated_at' => now()->toIso8601String(),
+        ], JSON_PRETTY_PRINT));
+
+        if (!empty($hiddenDates)) {
+            $holidayUploadNames = array_map(
+                fn ($date) => "System Holiday Attendance {$date}",
+                $hiddenDates
+            );
+
+            $holidayUploadIds = AttendanceUpload::query()
+                ->whereIn('original_name', $holidayUploadNames)
+                ->pluck('id');
+
+            if ($holidayUploadIds->isNotEmpty()) {
+                AttendanceRecord::query()
+                    ->whereIn('attendance_upload_id', $holidayUploadIds)
+                    ->delete();
+
+                AttendanceUpload::query()
+                    ->whereIn('id', $holidayUploadIds)
+                    ->delete();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'hidden_dates' => $hiddenDates,
+        ]);
+    }
+
 
     //STORE
     public function store_new_position(Request $request){
@@ -1220,6 +1312,33 @@ class AdministratorStoreController extends Controller
         );
 
         return redirect()->back()->with('success', 'Profile updated successfully');
+    }
+
+    public function update_leave_request_status($id, Request $request)
+    {
+        $attrs = $request->validate([
+            'status' => 'required|string|in:Approved,Rejected',
+            'month' => 'nullable|string',
+            'redirect_back' => 'nullable|boolean',
+        ]);
+
+        $leaveApplication = LeaveApplication::findOrFail($id);
+        $leaveApplication->update([
+            'status' => $attrs['status'],
+        ]);
+
+        $month = trim((string) ($attrs['month'] ?? ''));
+        $query = [];
+        if ($month !== '') {
+            $query['month'] = $month;
+        }
+
+        if ((bool) ($attrs['redirect_back'] ?? false)) {
+            return redirect()->back()->with('success', 'Leave request status updated.');
+        }
+
+        return redirect()->route('admin.adminLeaveManagement', $query)
+            ->with('success', 'Leave request status updated.');
     }
 
     public function update_bio(Request $request){

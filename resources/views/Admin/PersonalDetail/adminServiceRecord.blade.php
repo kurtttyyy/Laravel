@@ -12,23 +12,37 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white rounded-xl p-4 shadow">
         <p class="text-xs text-gray-400">EMPLOYEE ID</p>
-        <p class="font-semibold mt-1">EMP-2019-0847</p>
+        <p class="font-semibold mt-1" x-text="selectedEmployee?.employee?.employee_id ?? '-'"></p>
       </div>
 
       <div class="bg-white rounded-xl p-4 shadow">
         <p class="text-xs text-gray-400">DEPARTMENT</p>
-        <p class="font-semibold mt-1">Engineering</p>
+        <p class="font-semibold mt-1" x-text="selectedEmployee?.applicant?.position?.department ?? selectedEmployee?.employee?.department ?? '-'"></p>
       </div>
 
       <div class="bg-white rounded-xl p-4 shadow">
         <p class="text-xs text-gray-400">DATE HIRED</p>
-        <p class="font-semibold mt-1">Mar 15, 2019</p>
+        <p
+          class="font-semibold mt-1"
+          x-text="(() => {
+            const raw = selectedEmployee?.applicant?.date_hired || selectedEmployee?.employee?.employement_date;
+            if (!raw) return '-';
+            const datePart = raw.toString().split('T')[0];
+            const [year, month, day] = datePart.split('-').map(Number);
+            if (!year || !month || !day) return '-';
+            const date = new Date(year, month - 1, day);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+          })()"
+        ></p>
       </div>
 
       <div class="bg-white rounded-xl p-4 shadow">
         <p class="text-xs text-gray-400">STATUS</p>
-        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm mt-1">
-          Active
+        <span
+          class="inline-block px-3 py-1 rounded-full text-sm mt-1"
+          :class="(selectedEmployee?.account_status ?? '').toLowerCase() === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'"
+          x-text="selectedEmployee?.account_status ?? '-'">
         </span>
       </div>
     </div>
@@ -36,8 +50,37 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-indigo-50 text-indigo-600 rounded-xl p-6 text-center">
-        <p class="text-3xl font-bold">5.8</p>
-        <p class="text-sm">Years</p>
+        <p
+          class="text-3xl font-bold"
+          x-html="(() => {
+            const raw = selectedEmployee?.applicant?.date_hired || selectedEmployee?.employee?.employement_date;
+            if (!raw) return `0<span class='text-sm align-baseline ml-1'>Y</span> 0<span class='text-sm align-baseline ml-1'>M</span> 0<span class='text-sm align-baseline ml-1'>D</span>`;
+            const datePart = raw.toString().split('T')[0];
+            const [year, month, day] = datePart.split('-').map(Number);
+            if (!year || !month || !day) return `0<span class='text-sm align-baseline ml-1'>Y</span> 0<span class='text-sm align-baseline ml-1'>M</span> 0<span class='text-sm align-baseline ml-1'>D</span>`;
+            const start = new Date(year, month - 1, day);
+            if (Number.isNaN(start.getTime())) return `0<span class='text-sm align-baseline ml-1'>Y</span> 0<span class='text-sm align-baseline ml-1'>M</span> 0<span class='text-sm align-baseline ml-1'>D</span>`;
+            const today = new Date();
+            let years = today.getFullYear() - start.getFullYear();
+            let months = today.getMonth() - start.getMonth();
+            let days = today.getDate() - start.getDate();
+            if (days < 0) {
+              days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+              months -= 1;
+            }
+            if (months < 0) {
+              months += 12;
+              years -= 1;
+            }
+            if (years < 0) {
+              years = 0;
+              months = 0;
+              days = 0;
+            }
+            return `${years}<span class='text-sm align-baseline ml-1'>Y</span> ${months}<span class='text-sm align-baseline ml-1'>M</span> ${days}<span class='text-sm align-baseline ml-1'>D</span>`;
+          })()"
+        ></p>
+        <p class="text-sm">Service Length</p>
       </div>
 
       <div class="bg-green-50 text-green-600 rounded-xl p-6 text-center">

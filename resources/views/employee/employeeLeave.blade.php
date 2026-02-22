@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,10 +38,20 @@
 
 <div class="p-4 md:p-8 space-y-8 pt-20">
     @php
+        $authUser = auth()->user();
         $activeEmployeeForm = request()->query('form', 'leave');
         if (!in_array($activeEmployeeForm, ['leave', 'leave-download', 'official'], true)) {
             $activeEmployeeForm = 'leave';
         }
+        $employeeFormName = $employeeDisplayName
+            ?? trim(implode(' ', array_filter([
+                $authUser?->first_name ?? null,
+                $authUser?->middle_name ?? null,
+                $authUser?->last_name ?? null,
+            ])));
+        $employeeFormPosition = $authUser?->employee?->position
+            ?? data_get($authUser, 'applicant.position.title')
+            ?? '';
         $employeeFormQueryBase = array_filter([
             'month' => $selectedMonth ?? now()->format('Y-m'),
         ], fn ($value) => !is_null($value) && $value !== '');
@@ -70,9 +80,9 @@
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-calendar fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0) }}</h3>
-            <p class="text-gray-600 text-sm mb-4">Annual Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($annualLimit ?? 0) }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($vacationCardAvailable ?? max(($annualLimit ?? 0) - ($annualUsed ?? 0), 0)), 1, '.', ''), '0'), '.') }}</h3>
+            <p class="text-gray-600 text-sm mb-4">Vacation Leave</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($annualLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($annualUsed ?? 0) }})</p>
         </div>
 
 
@@ -82,9 +92,9 @@
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-bed fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0) }}</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($sickCardAvailable ?? max(($sickLimit ?? 0) - ($sickUsed ?? 0), 0)), 1, '.', ''), '0'), '.') }}</h3>
             <p class="text-gray-600 text-sm mb-1">Sick Leave</p>
-            <p class="text-gray-500 text-xs mt-4">of {{ (int) ($sickLimit ?? 0) }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
+            <p class="text-gray-500 text-xs mt-4">of {{ rtrim(rtrim(number_format((float) ($sickLimit ?? 0), 1, '.', ''), '0'), '.') }} days (used {{ (int) ($sickUsed ?? 0) }})</p>
         </div>
 
 
@@ -95,7 +105,7 @@
                 <i class="fa fa-calendar-o fa-2x"></i>
             </div>
             <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ max(($personalLimit ?? 0) - ($personalUsed ?? 0), 0) }}</h3>
-            <p class="text-gray-600 text-sm mb-1">Personal Days</p>
+            <p class="text-gray-600 text-sm mb-1">Others</p>
             <p class="text-gray-500 text-xs mt-4">of {{ (int) ($personalLimit ?? 0) }} days (used {{ (int) ($personalUsed ?? 0) }})</p>
         </div>
 
@@ -105,7 +115,7 @@
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <i class="fa fa-hourglass-half fa-2x"></i>
             </div>
-            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ (int) ($totalDaysUsed ?? 0) }}</h3>
+            <h3 class="text-4xl font-bold text-gray-900 mb-1 mt-7">{{ rtrim(rtrim(number_format((float) ($totalDaysUsedCard ?? $totalDaysUsed ?? 0), 1, '.', ''), '0'), '.') }}</h3>
             <p class="text-gray-600 text-sm mb-1">Days Used</p>
             <p class="text-gray-500 text-xs mt-4">this month</p>
         </div>
@@ -114,32 +124,40 @@
 
 <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
     <div class="px-4 py-3 border-b border-gray-200">
-        <h3 class="font-semibold text-gray-700">My Leave History (Approved, {{ $selectedMonth ?? now()->format('Y-m') }})</h3>
+        <h3 class="font-semibold text-gray-700">My Leave History ({{ now()->format('M d, Y') }})</h3>
     </div>
-    <div>
-        @forelse (($employeeMonthRecords ?? collect()) as $record)
+    <div class="max-h-96 overflow-y-auto">
+        @forelse (($monthRequestRecords ?? collect()) as $record)
             @php
                 $startDate = $record['start_date_carbon'] ?? null;
                 $endDate = $record['end_date_carbon'] ?? null;
-                $days = (int) ($record['days'] ?? 0);
+                $days = (float) ($record['days'] ?? 0);
+                $daysLabel = rtrim(rtrim(number_format($days, 1, '.', ''), '0'), '.');
                 $dateLabel = '-';
+                $statusLabel = ucfirst(strtolower((string) ($record['status'] ?? 'Pending')));
+                $statusClass = 'bg-amber-100 text-amber-700';
+                if (strcasecmp($statusLabel, 'Approved') === 0) {
+                    $statusClass = 'bg-green-100 text-green-700';
+                } elseif (strcasecmp($statusLabel, 'Rejected') === 0) {
+                    $statusClass = 'bg-rose-100 text-rose-700';
+                }
                 if ($startDate && $endDate) {
                     $dateLabel = $startDate->isSameDay($endDate)
                         ? $startDate->format('M d, Y')
-                        : $startDate->format('M d, Y').' - '.$endDate->format('M d, Y');
+                        : $startDate->format('M d, Y').' - '. $endDate->format('M d, Y');
                 }
             @endphp
             <div class="px-4 py-4 border-b border-slate-100 last:border-b-0 flex items-center justify-between gap-4">
                 <div>
                     <p class="font-semibold text-gray-900">{{ $record['leave_type'] ?? 'Leave' }}</p>
                     <p class="text-sm text-gray-700">{{ $employeeDisplayName ?? ($record['employee_name'] ?? '-') }}</p>
-                    <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $days }} day(s)</p>
+                    <p class="text-sm text-gray-500">{{ $dateLabel }} • {{ $daysLabel }} day(s)</p>
                     <p class="text-sm text-gray-400">{{ $record['reason'] ?? '-' }}</p>
                 </div>
-                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">Approved</span>
+                <span class="inline-flex rounded-full px-3 py-1 text-xs font-medium {{ $statusClass }}">{{ $statusLabel }}</span>
             </div>
         @empty
-            <div class="px-4 py-5 text-sm text-gray-500">No approved leave records for this month.</div>
+            <div class="px-4 py-5 text-sm text-gray-500">No leave records for this month.</div>
         @endforelse
     </div>
 </div>
@@ -176,7 +194,7 @@
 
 
 
-<div class="w-full md:flex-1 min-w-0 p-8 space-y-6 bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+<div class="w-full md:flex-1 min-w-0 p-8 space-y-6 bg-white rounded-2xl border border-gray-200 overflow-x-auto text-base">
     @if ($activeEmployeeForm === 'official')
         <h3 class="text-xl font-bold text-gray-900 mb-4">Apply for Business</h3>
         @include('requestForm.applicationOBF')

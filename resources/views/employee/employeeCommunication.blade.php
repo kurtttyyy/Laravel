@@ -39,53 +39,41 @@
     <main class="flex-1 ml-16 transition-all duration-300">
     @include('components.employeeHeader.communicationHeader')
     <div class="p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pt-20">
-    <!-- CARD 1 -->
-    <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700
-                    flex items-center justify-center text-white text-3xl font-semibold mb-4">
-            DV
+    @forelse($admins as $admin)
+        @php
+            $nameParts = array_filter([
+                $admin->first_name ?? '',
+                $admin->middle_name ?? '',
+                $admin->last_name ?? '',
+            ]);
+            $fullName = trim(implode(' ', $nameParts));
+            $initials = strtoupper(substr((string) ($admin->first_name ?? ''), 0, 1) . substr((string) ($admin->last_name ?? ''), 0, 1));
+            $displayStatus = trim((string) ($admin->status ?? ''));
+            if (strtolower($displayStatus) === 'approved') {
+                $displayStatus = 'Available';
+            }
+            $isAvailable = strtolower($displayStatus) === 'available';
+        @endphp
+
+        <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
+            <div class="mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700
+                        flex items-center justify-center text-white text-3xl font-semibold mb-4">
+                {{ $initials !== '' ? $initials : 'AD' }}
+            </div>
+
+            <h3 class="font-semibold text-lg">{{ $fullName !== '' ? $fullName : 'Admin User' }}</h3>
+            <p class="text-sm text-gray-500">{{ $admin->job_role ?? 'Administrator' }}</p>
+            <p class="text-sm text-gray-400 mb-4">{{ $admin->role }}</p>
+
+            <span class="px-4 py-1 text-sm rounded-full {{ $isAvailable ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600' }}">
+                {{ $displayStatus !== '' ? $displayStatus : 'No Status' }}
+            </span>
         </div>
-
-        <h3 class="font-semibold text-lg">Dr. Viloria</h3>
-        <p class="text-sm text-gray-500">HR Director</p>
-        <p class="text-sm text-gray-400 mb-4">Human Resources</p>
-
-        <span class="px-4 py-1 text-sm bg-green-100 text-green-600 rounded-full">
-            Available
-        </span>
-    </div>
-
-    <!-- CARD 2 -->
-    <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600
-                    flex items-center justify-center text-white text-3xl font-semibold mb-4">
-            AN
+    @empty
+        <div class="bg-white rounded-2xl shadow-sm p-8 text-center md:col-span-2 lg:col-span-4">
+            <p class="text-gray-600">No admin users found.</p>
         </div>
-
-        <h3 class="font-semibold text-lg">Antoinette</h3>
-        <p class="text-sm text-gray-500">HR Assistant</p>
-        <p class="text-sm text-gray-400 mb-4">Human Resources</p>
-
-        <span class="px-4 py-1 text-sm bg-green-100 text-green-600 rounded-full">
-            Available
-        </span>
-    </div>
-
-    <!-- CARD 3 -->
-    <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
-        <div class="mx-auto w-24 h-24 rounded-2xl bg-gradient-to-br from-green-400 to-green-600
-                    flex items-center justify-center text-white text-3xl font-semibold mb-4">
-            ML
-        </div>
-
-        <h3 class="font-semibold text-lg">Melody</h3>
-        <p class="text-sm text-gray-500">HR Assistant</p>
-        <p class="text-sm text-gray-400 mb-4">Human Resources</p>
-
-        <span class="px-4 py-1 text-sm bg-green-100 text-green-600 rounded-full">
-            Available
-        </span>
-    </div>
+    @endforelse
     </div>
 
     </main>
